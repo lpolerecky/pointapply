@@ -4,6 +4,7 @@
 #'
 #' @import dplyr
 #' @import rlang
+#'
 #' @docType package
 #' @name pointapply
 NULL
