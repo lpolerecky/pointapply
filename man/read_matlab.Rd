@@ -8,6 +8,7 @@ read_matlab(
   directory,
   plane,
   title,
+  species = NULL,
   grid_cell = 64,
   output = "sum",
   grid_sel = NULL,

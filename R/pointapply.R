@@ -4,6 +4,7 @@
 #'
 #' @import dplyr
 #' @import rlang
+#' @import ggplot2
 #'
 #' @docType package
 #' @name pointapply

@@ -1,0 +1,181 @@
+---
+title: "Regression assumptions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Regression assumptions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r setup}
+library(pointapply)
+```
+
+
+```{r data}
+
+# use download_point() to obtain processed data (only has to be done once)
+download_point()
+
+```
+
+
+```{r }
+grid_cell <- sapply(2:7, function(x) 2 ^ x)
+title <- c("MEX", "MON")
+name <- tidyr::crossing(grid_cell, title) %>%
+  dplyr::rowwise() %>% 
+  dplyr::transmute(name = paste("map_sum_grid", grid_cell,title, sep = "_")) %>% 
+  dplyr::pull(name)  
+
+data(list = name)
+# dataframe aggregated over depth
+tb <-purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
+
+```
+
+
+# Normality of residuals
+
+```{r QQ}
+
+tb_QQ <- diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm, 
+                grid.nm, .method = "QQ", .hyp = "norm", .output = "flag")
+
+```
+
+
+# Constant variance
+
+```{r CV}
+
+tb_CV <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
+                grid.nm, .method = "CV", .hyp = "bp", .output = "flag")
+
+```
+
+
+# Residuals with zero mean 
+
+```{r mu}
+
+tb_mu <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
+                grid.nm, .method = "QQ", .hyp = "ttest", .output = "flag")
+
+```
+
+
+# Independence of residuals 
+
+```{r IR}
+
+tb_IR <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
+                grid.nm, .method = "IR", .hyp = "ljung", .output = "flag")  
+
+```
+
+# Classification plots
+
+
+```{r}
+# Single ion stat for ROI size
+
+vc_N_13C <- group_by(tb, grid_size.nm, species.nm) %>% 
+  summarise(N = mean(N.pr), .groups = "drop") %>% 
+  filter(species.nm == "13C")   
+vc_N_13C <- set_names(sprintf("%.0f", vc_N_13C$N) , nm = vc_N_13C$grid_size.nm)
+
+```
+
+
+```{r QQclass}
+
+QQ_class <- hyp_class(tb_QQ, vc_N_13C, "Normality test") 
+
+# plot and save for paper
+QQ_class
+save_point(QQ_class, "bar_QQ_class" ,width = 7, height = 7, unit = "cm", on_build = TRUE)
+
+```
+
+
+```{r CVclass}
+
+CV_class <- hyp_class(tb_CV, vc_N_13C, "Breusch-Pagan test") 
+
+# plot and save for paper
+CV_class
+save_point(QQ_class, "bar_CV_class" ,width = 7, height = 7, unit = "cm", on_build = TRUE)
+
+```
+
+
+```{r muclass}
+
+mu_class <- hyp_class(tb_mu, vc_N_13C, "Student's t test")  
+
+# plot and save for paper
+mu_class
+save_point(mu_class, "bar_mu_class" ,width = 7, height = 7, unit = "cm", on_build = TRUE)
+
+```
+
+
+```{r IRclass}
+
+IR_class <- hyp_class(tb_IR, vc_N_13C, "Ljung-box test") 
+
+# plot and save for paper
+IR_class
+save_point(IR_class, "bar_IR_class" ,width = 7, height = 7, unit = "cm", on_build = TRUE)
+
+```
+
+
+```{r class, echo=FALSE}
+
+# overview
+p <- gridExtra::grid.arrange(gridExtra::arrangeGrob(QQ_class, CV_class, ncol = 2), gridExtra::arrangeGrob(mu_class, IR_class, ncol = 2)) 
+png(filename = usethis::proj_path("paper/graphs", "bar_over_class", ext = "png"), width = 14, height = 14, units = "cm", res = 256)
+grid::grid.draw(p)
+dev.off()
+
+```
+
+# Scatter plots
+
+## Supplementary Figure 3
+
+Reproducing Supplementary Figure 3 of the paper; Schobben, Kienhuis, Polerecky 2021
+
+```{r QQdens}
+
+QQ_dens <- twodens(
+  tb_QQ, 
+  TQ,
+  RQ, 
+  "Theoretical quantiles", 
+  "Sample quantiles", 
+  "Normal QQ plot",
+  0.1, 
+  grid_size.nm,
+  c(-4, 4), 
+  c(-4, 4)
+  )
+
+# add abline
+QQ_dens <- QQ_dens + geom_abline(alpha = 0.7, linetype = 3) 
+
+# plot and save for paper
+QQ_dens 
+save_point(QQ_dens, name = "point_QQ", width = 12, height = 8, unit = "cm", 
+           on_build = TRUE)
+```

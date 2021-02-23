@@ -24,12 +24,15 @@
 #' # Pre-process real data as in the paper; Schobben, Kienhuis, Polerecky 2021
 #' tb_rw <- read_matlab(get_matlab("2020-08-20-GLENDON"), plane = height,
 #'                      title = "MEX")
-read_matlab <- function(directory, plane, title, grid_cell = 64, output = "sum",
-                        grid_sel = NULL, scaler = 40 / 256){
+read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
+                        output = "sum", grid_sel = NULL, scaler = 40 / 256){
 
   plane <- enquo(plane)
+  # search pattern
+  search_pattern <- stringr::str_c(paste0(species, "_cnt.mat$"), collapse = "|")
   # list files
-  ls_files <- list.files(directory, pattern = "_cnt.mat$", full.names = TRUE)
+  ls_files <- list.files(directory, pattern = search_pattern, full.names = TRUE)
+
   # read count cube files
   all_files <- purrr::map(ls_files, ~purrr::pluck(R.matlab::readMat(.x), "cnt"))
   # dimensions
@@ -38,7 +41,10 @@ read_matlab <- function(directory, plane, title, grid_cell = 64, output = "sum",
   # data and metadata
   all_files <- purrr::map(all_files, ~dim_labeller(.x, dims = dim_names))
   dim_sizes <- purrr::map(all_files, ~set_names(dim(.x), nm = dim_names))
-  all_species <- stringr::str_extract_all(ls_files, "((?<=/)[[:alnum:]]*)(?=_cnt)")
+  all_species <- stringr::str_extract_all(
+    ls_files,
+    "((?<=/)[[:alnum:]]*)(?=_cnt)"
+    )
   chop_files <- stringr::str_split(directory,"/")[[1]]
   file_names <- purrr::map(
     1:dplyr::n_distinct(ls_files),
@@ -63,8 +69,6 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
                                title, grid_cell, output, grid_sel, scaler,
                                dim_names) {
 
-
-  # plane = enquo(plane)
   if (grid_cell != 1) {
     # create a grid
     grid_layout <- grid_gen(dims = dim_size, plane = plane,
@@ -178,7 +182,7 @@ accumulate_cnts <- function(df_2d, sum_plane, title, species, file_name, grid,
     group_by(!!! gr_var, grid.nm) %>%
     summarise(
       dim_name.nm = as_name(sum_plane),
-      grid.nm = (grid * scaler) ^ 2,
+      grid_size.nm = (grid * scaler) ^ 2,
       across(c(!!! stat_var), mean, .names = "mean_{.col}.mt"),
       N.rw = as.numeric(sum(N.rw)),
       t.nm = n() * 1e-3,
