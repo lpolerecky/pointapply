@@ -8,156 +8,204 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE
 )
+
 ```
+
+
+# Introduction
+
+
+The validity of inter- and intra- isotope models is verified for the nanoSIMS generated data by an assessment of the implicit assumptions of the linear regression model (Eq. (4) of the paper); normality, homogeneity and independence of residuals. 
+
+
+
+In addition, the regression assumptions are used to aid the selection of the appropriate grid-cell size, as the underlying data structure of ion counts depends on this factor encompassed in the individual measurements of a conventional SIMS isotope analysis. In effect, the smaller the grid-cell (i.e. measurement time) the more the reduced counts will deviate from a normal (Gaussian distribution). This effect will affect at first counts of the rare isotope (i.e. ^13^C). 
+
+The function to perform regression diagnostics `diag_R()` is a core feature of the accompanying package `point`.
 
 
 ```{r setup}
-library(pointapply)
+library(point) # regression diagnostics
+library(pointapply) # load package
 ```
+
+
+```{r bld, echo=FALSE}
+on_build <- TRUE
+```  
+
+
+# Download data
+
+The validation of regression assumptions of Supplementary Section requires ion count data processed with the *point* R package. Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("read-matlab")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. 
 
 
 ```{r data}
-
 # use download_point() to obtain processed data (only has to be done once)
-download_point()
-
+download_point(type = "processed")
 ```
+
+
+# Load data
+
+For this example processed data is loaded with different grid-cell sizes to gauge the effect of cell-size on the underlying data structure and its effect on the validity of the linear regression model. In the study grid-cell size of `r sapply(2:7, function(x) 2 ^ x)` pixels for one side of the square cell.
 
 
 ```{r }
+# grid-cell sizes
 grid_cell <- sapply(2:7, function(x) 2 ^ x)
-title <- c("MEX", "MON")
-name <- tidyr::crossing(grid_cell, title) %>%
-  dplyr::rowwise() %>% 
-  dplyr::transmute(name = paste("map_sum_grid", grid_cell,title, sep = "_")) %>% 
-  dplyr::pull(name)  
-
-data(list = name)
+# names of the analytes in the paper
+name <- c("MEX", "MON")
+# load
+name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE)
 # dataframe aggregated over depth
 tb <-purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
-
 ```
 
 
-# Normality of residuals
+# Regression diagnostics
+
+## Normality of residuals
+
+The assumption of normality is tested on the studentized residuals ($\hat{e}_i^*$) of the ratio method regression model for ^12^C (independent) and ^13^C (dependent), see the paper and the documentation of the `point` package for more information. The `diag_R()` with the `.method = "QQ"` generates sample quantiles and theoretical quantiles (and the predicted quantiles together with a standard error) as well as performing an *Anderson-Darling* hypothesis test (by selecting: `.hyp = "norm"`) with the null hypothesis $H_0$ of normality for $\hat{e}_i^*$. 
+
 
 ```{r QQ}
-
 tb_QQ <- diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm, 
                 grid.nm, .method = "QQ", .hyp = "norm", .output = "flag")
-
 ```
 
 
-# Constant variance
+## Residuals with a mean of zero 
 
-```{r CV}
+For the next chunk of code, only the argument `.hyp` is changed to `ttest`. This invokes another hypothesis test, which checks whether the mean of the pooled $\hat{e}_i^*$ is significantly different from zero by performing a one-sample two-sided *Student’s t* hypothesis test. 
 
-tb_CV <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
-                grid.nm, .method = "CV", .hyp = "bp", .output = "flag")
-
-```
-
-
-# Residuals with zero mean 
 
 ```{r mu}
-
 tb_mu <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
                 grid.nm, .method = "QQ", .hyp = "ttest", .output = "flag")
-
 ```
 
 
-# Independence of residuals 
+## Constant variance
+
+Patterns in the homogeneity of $\hat{e}_i^*$ are another diagnostic feature for the validity of the regression model. The `diag_R()` function with argument  `.method = "CV"` provides the necessary building blocks for plotting a *scale-location* plot, where $\hat{e}_i^*$ is plotted against the predicted value (here $\hat{^{13}C}$) to visualise potential patterns that can help assess whether a linear model is the most accurate representation of the sampled data. This is formalized in yet another hypothesis test; *Breusch-Pagan* test (here set by the argument `.hyp = "bp"`), which essentially plots a least square model on this location-scale plot. Again, check the paper and the documentation of the `point` package for more information on the function.
+
+
+```{r CV}
+tb_CV <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
+                grid.nm, .method = "CV", .hyp = "bp", .output = "flag")
+```
+
+
+## Independence of residuals 
+
+The independence of the distributions, or autocorrelation among measurements, is checked by calculating the correlation of the series of $\hat{e}_i^*$ with a time-lagged version of itself. This is done by setting the argument `.method` to `"IR"`. Also, this can be cast in a hypothesis test. The `diag_R()` function applies as a *Ljung-Box* hypothesis test, where the timeseries is cross-validated with a timeseries without autocorrelation ("white noise"); the later forms the basis for the $H_0$ of "no auto-correlation". 
+
 
 ```{r IR}
-
 tb_IR <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
                 grid.nm, .method = "IR", .hyp = "ljung", .output = "flag")  
-
 ```
 
-# Classification plots
+
+# Visualization
+## Classification plots
+
+Barplots (`ggplot` with `geom_bar()`) are chosen to visualise (Fig. and Supplementary Fig. ), and summarise, the outcomes of the different hypothesis tests for the different grid-cell sizes. Besides a bin selection based on grid-cell size, a secondary x-axis is added to further emphasize the importance of count statistics (Poisson statistics) on the underlying data structure, and thus a crucial aspects in the outcome of various hypothesis tests. For this the mean count of the rare isotope (^13^C) is calculated ove both samples added together and for each grid-cell size separately. 
 
 
 ```{r}
-# Single ion stat for ROI size
-
-vc_N_13C <- group_by(tb, grid_size.nm, species.nm) %>% 
-  summarise(N = mean(N.pr), .groups = "drop") %>% 
-  filter(species.nm == "13C")   
-vc_N_13C <- set_names(sprintf("%.0f", vc_N_13C$N) , nm = vc_N_13C$grid_size.nm)
-
+# mean ion counts for grid-cell sizes
+vc_N_13C <- dplyr::group_by(tb, grid_size.nm, species.nm) %>% 
+  dplyr::summarise(N = mean(N.pr), .groups = "drop") %>% 
+  dplyr::filter(species.nm == "13C")   
+vc_N_13C <- rlang::set_names(
+  sprintf("%.0f", vc_N_13C$N) , 
+  nm = vc_N_13C$grid_size.nm
+  )
 ```
 
 
+The function `hyp_class()` constructs barplots showing the frequency of $H_0$ rejection for the various hypothesis tests.
+
+
 ```{r QQclass}
+QQ_class <- hyp_class(tb_QQ, vc_N_13C, "Normality test") # barplot
+save_point(QQ_class, "bar_QQ_class" ,width = 7, height = 7, unit = "cm", on_build) # save
+```
 
-QQ_class <- hyp_class(tb_QQ, vc_N_13C, "Normality test") 
 
-# plot and save for paper
-QQ_class
-save_point(QQ_class, "bar_QQ_class" ,width = 7, height = 7, unit = "cm", on_build = TRUE)
-
+```{r echo=FALSE, eval=TRUE, fig.cap="Anderson-Darling normality test.", out.width="50%"}
+ knitr::include_graphics(
+   fs::path_package("pointapply", "paper/graphs", "bar_QQ_class", ext = "png")
+   )
 ```
 
 
 ```{r CVclass}
+CV_class <- hyp_class(tb_CV, vc_N_13C, "Breusch-Pagan test") # barplot
+save_point(CV_class, "bar_CV_class" ,width = 7, height = 7, unit = "cm",  on_build) # save
+```
 
-CV_class <- hyp_class(tb_CV, vc_N_13C, "Breusch-Pagan test") 
 
-# plot and save for paper
-CV_class
-save_point(QQ_class, "bar_CV_class" ,width = 7, height = 7, unit = "cm", on_build = TRUE)
-
+```{r echo=FALSE, eval=TRUE, fig.cap="Breusch-Pagan test.", out.width="50%"}
+ knitr::include_graphics(
+   fs::path_package("pointapply", "paper/graphs", "bar_CV_class", ext = "png")
+   )
 ```
 
 
 ```{r muclass}
+mu_class <- hyp_class(tb_mu, vc_N_13C, "Student's t test") # barplot  
+save_point(mu_class, "bar_mu_class" ,width = 7, height = 7, unit = "cm",  on_build) # save
+```
 
-mu_class <- hyp_class(tb_mu, vc_N_13C, "Student's t test")  
 
-# plot and save for paper
-mu_class
-save_point(mu_class, "bar_mu_class" ,width = 7, height = 7, unit = "cm", on_build = TRUE)
-
+```{r echo=FALSE, eval=TRUE, fig.cap="Student's t test.", out.width="50%"}
+ knitr::include_graphics(
+   fs::path_package("pointapply", "paper/graphs", "bar_mu_class", ext = "png")
+   )
 ```
 
 
 ```{r IRclass}
+IR_class <- hyp_class(tb_IR, vc_N_13C, "Ljung-box test")  # barplot
+save_point(IR_class, "bar_IR_class" ,width = 7, height = 7, unit = "cm",on_build) # save
+```
 
-IR_class <- hyp_class(tb_IR, vc_N_13C, "Ljung-box test") 
 
-# plot and save for paper
-IR_class
-save_point(IR_class, "bar_IR_class" ,width = 7, height = 7, unit = "cm", on_build = TRUE)
-
+```{r echo=FALSE, eval=TRUE, fig.cap="Ljung-box test.", out.width="50%"}
+ knitr::include_graphics(
+   fs::path_package("pointapply", "paper/graphs", "bar_IR_class", ext = "png")
+   )
 ```
 
 
 ```{r class, echo=FALSE}
-
 # overview
 p <- gridExtra::grid.arrange(gridExtra::arrangeGrob(QQ_class, CV_class, ncol = 2), gridExtra::arrangeGrob(mu_class, IR_class, ncol = 2)) 
-png(filename = usethis::proj_path("paper/graphs", "bar_over_class", ext = "png"), width = 14, height = 14, units = "cm", res = 256)
+png(filename = fs::path_package("pointapply", "paper/graphs", "bar_over_class", ext = "png"), width = 14, height = 14, units = "cm", res = 256)
 grid::grid.draw(p)
 dev.off()
 
 ```
 
+
 # Scatter plots
 
-## Supplementary Figure 3
+The results of the regression diagnostics are furthermore evaluated by visualising the normality of the pooled $\hat{e}_i^*$ as a *normal Quantile--Quantile plot* (Supplementary Fig. ) and homogeneity of variance as a *scale-location* plot (Supplementary Fig. ). Because of the high number of ion counts in a standard SIMS measurement, the 2D-density of the data (i.e. how many data point fall in a specific regions on the x-y coordinates of the plot) is highlighted by mapping of color and alpha to the individual points for a better visualization of patterns. This is done by calculating the 2D density of each observation with the function `MASS::kde2d()`, and this is included in the function `twodens()` which produces a `ggplot` with `geom_point()`.
 
-Reproducing Supplementary Figure 3 of the paper; Schobben, Kienhuis, Polerecky 2021
+## Normal Quantile--Quantile plot
+
 
 ```{r QQdens}
-
 QQ_dens <- twodens(
   tb_QQ, 
   TQ,
@@ -170,12 +218,49 @@ QQ_dens <- twodens(
   c(-4, 4), 
   c(-4, 4)
   )
-
 # add abline
 QQ_dens <- QQ_dens + geom_abline(alpha = 0.7, linetype = 3) 
-
 # plot and save for paper
-QQ_dens 
 save_point(QQ_dens, name = "point_QQ", width = 12, height = 8, unit = "cm", 
-           on_build = TRUE)
+           on_build)
+```
+
+
+```{r echo=FALSE, eval=TRUE, fig.cap="Quantile--Quantile normality plot", out.width="75%"}
+ knitr::include_graphics(
+   fs::path_package("pointapply", "paper/graphs", "point_QQ", ext = "png")
+   )
+```
+
+
+## Scale--location plot
+
+
+```{r CVdens}
+CV_dens <- twodens(
+  tb_CV, 
+  hat_Xt.pr.13C,
+  studE, 
+  substitute(
+    "fitted value (" * hat(a) * ")", 
+    list(a = point::ion_labeller("13C", "expr"))
+    ), 
+  expression("studentized residuals (" * italic(e)^"*" * ")"), 
+  "Scale-location plot",
+  0.1, 
+  gr = grid_size.nm,
+  facet_sc = "free_x"
+  )
+# add ab line
+CV_dens <- CV_dens + geom_hline(yintercept = 0, linetype = 3)
+# plot and save for paper
+save_point(CV_dens, name = "point_CV", width = 12, height = 8, unit = "cm", 
+           on_build)
+```
+
+
+```{r echo=FALSE, eval=TRUE, fig.cap="Scale--location plot", out.width="75%"}
+ knitr::include_graphics(
+   fs::path_package("pointapply", "paper/graphs", "point_CV", ext = "png")
+   )
 ```
