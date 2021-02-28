@@ -22,16 +22,16 @@ hyp_class <- function(.data, sec_vc, ttl) {
     scale_x_continuous(
       breaks = as.numeric(names(sec_vc)),
       trans = "log2",
-      labels = scales::label_number(2),
+      labels = scales::label_number(accuracy = 0.1),
       sec.axis = dup_axis(
-        name = expression(bar(N)~"("^13*C*" cnt)"),
+        name = expression(bar(N)~"("^13*C*" count)"),
         labels = unname(sec_vc)
         )
       ) +
     labs(
       title = ttl,
-      x = expression("grid ("*mu*m*")"),
-      y = "frequency H0"
+      x = expression("grid-cell ("*mu*m^2*")"),
+      y = expression("frequency H"[0])
       ) +
     theme_classic() +
     themes_IC
