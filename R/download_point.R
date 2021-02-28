@@ -1,44 +1,66 @@
-#' Write point ion count data
+#' Download, write and plot ion count data
 #'
-#'  A wrapper around zen4R in order to download the large matlab files as well as processed data cubes.
+#' \code{download_point()} is a wrapper around zen4R in order to download the
+#' large matlab files as well as processed data cubes and simulated data.
+#' \code{write_point()} stores processed  matlab files in the correct directory.
+#' \code{save_point()} stores ggplots in the correct directory for usage in the
+#' paper.
+#'
+#' @param obj Character string of object to store.
+#' @param ggplot ggplot object to be stored.
+#' @param name Character string for graphic based on ggplot.
+#' @param width Numeric value for width of graphic based on ggplot.
+#' @param height Numeric value for height of graphic based on ggplot.
+#' @param height Character string indicating dimension units fpr graphic based
+#' on ggplot.
+#' @param on_build Logical whether download is loaded during build
+#' (default = FALSE).
+#'
+#' @return Raw matlab files are stored in the directories
+#' `extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
+#' processed data is stored in the directory `data`. Figures are stored in the
+#' directory `paper/2020-08-20-GLENDON`
 #'
 #' @export
-download_point <- function (type = "processed", on_build = FALSE) {
+download_point <- function (type = "all") {
 
-  if (on_build) {
-    path <- usethis::proj_path("inst/extdata")
-    } else {
-     path_ext <- fs::path_package("pointapply", "extdata")
-     path_int <- fs::path_package("pointapply", "data")
-     }
+  path_ext <- fs::path_package("pointapply", "extdata")
+  path_int <- fs::path_package("pointapply", "data")
 
   # get the data
-  pointdata <- zen4R::download_zenodo("10.5281/zenodo.4557485", path = path_ext )
+  if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
+    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4564170", path = path_ext)
+  }
 
+  if (type == "all" | type == "raw") {
   # extract matlab
-  ls_mat <- list.files(path_ext, pattern = "GLENDON.zip", full.names = TRUE)
-  purrr::walk(ls_mat, ~unzip(.x, exdir = tools::file_path_sans_ext(.x), junkpaths = TRUE))
+  ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
+  purrr::walk(
+    ls_mat,
+    ~unzip(.x, exdir = tools::file_path_sans_ext(.x), junkpaths = TRUE)
+    )
+  }
 
+  if (type == "all" | type == "processed") {
   # purge data
   purrr::walk(list.files(path_int, full.names = TRUE), file.remove)
-  # extract data rda format
-  unzip(list.files(path_ext, pattern = "data.zip", full.names = TRUE), exdir = path_int, junkpaths = TRUE)
-
+  # extract data (.rda format)
+  ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
+  unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
+  }
 }
 #' @rdname download_point
 #'
 #' @export
 write_point <- function (obj, on_build = FALSE) {
 
-  obj <- rlang::as_name(obj)
-
   if (on_build) {
     path <- usethis::proj_path("inst/extdata/data", obj, ext = "rda")
     } else {
       path <- fs::path_package("pointapply", "data",  obj, ext = "rda")
-    }
+      }
   envir <- parent.frame()
-  args <- list2(list = obj, file = path, envir = envir, compress = "xz", version = 2)
+  args <- list2(obj, file = path, envir = envir, compress = "xz", version = 2)
 
   rlang::exec("save", !!!args)
 }
@@ -48,12 +70,27 @@ write_point <- function (obj, on_build = FALSE) {
 save_point <- function (ggplot, name, width, height, unit, on_build = FALSE) {
 
   if (on_build) {
-    path <- usethis::proj_path("paper/graphs", name, ext = "png")
-  } else {
-    path <- fs::path_package("pointapply", "paper/graphs", name, ext = "png")
-  }
+    path <- usethis::proj_path("inst/paper/graphs", name, ext = "png")
+    } else {
+      path <- fs::path_package("pointapply", "paper/graphs", name, ext = "png")
+      }
   envir <- parent.frame()
   args <- list2(ggplot, file = path, width = width, height = height, unit = unit)
 
   rlang::exec("ggsave", !!!args)
+
+}
+#' @rdname download_point
+#'
+#' @export
+load_point <- function(type, name, grid_cell, return_name = FALSE){
+
+  name <- tidyr::crossing(grid_cell, name) %>%
+  dplyr::rowwise() %>%
+  dplyr::transmute(name = paste(type, grid_cell, name, sep = "_")) %>%
+  dplyr::pull(name)
+
+  data(list = name)
+  if (return_name) return(name)
+
 }
