@@ -5,14 +5,19 @@
 #' \code{write_point()} stores processed  matlab files in the correct directory.
 #' \code{save_point()} stores ggplots in the correct directory for usage in the
 #' paper.
+#' \code{load_point()} load .rda files of the package.
 #'
 #' @param obj Character string of object to store.
 #' @param ggplot ggplot object to be stored.
-#' @param name Character string for graphic based on ggplot.
+#' @param name Character string for graphic based on ggplot or file to be
+#' loaded.
 #' @param width Numeric value for width of graphic based on ggplot.
 #' @param height Numeric value for height of graphic based on ggplot.
-#' @param height Character string indicating dimension units fpr graphic based
+#' @param unit Character string indicating dimension units for graphic based
 #' on ggplot.
+#' @param type Character string for type of file to be loaded.
+#' @param grid_cell Numeric value of grid_cell size in pixels.
+#' @param return_name Logical whether to return file names.
 #' @param on_build Logical whether download is loaded during build
 #' (default = FALSE).
 #'
@@ -70,9 +75,9 @@ write_point <- function (obj, on_build = FALSE) {
 save_point <- function (ggplot, name, width, height, unit, on_build = FALSE) {
 
   if (on_build) {
-    path <- usethis::proj_path("inst/paper/graphs", name, ext = "png")
+    path <- usethis::proj_path("inst/paper/figures", name, ext = "png")
     } else {
-      path <- fs::path_package("pointapply", "paper/graphs", name, ext = "png")
+      path <- fs::path_package("pointapply", "paper/figures", name, ext = "png")
       }
   envir <- parent.frame()
   args <- list2(ggplot, file = path, width = width, height = height, unit = unit)
@@ -83,14 +88,25 @@ save_point <- function (ggplot, name, width, height, unit, on_build = FALSE) {
 #' @rdname download_point
 #'
 #' @export
-load_point <- function(type, name, grid_cell, return_name = FALSE){
+load_point <- function(type, name, grid_cell, return_name = FALSE, on_build){
 
   name <- tidyr::crossing(grid_cell, name) %>%
-  dplyr::rowwise() %>%
-  dplyr::transmute(name = paste(type, grid_cell, name, sep = "_")) %>%
-  dplyr::pull(name)
+    dplyr::rowwise() %>%
+    dplyr::transmute(
+      name =
+        ifelse(
+          is.null(grid_cell),
+          paste(type, name, sep = "_"),
+          paste(type, grid_cell, name, sep = "_")
+          )
+      ) %>%
+    dplyr::pull(name)
 
-  data(list = name)
+  if (on_build) {
+    usethis::proj_path("inst/extdata/data", name, ext = "rda") %>%
+      purrr::walk(load, .GlobalEnv)
+    } else {
+      data(list = name)
+      }
   if (return_name) return(name)
-
 }
