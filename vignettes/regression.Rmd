@@ -1,8 +1,8 @@
 ---
-title: "Regression assumptions"
+title: "Validation of regression assumptions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Regression assumptions}
+  %\VignetteIndexEntry{Validation of regression assumptions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -30,13 +30,13 @@ In addition, the regression assumptions are used to aid the selection of the app
 The function to perform regression diagnostics `diag_R()` is a core feature of the accompanying package `point`.
 
 
-```{r setup}
+```{r setup, eval=TRUE}
 library(point) # regression diagnostics
-library(pointapply) # load package
+devtools::load_all(".") # library(pointapply) # load package
 ```
 
 
-```{r bld, echo=FALSE}
+```{r bld, echo=FALSE, eval=TRUE}
 on_build <- TRUE
 ```  
 
@@ -48,7 +48,7 @@ The validation of regression assumptions of Supplementary Section requires ion c
 
 ```{r data}
 # use download_point() to obtain processed data (only has to be done once)
-download_point(type = "processed")
+# download_point(type = "processed")
 ```
 
 
@@ -63,7 +63,7 @@ grid_cell <- sapply(2:7, function(x) 2 ^ x)
 # names of the analytes in the paper
 name <- c("MEX", "MON")
 # load
-name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE)
+name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE, on_build)
 # dataframe aggregated over depth
 tb <-purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
 ```

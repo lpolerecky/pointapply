@@ -1,0 +1,183 @@
+---
+title: "SIMS analytical artefacts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SIMS analytical artefacts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+
+# Introduction
+
+This vignette deals with the evaluation of the impact of systematic and random biases on high-precision isotope data generated with the nanoSIMS 50L, and as discussed in the paper (Supplementary Section 2.1 *Precision of isotope analysis* and Supplementary Section 2.3 *Quasi Simulations Arrival*). The here discussed analytical artefacts all have been argued to compromise SIMS isotope analyses and do not relate to the isotope homogeneity of the analyte (i.e., the target of this study).
+
+
+```{r setup, eval = TRUE}
+library(point) # regression diagnostics
+devtools::load_all(".") # library(pointapply) # load package
+```
+
+
+```{r bld, echo=FALSE}
+on_build <- TRUE
+```  
+
+
+# Download data
+
+The assessment of these analytical artefacts  is largely based on the *point* R package. Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. Simulated data (*Sensitivity by simulation* (`vignette("simulation")`) is used to gauge the effectiveness of precision metrics (such as, the error of the mean) of an SIMS isotope analysis in detecting isotopically anomalies entrained in the analyte (intra-isotope variability).
+
+
+```{r data}
+# use download_point() to obtain processed data (only has to be done once)
+# download_point(type = "processed")
+```
+
+
+# Load data
+
+For this example processed "real" data is loaded with a grid-cell size of 64 pixels by 64 pixels (100$\,\mu$m^2). Simulated data processed with Cook's D regression diagnostics is used to compare the here developed intra-isotope test statistic with precision metrics.
+
+
+```{r }
+# load "real" data
+load_point("map_sum_grid", c("MEX", "MON"), grid_cell = 64, return_name = FALSE, on_build)
+# load simulated data
+load_point("simu", "CD_eval_intra", NULL, return_name = FALSE, on_build)
+```
+
+
+# Systematic biases
+## Quasi Simulations Arrival (QSA)
+
+The combination of measuring under high ionisation efficiencies and the usage of electron multipliers (EM) for ion detection can lead to an artefact understood as the more-or-less (quasi) simultaneous arrival (QSA) of an incident ion at the detection device. Differentiation of the two secondary ions is thus not possible, and the ions are therefore counted as $1$ detection event by the machine. In the case of isotope systems this could theoretically lead to undersampling of the common isotope [@Slodzian2004]. An exact correction of undersampling induced by QSA can be a cumbersome undertaking, as such the R package `point` has a diagnostic tool that helps evaluate whether the ion count data is likely to have been compromised by this analytical artefact. The function `QSA_test()` fits a least-square linear model to the common isotope count rates (e.g. ^12^C) as a predictor, and the targeted isotope ratio (e.g. ^13^C/^12^C) as the independent variable. If undersampling would be present in the ion count data, then this would cause a significant positive linear trend of higher isotope ratios with higher count rates of the common isotope.
+
+
+```{r QSA}
+# bind dataframes
+tb <- bind_rows(map_sum_grid_64_MEX$depth, map_sum_grid_64_MON$depth)
+# QSA test
+tb_QSA <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm, grid.nm, .nest = grid.nm)
+# make mlm model line
+tb_QSA <- mutate(tb_QSA, hat_R = alpha_grid.nm + beta_grid.nm * Xt.pr.12C)
+```
+
+
+The function `twodens` provided in this package is used to visualise the high denisty data.
+
+
+```{r}
+# labels for ion count rates
+xlab <- substitute(
+  a ~ "(count sec"^"-"*")", 
+  list(a = point::ion_labeller("12C", "expr"))
+  )
+
+# plot
+QSA_dens <- twodens(
+  tb_QSA, 
+  Xt.pr.12C,
+  R_Xt.pr, 
+  xlab, 
+  point::R_labeller("13C", "12C", "expr"), 
+  "QSA test",
+  1,
+  gr = sample.nm,
+  unit = "dim",
+  facet_sc = "free"
+  )
+
+# add lm line
+QSA_dens + geom_line(aes(y = hat_R)) 
+
+# save data
+write_point("tb_QSA", on_build )
+ 
+# save plot  
+save_point(last_plot(), "point_QSA", width = 12, height = 6, unit = "cm", on_build)
+```
+
+
+```{r echo=FALSE, eval=TRUE, fig.cap="QSA test.", out.width="80%"}
+ knitr::include_graphics(
+   fs::path_package("pointapply", "paper/graphs", "point_QSA", ext = "png")
+   )
+```
+
+
+## Random bias
+
+The random nature of secondary ions emitted from an analytical substrate (e.g. rock sample) during sputtering can be described by Poisson statistics, which can be used to predict the precision of pulsed ion counts (e.g. measurements with a *Cameca NanoSIMS 50L*) under ideal circumstances. More specifically, the variation can be deduced from the total counts of secondary ions. Usefully, we can compare these predictive values with the descriptive statistics; essentially estimates of the true population location (e.g. mean) and spread (variance).
+
+The reduced $\chi^2$ can be used to assess the machine performance and analyte homogeneity as it cross-validates the observed error estimate with the theoretical Poisson-based precision. For example, the reduced $\chi^2$ of an isotope ratio equates to:
+
+\begin{equation}
+  \chi^2 = \left( \frac{s_{\bar{R}}} {\hat{s}_{\bar{R}}} \right)^2   
+\end{equation}
+
+where values close to $1$ suggest good agreement between the actual measurement and the predicted value [@Kilburn2015a]. Values lower than $1$ suggest that the analysis was better than predicted, and values higher than $1$ indicate that the analysis was worse than predicted by Poisson statistics.
+
+Intra-isotope variation is measured by the test (based on F-statistic) as outlined in the paper. Varying degrees of variance in the ionization efficiency of the analyte cause a systematic trend that is mirrored in both isotopes. This ionization efficiency trend has been parameterized as the difference between the relative standard deviation of the common isotope $\epsilon_{X^{a}}$ and the theoretical standard deviation $\hat{\epsilon}_{N^{a}}$, based on Poisson statistics. This ionization efficiency trend has an impact on the accuracy of the intra-isotope test (see paper), and therefore has been included in the simulated data. For this comparative approach an ionization trend of below < 6% has been omitted, because of limited detection at the lower ranges of ionization efficiency. The remainder has been divided into three groups; low (6--21%), medium (22--37%) and high (38--53%) ionization efficiency with the `ggplot::cut_width()` function.
+
+
+```{r cut}
+# filter and cut continuous ionization efficiency
+simu_CD_eval_intra <- simu_CD_eval_intra %>% 
+ mutate(ion_trend = RS_Xt.sm.12C - hat_RS_Xt.sm.12C) %>% 
+ filter(ion_trend > 6) %>% 
+ mutate(ion_trend = 
+          factor(
+            cut_width(ion_trend, 10), 
+            labels = c("low", "medium", "high") 
+            ) 
+        )
+```
+  
+  
+A simple ggplot (`ggplot() + geom_point`) has been used to compare the F statistic for intra-isotope variability with the $\chi^2$ for an assessment of the precision.
+
+  
+```{r FvsChi}
+# plot F vs Chi2
+ggplot(simu_CD_eval_intra, aes(x = chi2_R_Xt.sm, y = F_vl, color = force.nm)) +
+  geom_point() +
+  facet_grid(cols = vars(type.nm), rows = vars(ion_trend)) +
+  scale_color_distiller(
+    expression("isotope variation in substrate ("* Delta[B - A] *" \u2030 )"),
+    palette = "YlOrRd"
+    ) +
+  scale_y_continuous(
+    expression(F["(2),(n-3)"]),
+    expand = c(0, 0),
+    breaks = scales::pretty_breaks(4),
+    ) +
+  scale_x_continuous(
+    expression(chi^2),
+    expand = c(0, 0),
+    breaks = scales::pretty_breaks(4),
+    ) +
+  ggtitle("Precision vs. accuracy") +
+  theme_bw() +
+  themes_IC +
+  theme(legend.position = "bottom") 
+
+# save 
+save_point(last_plot(), "simu_precision", width = 14, height = 14, unit = "cm", on_build)
+```
+
+
+```{r echo=FALSE, eval=TRUE, fig.cap="The sensitivity of precision and accuracy-based test statistics to intra-isotope variability.", out.width="80%"}
+ knitr::include_graphics(
+   fs::path_package("pointapply", "paper/graphs", "simu_precision", ext = "png")
+   )
+```
+

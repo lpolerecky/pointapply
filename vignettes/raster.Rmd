@@ -34,7 +34,7 @@ on_build <- TRUE
 
 # Download data
 
-Ion count data processed with the *point* R package is required to produce the raster plots (Figs and Supplementary Fig). Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("read-matlab")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. 
+Ion count data processed with the *point* R package is required to produce the raster plots (Figs and Supplementary Fig). Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. 
 
 
 ```{r data}
