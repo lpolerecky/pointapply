@@ -1,7 +1,8 @@
 #' Combination plot
 #'
-#' \code{gg_effect} Combine raster images for ion count ratios with high
-#' precision isotope ratios.
+#' \code{gg_effect} combines raster images for ion count ratios with high
+#' precision isotope ratios. \code{gg_sketch} draws the layout of the
+#' grid_cells.
 #'
 #' @param ls Named list containing dataframes for planes of ion counts for
 #' high precision isotope ratios.
@@ -18,6 +19,8 @@
 #' @param grid_cell Grid-cell size in pixels (default = 64).
 #' @param scaler Numeric converting the pixels to metric dimension of
 #' measurement (default is the conversion used in this study).
+#' @param Xt Variable for ion count rates (default = Xt.pr).
+#' @param grid Variable for grid_cell number (default = grid.nm).
 #'
 #' @return \code{\link[ggplot2:ggplot]{ggplot}}.
 #'
@@ -143,10 +146,14 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
     ) %>%
     rlang::set_names(nm = dim_names) %>%
     purrr::map(flatten_matrix, var = "grid.nm") %>%
-    purrr::map(~summarise(group_by(.x, grid.nm), across(.fns = mean), .groups = "drop")) %>%
+    purrr::map(
+      ~summarise(group_by(.x, grid.nm), across(.fns = mean),
+                 .groups = "drop")
+      ) %>%
     purrr::map(tibble::add_column, sample.nm = "sketch")
 
-  df <- dim_folds(ls_sketch, height, width,  depth, "sketch", "tile", res, grid_cell)
+  df <- dim_folds(ls_sketch, height, width,  depth, "sketch", "tile", res,
+                  grid_cell)
   ggplot(df, aes(x = width, y = height)) +
     geom_tile(fill = "transparent", color = "black") +
     geom_text(aes(label = grid.nm)) +
@@ -184,12 +191,9 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
     themes_IC
 }
 
-
 #-------------------------------------------------------------------------------
 # supportive functions
 #-------------------------------------------------------------------------------
-
-
 # Calculate distance for side plots (width and height aggregation plane)
 dim_folds <- function(ls, dim1, dim2, dim3, ttl, geom, res, grid_cell){
 
@@ -197,7 +201,7 @@ dim_folds <- function(ls, dim1, dim2, dim3, ttl, geom, res, grid_cell){
   dim2 <- enquo(dim2)
   dim3 <- enquo(dim3)
 
-  ls <- purrr::map(ls, ~filter(.x, sample.nm == ttl))
+  ls <- purrr::map(ls, ~filter(.x, .data$sample.nm == ttl))
 
   if (geom == "tile") {
     ls <- purrr::map_at(
