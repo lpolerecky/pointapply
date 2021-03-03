@@ -1,4 +1,16 @@
 #' Create significance codes for p values
+#'
+#' The function \code{sig_coder()} produces significance stars associated with p
+#' values
+#'
+#' @param x p value (numeric) (default = NULL)
+#' @param make_lab Logical whether to return a legend for the significance
+#'  stars (default = TRUE).
+#'
+#' @return Character string encoding for the significance star associated with
+#' the p value. If argument \code{make_lab = TRUE} then a list is return, where
+#' the second element contains the legend.
+#'
 #' @export
 sig_coder <- function(x = NULL, make_lab = TRUE) {
 
