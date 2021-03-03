@@ -3,14 +3,14 @@
 #' \code{twodens} Scatter plots with 2D density as color and alpha scale to
 #' visualise very dens data
 #'
-#' @param .data Dataframe.
+#' @param IC Ion count data.
 #' @param x Variable for the x axis.
 #' @param y Variable for the y axis.
 #' @param xlab Character string or expression for x axis label.
 #' @param ylab Character string or expression for x axis label.
 #' @param ttl Character string or expression for plot title.
-#' @param downsample A numeric supplying the fraction for downsampling of the original
-#' dataframe.
+#' @param downsample A numeric supplying the fraction for down-sampling of the
+#' original data frame.
 #' @param gr A grouping variable.
 #' @param x_lim Numeric range for x axis (default = NULL).
 #' @param y_lim Numeric range for y axis (default = NULL).
@@ -18,16 +18,16 @@
 #' string \code{"um"} is used for the grid cell size comparison plots. The
 #' string \code{"dim"} is used for all other plots, and defaults to the grouping
 #' variable name.
-#' @param sds Numeric settings the seeds for downsampling via `set.seed()`.
+#' @param sds Numeric settings the seeds for down-sampling via `set.seed()`.
 #' @param geom A character string for the geometry mapped on the aesthetics.
 #' Options are  \code{"point"} for normal scatter plots, and \code{"dens2d"} for
 #' density contour lines.
 #' @param facet_sc The \code{scales} parameter of `ggplot2::facet_grid`
 #'
-#' @return \code{\link[ggplot2:ggplot]{ggplot}}.
+#' @return \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
-twodens <- function(.data, x, y, xlab, ylab, ttl, downsample, gr, x_lim = NULL,
+twodens <- function(IC, x, y, xlab, ylab, ttl, downsample, gr, x_lim = NULL,
                     y_lim = NULL, unit = "um", sds = 22, geom = "point",
                     facet_sc = "fixed"){
 
@@ -37,28 +37,29 @@ twodens <- function(.data, x, y, xlab, ylab, ttl, downsample, gr, x_lim = NULL,
   # grouping
   if (!is.null(rlang::get_expr(gr))) {
 
-    .data <- group_by(.data, !!gr)
-    ran <- range(count(.data, !!gr)$n)
+    IC <- group_by(IC, !!gr)
+    ran <- range(count(IC, !!gr)$n)
 
     if (unit == "um") {
+      IC <- mutate(IC, !!gr:= round(!!gr, 1))
       lab <- eval(
         rlang::call2(
           "label_bquote",
-          substitute(.(x)~mu*"m", lst(x = rlang::get_expr(gr)))
+          substitute(.(x)~mu*"m"^2, lst(x =  rlang::get_expr(gr)))
         )
       )
     }
     if (unit == "dim") lab <- label_value
   } else {
-    ran <- range(count(.data)$n)
+    ran <- range(count(IC)$n)
   }
 
   # downsample
-  .data <- slice_sample(.data, prop = downsample)
+  IC <- slice_sample(IC, prop = downsample)
 
   # calculate density
-  .data <- mutate(
-    .data,
+  IC <- mutate(
+    IC,
     h_x = if_else(MASS::bandwidth.nrd({{x}}) == 0, 0.1, MASS::bandwidth.nrd({{x}})),
     h_y = if_else(MASS::bandwidth.nrd({{y}}) == 0, 0.1, MASS::bandwidth.nrd({{y}})),
     dens = get_density({{x}}, {{y}}, h = c(h_x, h_y), n = log(ran[2]) / log(n()) * 100),
@@ -66,7 +67,7 @@ twodens <- function(.data, x, y, xlab, ylab, ttl, downsample, gr, x_lim = NULL,
     alpha_sc = (ran[1] / n()) / 4
   )
 
-  p <- ggplot(.data, aes(x = {{x}}, y = {{y}}))
+  p <- ggplot(IC, aes(x = {{x}}, y = {{y}}))
 
   if (geom == "point")  p <- p + geom_point(aes(color = dens, alpha =  alpha_sc))
   if (geom == "dens2d")  {
@@ -76,7 +77,7 @@ twodens <- function(.data, x, y, xlab, ylab, ttl, downsample, gr, x_lim = NULL,
       contour = FALSE,
       contour_var = "count",
       show.legend = FALSE,
-      h = c(.data$h_x, .data$h_y)
+      h = c(IC$h_x, IC$h_y)
       ) +
       scale_fill_distiller(
         limits = c(0.01, 1),
