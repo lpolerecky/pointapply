@@ -21,19 +21,18 @@ read_matlab(
 \item{plane}{Variable for the dimension over which to be aggregated}
 
 \item{grid_cell}{Integer indicating size of cells in pixels, only exponent of
-base two allowed}
+base two allowed (default = 64)}
 
 \item{output}{Character string for type of output; \code{"complete"} or
 \code{"sum"}.}
 
-\item{grid_sel}{Integer selecting an grid-cell for in-depth analysis
-(default is 64 pixels as used in this study).}
+\item{grid_sel}{Integer selecting an grid-cell for in-depth analysis.}
 
 \item{scaler}{Numeric converting the pixels to metric dimension of
 measurement (default is the conversion used in this study).}
 }
 \value{
-A \code{\link[tibble:tibble]{tibble}} containing the ion counts
+A \code{tibble::\link[tibble:tibble]{tibble}} containing the ion counts
 aggregated over the plane of choice, and if \code{output = "sum"}.
 }
 \description{
@@ -44,6 +43,5 @@ matlab files exported by LANS.
 # Use get_matlab() to path to data bundled with this package
 
 # Pre-process real data as in the paper; Schobben, Kienhuis, Polerecky 2021
-tb_rw <- read_matlab(get_matlab("2020-08-20-GLENDON"), plane = height,
-                     title = "MEX")
+read_matlab(get_matlab("2020-08-20-GLENDON"), plane = height, title = "MEX")
 }

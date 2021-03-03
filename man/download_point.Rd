@@ -4,14 +4,52 @@
 \alias{download_point}
 \alias{write_point}
 \alias{save_point}
-\title{Write point ion count data}
+\alias{load_point}
+\title{Download, write and plot ion count data}
 \usage{
-download_point(type = "processed", on_build = FALSE)
+download_point(type = "all")
 
 write_point(obj, on_build = FALSE)
 
 save_point(ggplot, name, width, height, unit, on_build = FALSE)
+
+load_point(type, name, grid_cell, return_name = FALSE, on_build)
+}
+\arguments{
+\item{type}{Character string for type of file to be loaded.}
+
+\item{obj}{Character string of object to store.}
+
+\item{on_build}{Logical whether download is loaded during build
+(default = FALSE).}
+
+\item{ggplot}{ggplot object to be stored.}
+
+\item{name}{Character string for graphic based on ggplot or file to be
+loaded.}
+
+\item{width}{Numeric value for width of graphic based on ggplot.}
+
+\item{height}{Numeric value for height of graphic based on ggplot.}
+
+\item{unit}{Character string indicating dimension units for graphic based
+on ggplot.}
+
+\item{grid_cell}{Numeric value of grid_cell size in pixels.}
+
+\item{return_name}{Logical whether to return file names.}
+}
+\value{
+Raw matlab files are stored in the directories
+`extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
+processed data is stored in the directory `data`. Figures are stored in the
+directory `paper/2020-08-20-GLENDON`
 }
 \description{
-A wrapper around zen4R in order to download the large matlab files as well as processed data cubes.
+\code{download_point()} is a wrapper around zen4R in order to download the
+large matlab files as well as processed data cubes and simulated data.
+\code{write_point()} stores processed  matlab files in the correct directory.
+\code{save_point()} stores ggplots in the correct directory for usage in the
+paper.
+\code{load_point()} load .rda files of the package.
 }

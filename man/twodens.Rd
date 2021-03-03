@@ -5,7 +5,7 @@
 \title{Scatter plots for very dens datasets}
 \usage{
 twodens(
-  .data,
+  IC,
   x,
   y,
   xlab,
@@ -22,7 +22,7 @@ twodens(
 )
 }
 \arguments{
-\item{.data}{Dataframe.}
+\item{IC}{Ion count data.}
 
 \item{x}{Variable for the x axis.}
 
@@ -34,8 +34,8 @@ twodens(
 
 \item{ttl}{Character string or expression for plot title.}
 
-\item{downsample}{A numeric supplying the fraction for downsampling of the original
-dataframe.}
+\item{downsample}{A numeric supplying the fraction for down-sampling of the
+original data frame.}
 
 \item{gr}{A grouping variable.}
 
@@ -48,7 +48,7 @@ string \code{"um"} is used for the grid cell size comparison plots. The
 string \code{"dim"} is used for all other plots, and defaults to the grouping
 variable name.}
 
-\item{sds}{Numeric settings the seeds for downsampling via `set.seed()`.}
+\item{sds}{Numeric settings the seeds for down-sampling via `set.seed()`.}
 
 \item{geom}{A character string for the geometry mapped on the aesthetics.
 Options are  \code{"point"} for normal scatter plots, and \code{"dens2d"} for
@@ -57,7 +57,7 @@ density contour lines.}
 \item{facet_sc}{The \code{scales} parameter of `ggplot2::facet_grid`}
 }
 \value{
-\code{\link[ggplot2:ggplot]{ggplot}}.
+\code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 }
 \description{
 \code{twodens} Scatter plots with 2D density as color and alpha scale to

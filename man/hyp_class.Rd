@@ -4,17 +4,17 @@
 \alias{hyp_class}
 \title{Barplots for hypothesis testing}
 \usage{
-hyp_class(.data, sec_vc, ttl)
+hyp_class(IC, sec_vc, ttl)
 }
 \arguments{
-\item{.data}{Dataframe.}
+\item{IC}{Ion count data}
 
-\item{sec_vc}{Vector for secondary axis.}
+\item{sec_vc}{Named vector for secondary axis.}
 
 \item{ttl}{Character string or expression for plot title.}
 }
 \value{
-\code{\link[ggplot2:ggplot]{ggplot}}.
+\code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 }
 \description{
 \code{hyp_class} Barplot for the classification of failing to reject a zero
