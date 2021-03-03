@@ -1,48 +1,72 @@
-#' Combination plot
+#' Heatmaps and summary plots for model performance.
 #'
-#' \code{gg_effect} Combine raster images for ion count ratios with high
-#' precision isotope ratios.
+#' \code{heat_map} generates a heatmap for model accuracy evaluation along
+#' two continuous variables and up to two categorical values. Instead
+#' \code{heat_sum} summarise the heatmap over opne of the two continuous and
+#' crossed variables.
 #'
-#' @param IC Ion count data.
-#' @param grid_sel Integer selecting an grid-cell for in-depth analysis.
-#' @param image Dataframe for ion raster map.
-#' @param ions A character vector of three ions involved in the analysis.
-#' @param ion1_thr Character string for ion in the enumerator of ion ratio of
-#' the map.
-#' @param ion2_thr Character string for ion in the denominator of ion ratio of
-#' the map.
-#' @param thr Numeric threshold value for filter selection.
-#' @param ion1_R A character string constituting the rare isotope ("13C").
-#' @param ion2_R A character string constituting the common isotope ("12C").
-#' @param Xt Variable for ion count rates.
-#' @param N Variable for ion counts.
-#' @param colors Color palette to identify matrix and inclusion.
+#' @param simu Ion count data.
+#' @param x Variable (continuous variable number one) isotope offset in paper.
+#' @param y Variable (continuous variable number two) excess ionization
+#' efficiency in paper.
+#' @param stat Numeric for the model accuracy (between 0 and 1).
+#' @param grp1 Nominal factorial number one; outlier detection method in paper.
+#' @param grp2 Nominal factorial number one; for intra-isotope variability in
+#' paper.
+#' @param conversion Named vector for the conversion of the ionization trend to
+#' excess ionization efficiency.
+#' @param ttl Character string or expression for the plot title.
+#' @param x_lab Character string or expression for the x-axis label.
+#' @param y_lab Character string or expression for the y-axis label.
+#' @param x_sec Character string or expression for the secondary x-axis label.
+#' @param y_sec Character string or expression for the secondary y-axis label.
+#' @param trans_base Isotope value for the scale transformation for fractional
+#' size of the isotope anomaly.
+#' @param trans_n Initial sample size for the scale transformation for
+#' fractional size of the isotope anomaly.
 #'
 #' @return \code{\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
 heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
-                     y_lab){
+                     y_lab, x_sec = NULL, trans_base = -2, trans_n = 10){
+
+  grp1 <- enquo(grp1)
+  grp2 <- enquo(grp2)
 
   # create rectangle annotation
   rcts <- rect_fun(xaxis = pull(simu, {{x}}), yaxis = pull(simu, {{y}}))
+
+  # transformation of secondary axis
+  if (!is.null(x_sec)){
+    tr <- rayleigh_trans(trans_base, trans_n)
+    second_axis <- sec_axis(
+      trans = ~tr$transform(.) * -1 ,
+      name = x_sec,
+      breaks = scales::pretty_breaks(3)
+      )
+  } else {
+    second_axis <- waiver()
+    }
 
   # plot
   p <- ggplot(simu, aes(x = {{x}}, y = {{y}}, fill = {{stat}})) +
     geom_tile()
 
   # facets
-  if (!all(sapply(list(grp1, grp2), is.null))) {
+  if (!all(purrr::map_lgl(list(grp1, grp2), ~is.null(rlang::get_expr(.x))))) {
     p <- p + facet_grid(
-      rows = vars({{grp1}}),
-      cols = vars({{grp2}}),
+      rows = vars(!!grp1),
+      cols = vars(!!grp2),
       labeller = label_parsed
-    )
-  }
+      )
+    }
 
   p + scale_x_continuous(
       labels = scales::label_number(),
-      expand = c(0, 0)
+      expand = c(0, 0),
+      # secondary x axis
+      sec.axis = second_axis
       ) +
     scale_y_continuous(
       breaks = unname(conversion),
@@ -56,7 +80,7 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
       aes(xmin = xl, xmax = xu, ymin = yl, ymax = yu, color = col_type),
       fill = "transparent",
       inherit.aes = FALSE
-    ) +
+      ) +
     scale_size(range= c(0.5, 1.5)) +
     scale_color_identity() +
     ggrepel::geom_text_repel(
@@ -76,13 +100,13 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
 #'
 #' @export
 heat_sum <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
-                     y_lab, x_sec, y_sec){
+                     y_lab, x_sec, y_sec, trans_base = -20, trans_n = 6){
 
   # default colors
   def_cols <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")
 
-  # transformation with hypothetical inclusion of -20 and a frac size of 1/6
-  tr <- rayleigh_trans(-20, 6)
+  # transformation of secondary axis
+  tr <- rayleigh_trans(trans_base, trans_n)
 
   # specificity background rectangle
   tb_rec <-tibble(
