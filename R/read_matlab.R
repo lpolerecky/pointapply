@@ -6,15 +6,14 @@
 #' @param directory Character string for path to the Matlab data-file
 #' @param plane Variable for the dimension over which to be aggregated
 #' @param grid_cell Integer indicating size of cells in pixels, only exponent of
-#' base two allowed
+#' base two allowed (default = 64)
 #' @param output Character string for type of output; \code{"complete"} or
 #' \code{"sum"}.
-#' @param grid_sel Integer selecting an grid-cell for in-depth analysis
-#' (default is 64 pixels as used in this study).
+#' @param grid_sel Integer selecting an grid-cell for in-depth analysis.
 #' @param scaler Numeric converting the pixels to metric dimension of
 #' measurement (default is the conversion used in this study).
 #'
-#' @return A \code{\link[tibble:tibble]{tibble}} containing the ion counts
+#' @return A \code{tibble::\link[tibble:tibble]{tibble}} containing the ion counts
 #' aggregated over the plane of choice, and if \code{output = "sum"}.
 #'
 #' @export
@@ -22,8 +21,7 @@
 #' # Use get_matlab() to path to data bundled with this package
 #'
 #' # Pre-process real data as in the paper; Schobben, Kienhuis, Polerecky 2021
-#' tb_rw <- read_matlab(get_matlab("2020-08-20-GLENDON"), plane = height,
-#'                      title = "MEX")
+#' read_matlab(get_matlab("2020-08-20-GLENDON"), plane = height, title = "MEX")
 read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
                         output = "sum", grid_sel = NULL, scaler = 40 / 256){
 
@@ -101,7 +99,7 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
       # complete counts from selected grid-cells
       res <- filter(df_2d, grid.nm == grid_sel) %>%
         mutate(
-          title = title,
+          sample.nm = title,
           N.rw = as.double(N.rw),
           t.nm = 1e-3 * !! plane,
           species.nm = species,
