@@ -1,0 +1,91 @@
+---
+output: github_document
+bibliography: biblio.bib
+biblio-style: apalike
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+
+```{r pkgs, include=FALSE, message=FALSE, eval=TRUE}
+# Required packages
+pkgs <- miscutils::pkg_refworker(
+  c("purrr", "knitr", "rmarkdown", "bookdown", "dplyr", "devtools", "bibtex", 
+    "R.matlab", "cubelyr", "rlang", "roxygen2", "ggplot2", "tibble", "tidyr",
+    "stringr", "cubelyr", "rticles"),
+  "library.bib",
+  "biblio.bib"
+  )     
+```
+
+# pointapply
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The R package `pointapply` contains the code and data to reconstruct the publication: Martin Schobben, Michiel Kienhuis, and Lubos Polerecky. 2021. *New methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry*, preprint on [Eartharxiv](https://eartharxiv.org/).
+
+This paper assess the performance of the application of the `diag_R()` and `eval_diag` function of the sister package `point` in detecting isotope heterogeneity in natural substrates. 
+
+# Render the paper
+
+Use the function `pointapply::render_paper()` and specify the directory to save the paper.
+
+
+``` r
+# Knit
+pointapply::render_paper(title = "Schobbenetal_SIMS_method", 
+                         output_dir = "mydir")
+```
+
+## Credits
+
+The construction of the R [@rversion] package *pointapply* and associated documentation was aided by the packages; *devtools* [@devtools], *roxygen2* [@roxygen2], *knitr* [@knitr1 ; @knitr2], *rmarkdown* [@rmarkdown1; @rmarkdown2].
+
+The book: *R packages: organize, test, document, and share your code*, by @Wickham2015 is a great guide for learning how to build packages. 
+
+In addition, this package relies on a set of external packages from the tidyverse universe, including: *dplyr* [@dplyr], *tidyr* [@tidyr], *tibble* [@tibble], *stringr* [@stringr], *magrittr* [@magrittr], *ggplot2* [@ggplot2], and *purrr* [@purrr] for internal functioning. The package *rlang* [@rlang] was used for tidy evaluation.
+
+Some specialised specialised packages where used, notably; *R.matlab* for loading the matlab LANS files [@R.matlab] and *cubelyr* [@cubelyr] for flattening the 3D arrays.
+
+The paper was written with *bookdown* [@bookdown1; @bookdown2], *rticles* [@rticles] and *bibtex* [@bibtex].
+
+
+## Installation
+
+You can install the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("MartinSchobben/pointapply")
+```
+
+
+## Reconstruct the paper from scratch
+
+The data figures can be constructed with the functions contain in this package. The following vignettes detail all these operations in a coherent story line.
+
+**Data:**
+
+*   Synthetic data for validation of model performance and Figure 2 (`vignette("simulation")`).
+*   Real data reading and processing and Supplementary Figure 1 (`vignette("data")`).
+
+Because of the excessive file-sizes of ion count data, the data is stored externally on [Zenodo](https://doi.org/10.5281/zenodo.4564170), and can be accessed with the function `download_point()`.
+
+**Figures:**
+
+*   Evaluation of model performance; Figures 4--6 (`vignette("performance")`).
+*   Raster images and scatter plots of real SIMS ^13^C/^12^C analyses; Figures 7--9 and Supplementary Figures 7 and 8 (`vignette("raster")`).
+*   Regression diagnostics; Figure 3 and Supplementary Figures 3--5 (`vignette("regression")`).
+*   Accuracy of SIMS isotope analysis; Figure 3 and Supplementary Figures 2 and 6 (`vignette("accuracy")`).
+
+# References
