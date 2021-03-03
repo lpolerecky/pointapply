@@ -1,0 +1,16 @@
+bookdown::word_document2:
+  reference_docx: templates/default_manuscript_secnumbs.docx
+  pandoc_args:
+    - --top-level-division=section
+    - --citation-abbreviations=templates/abbreviations.json
+bookdown::pdf_book:
+  pandoc_args:
+    - --top-level-division=section
+    - --citation-abbreviations=templates/abbreviations.json
+  toc: false
+  keep_tex: true
+  latex_engine: xelatex
+  base_format: rticles::arxiv_article
+  includes:
+    in_header: ["units.sty", "preamble.tex"]
+

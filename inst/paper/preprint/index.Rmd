@@ -1,0 +1,142 @@
+--- 
+title: "New methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry"
+authors:
+  - name: Martin Schobben
+    thanks: "Corresponding author (alternative email: schobbenmartin@gmail.com)."
+    department: Department of Earth Sciences 
+    affiliation: Utrecht University
+    location: Utrecht
+    email: m.a.n.schobben@uu.nl
+  - name: Michiel Kienhuis  
+    department: Department of Earth Sciences 
+    affiliation: Utrecht University
+    location: Utrecht
+    email: m.v.m.kienhuis@uu.nl
+  - name: Lubos Polerecky
+    department: Department of Earth Sciences 
+    affiliation: Utrecht University
+    location: Utrecht
+    email: l.polerecky@uu.nl
+abstract: |
+  The premise of SIMS isotope studies on geological and biological materials is to detect isotope variability between measurement spots of an analytical substrate (inter-isotope variability). However, much is unknown about the spatial scales at which isotopic variability might manifest itself. Considering the indiscriminate secondary ion generation with SIMS, it is often unknown how isotope variability is comprised within one analysis at a single spot (intra-isotope variability). This has important consequences for the averaged isotope value derived from a routine data reduction protocol for a single analysis. It thus follows, that this averaged value can either represent a  truly  homogeneous end-member, or a mixture of two or more components with widely different isotope values. Here, we present a novel method for the detection of both intra- and inter- SIMS isotope variability, based on common regression methods. Homogeneous end-members are a prerequisite when, e.g., searching for reference materials, but also for the understanding biological and geological processes at a microscopic scale. The here-presented methods are bundled in the R package point for convenient application in future studies.
+keywords:
+  - Reference Materials, Isotope data analysis, Chemometrics, Minerals
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: biblio.bib
+biblio-style: "apalike"
+link-citations: yes
+always_allow_html: true
+---
+
+```{r setup, echo=FALSE}
+# Default knitr options
+	knitr::opts_chunk$set(
+	  echo = FALSE, 
+		message = FALSE,
+		warning = FALSE,
+		# fig.pos = 'p', # place figs on own page
+		dpi = 300, 
+		digits = 2,
+		results = 'asis',
+		dev = "CairoPDF"
+		)
+```
+
+
+```{r bld, echo=FALSE}
+on_build <- TRUE
+```  
+
+
+```{r path}
+here::i_am("index.Rmd")
+```
+
+
+```{r pkgs}
+# Required packages
+pkgs <- miscutils::pkg_refworker(
+  c("tidyverse", "Cairo", "bibtex", "point", "patchwork", "scales", "here", "units", "rmarkdown", "knitr", "R.matlab", "cubelyr", "kableExtra"),
+  "library.bib",
+  "biblio.bib"
+  )     
+```
+
+
+```{r units}
+# latex unit SIUnitx package
+SI <- function(x, unit, not = "fl", word = knitr::pandoc_to("docx")) {
+  if (not == "in") x <- sprintf("%.0f", x)  
+  if (not == "fl") x <- sprintf("%.2f", x)  
+  if (not == "sc") x <- sprintf("%.2e", x)
+  if (word) {
+    paste0(x, str_c(unit, collapse = "/")) 
+    } else {
+      paste0("$\\SI{",x,"}{\\", str_c(unit, collapse = "\\"),"}$")
+      }
+  }
+# deal with per mill latex vs doxc
+permille <- function(x, sign = FALSE, word = knitr::pandoc_to("docx")){
+  if (sign) x <- sprintf("%+.1f", x)  else x <- sprintf("%.1f", x)  
+  if (word) {
+    paste0(x, "‰")
+    } else {
+      paste0("$", x, "\\text{\\textperthousand}$")
+      }
+  }
+```
+
+
+```{r kable}
+# ensure correct kable output
+options("kableExtra.html.bsTable" = TRUE) 
+```
+
+
+```{r label, options}
+devtools::load_all(".")
+```
+
+
+```{r data}
+# raw data 64 pixels
+load_point("map_sum_grid", c("MEX", "MON"), 64, return_name = FALSE, on_build)
+map_sum_grid_64_all <- bind_rows(bind_rows(map_sum_grid_64_MEX), bind_rows(map_sum_grid_64_MEX))
+# general statistics single ions for grid-cell 64 
+load_point("stat_Xt", "all", 64, return_name = FALSE, on_build)
+# general statistics isotope ratios for grid-cell 64 
+load_point("stat_R", "all", 64, return_name = FALSE, on_build)
+# QSA data
+load_point("test_QSA", "all", 64, return_name = FALSE, on_build)
+# inter-isotope variability test results
+load_point("diag", c("MEX", "MON"), 64, return_name = FALSE, on_build)
+```
+
+
+```{r filesizes}
+# filesizes
+fsize_intra <- file.info(here("data", "simu_sens_IC_intra.rda"))$size / 10^6
+ls_files <- lapply(1:10, function(x) paste0("simu_sens_IC_inter_", x, ".rda"))
+fsize_inter <- map_dbl(ls_files, ~file.info(here("data", .x))$size / 10^6) %>% 
+  sum()
+```
+
+
+```{r sumfun}
+# filter select cast function
+var_mean <- function(data, plane, grid_cell, var) {
+  filter(data, dim_name.nm == plane, grid.nm %in% grid_cell) %>% 
+    pull({{var}}) %>% 
+    mean() 
+  }
+```
+  
+  
+```{r child}
+# child duplicate option
+options(knitr.duplicate.label = "allow")
+```
+  
+  
+\newpage
