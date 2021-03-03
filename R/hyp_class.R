@@ -3,16 +3,16 @@
 #' \code{hyp_class} Barplot for the classification of failing to reject a zero
 #' hypothesis (Fig. 3 and Supplementary Fig. 5)
 #'
-#' @param .data Dataframe.
-#' @param sec_vc Vector for secondary axis.
+#' @param IC Ion count data
+#' @param sec_vc Named vector for secondary axis.
 #' @param ttl  Character string or expression for plot title.
 #'
-#' @return \code{\link[ggplot2:ggplot]{ggplot}}.
+#' @return \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
-hyp_class <- function(.data, sec_vc, ttl) {
+hyp_class <- function(IC, sec_vc, ttl) {
 
-  distinct(.data, grid_size.nm, grid.nm, .keep_all = TRUE) %>%
+  distinct(IC, grid_size.nm, grid.nm, .keep_all = TRUE) %>%
     add_count(grid_size.nm, name = "ntot") %>%
     count(grid_size.nm, hyp, ntot) %>%
     mutate(freq = n / ntot) %>%
