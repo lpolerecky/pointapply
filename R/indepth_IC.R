@@ -1,11 +1,10 @@
-#' Combination plot
+#' In-depth analysis of one grid_cell
 #'
-#' \code{gg_effect} Combine raster images for ion count ratios with high
-#' precision isotope ratios.
+#' \code{gg_effect} This plot function is used to produce the scatterplots of
+#' Figure 9 and Supplementary Figure 8.
 #'
 #' @param IC Ion count data.
-#' @param grid_sel Integer selecting an grid-cell for in-depth analysis.
-#' @param image Dataframe for ion raster map.
+#' @param image Data frame for ion raster map.
 #' @param ion1_thr Character string for ion in the enumerator of ion ratio of
 #' the map.
 #' @param ion2_thr Character string for ion in the denominator of ion ratio of
@@ -13,11 +12,12 @@
 #' @param thr Numeric threshold value for filter selection.
 #' @param ion1_R A character string constituting the rare isotope ("13C").
 #' @param ion2_R A character string constituting the common isotope ("12C").
-#' @param Xt Variable for ion count rates.
-#' @param N Variable for ion counts.
-#' @param colors Color palette to identify matrix and inclusion.
+#' @param Xt Variable for ion count rates (default = Xt.pr).
+#' @param N Variable for ion counts (default = N.rw).
+#' @param colors Color palette to identify matrix and inclusion (default =
+#' \code{ c("#FFEDA0", "#FEB24C")}).
 #'
-#' @return \code{\link[ggplot2:ggplot]{ggplot}}.
+#' @return \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
 gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
@@ -34,8 +34,12 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
     rlang::set_names(nm = ions)
   M_Xt <- rlang::parse_expr(paste("M", rlang::as_name(Xt), sep = "_"))
   S_Xt <- rlang::parse_expr(paste("S", rlang::as_name(Xt), sep = "_"))
-  M_Xt1 <- rlang::parse_expr(paste("M", rlang::as_name(args[[ion1_R]]), sep = "_"))
-  M_Xt2 <- rlang::parse_expr(paste("M", rlang::as_name(args[[ion2_R]]), sep = "_"))
+  M_Xt1 <- rlang::parse_expr(
+    paste("M", rlang::as_name(args[[ion1_R]]), sep = "_")
+    )
+  M_Xt2 <- rlang::parse_expr(
+    paste("M", rlang::as_name(args[[ion2_R]]), sep = "_")
+    )
   lower1 <- rlang::parse_expr(paste("lower", ion1_R , sep = "."))
   lower2 <- rlang::parse_expr(paste("lower", ion2_R , sep = "."))
   upper1 <- rlang::parse_expr(paste("upper", ion1_R , sep = "."))
@@ -43,27 +47,27 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
 
   im_ROI <-filter(
     image,
-    width %in% unique(IC$width),
-    height %in% unique(IC$height)
+    .data$width %in% unique(IC$width),
+    .data$height %in% unique(IC$height)
     )  %>%
     point::cov_R(ions, height, width, grid.nm, sample.nm) %>%
     summarise(
-      height = height,
-      width = width,
+      height = .data$height,
+      width = .data$width,
       R_depth = !!args[[ion1_thr]] / !!args[[ion2_thr]],
       flag = if_else(R_depth >= thr, "inclusion", "matrix"),
       ntot = n()
       ) %>%
     group_by(flag) %>%
     mutate(
-      pxl = n_distinct(height, width),
+      pxl = n_distinct(.data$height, .data$width),
       frac = pxl / ntot
       ) %>%
     ungroup # pixels for domains and fraction
 
   # combine image and counts
   tb_inc <- left_join(IC, im_ROI, by = c("width", "height")) %>%
-    group_by(sample.nm, species.nm, flag, depth) %>%
+    group_by(.data$sample.nm, .data$species.nm, .data$flag, .data$depth) %>%
     summarise(
       pxl = unique(pxl),
       frac = unique(frac),
@@ -75,7 +79,7 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
 
   # sum stats
   tb_Xt <- point::stat_Xt(tb_inc, sample.nm, flag, frac, .t = depth) %>%
-    group_by(flag, species.nm) %>%
+    group_by(.data$flag, .data$species.nm) %>%
     mutate(
       t.nm = row_number(),
       lower = !!M_Xt - !!S_Xt,
