@@ -1,8 +1,7 @@
 ---
-output: 
-  github_document:
-    pandoc_args: --webtex=http://chart.apis.google.com/chart?cht=tx&chl=
-bibliography: biblio.bib   
+output: github_document
+bibliography: biblio.bib
+biblio-style: apalike
 ---
 
 <!--  use the --webtex argument in the YAML to render equations -->
