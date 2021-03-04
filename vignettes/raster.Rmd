@@ -1,6 +1,8 @@
 ---
 title: "Raster images"
 output: rmarkdown::html_vignette
+bibliography: biblio.bib
+biblio-style: apalike
 vignette: >
   %\VignetteIndexEntry{Raster images}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,29 +20,29 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-This vignette deals with the visualization of spatial ion maps and high-precision isotope data generated with the nanoSIMS 50L, and as discussed in the paper (Figs 7 and 8, and Supplementary Fig. 7). 
+This vignette deals with the visualization of spatial ion maps and high-precision isotope data generated with the Cameca nanoSIMS 50L, and as discussed in the paper (Figs 7 and 8, and Supplementary Fig. 7). 
 
 
 ```{r setup, eval = TRUE}
 library(point) # regression diagnostics
-devtools::load_all(".") # library(pointapply) # load package
+library(pointapply) # load package
 ```
 
 
-```{r bld, echo=FALSE}
-on_build <- TRUE
+```{r bld, echo=FALSE, eval=TRUE}
+on_build <- FALSE
 ```  
 
 
 # Download data
 
-Ion count data processed with the *point* R package is required to produce the raster plots (Figs and Supplementary Fig). Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. 
+Ion count data processed with the *point* R package [@point] is required to produce the raster plots (Figs 7 and 8, and Supplementary Fig. 7). Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4580159) with the function `download_point()`. 
 
 
 ```{r data}
 # use download_point() to obtain processed data.
 # this only has to be done once after installation
-# download_point()
+# download_point(type = "processed")
 ```
 
 
@@ -70,14 +72,12 @@ The function `gg_cnts()` is designed for plotting of ion count ratios, i.e. the 
 ```{r raster}
 gg_cnts(map_raster_image_MEX$depth, "12C14N", "12C", ttl = "MEX", viri = "D")
 # save
-save_point(last_plot(), "simple_raster_Mex_12C-14N-12C", width = 10, height = 8, unit = "cm", on_build = TRUE)
+save_point("simple_raster_Mex_12C-14N-12C", last_plot(), width = 10, height = 8, unit = "cm", on_build = TRUE)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Simple ion ratio map (MEX).", out.width="80%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs",  "simple_raster_Mex_12C-14N-12C", ext = "png")
-   )
+ knitr::include_graphics("figures/simple_raster_Mex_12C-14N-12C.png")
 ```
 
 ## Combination plot
@@ -112,16 +112,17 @@ In the first example (Fig. 7), high-precision grid-cells for ^13^C/^12^C is comb
 
 ```{r grid1}
 # combination plot
-gg_effect(ls_eval, map_raster_image_MON, "MON", "12C-40Ca16O", viri = "B")
-# save
-save_point(last_plot(), "raster_MON_12C-40Ca16O" ,width = 16, height = 14, unit = "cm", on_build = TRUE)
+diag_64_MON <- gg_effect(ls_eval, map_raster_image_MON, "MON", "12C-40Ca16O", viri = "B")
+# save plot
+save_point("raster_MON_12C-40Ca16O", diag_64_MON[[2]], width = 16, height = 14, unit = "cm", on_build)
+# save data
+diag_64_MON <- diag_64_MON[[1]]
+write_point("diag_64_MON", on_build)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C", "40Ca16O"), ")--grid-cell combination plot (MON)."), out.width="80%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs",  "raster_MON_12C-40Ca16O", ext = "png")
-   )
+ knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
 ```
 
 
@@ -152,7 +153,7 @@ Thereafter, the ion ratio map (`r point::R_labeller("12C", "40Ca16O")`) is combi
 
 ```{r grid2}
 # combination plot (organic C enrichment)
-gg_MEX_raster1 <- gg_effect(
+diag_64_MEX  <- gg_effect(
   ls_eval, 
   map_raster_image_MEX, 
   "MEX", 
@@ -160,18 +161,19 @@ gg_MEX_raster1 <- gg_effect(
   viri = "B"
   )
 # rectangle identifying area of in depth analyses (see below)
-p <- gg_MEX_raster1[[2]] + 
-  annotate("rect", xmin = 0, xmax = 64, ymin = 64, ymax = 128, 
+diag_64_MEX[[2]] <- diag_64_MEX[[2]] + 
+  ggplot2::annotate("rect", xmin = 0, xmax = 64, ymin = 64, ymax = 128, 
            fill = "transparent", color = "red", size = 1)
-# save
-save_point(p, "raster_MEX_12C-40Ca16O" ,width = 16, height = 14, unit = "cm", on_build = TRUE)
+# save plot
+save_point("raster_MEX_12C-40Ca16O", diag_64_MEX[[2]], width = 16, height = 14, unit = "cm", on_build = TRUE)
+# save data
+diag_64_MEX <- diag_64_MEX[[1]]
+write_point("diag_64_MEX", on_build)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C", "40Ca16O"), ")--grid-cell combination plot (MEX)."), out.width="80%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs",  "raster_MEX_12C-40Ca16O", ext = "png")
-   )
+ knitr::include_graphics("figures/raster_MEX_12C-40Ca16O.png")
 ```
 
 
@@ -191,18 +193,16 @@ gg_MEX_raster2 <- gg_effect(
   viri = "D"
   )
 # rectangle identifying area of in depth analyses  (see below)
-p <- gg_MEX_raster2[[2]] + 
-  annotate("rect", xmin = 128, xmax = 192, ymin = 0, ymax = 64, 
+gg_MEX_raster2[[2]] <- gg_MEX_raster2[[2]] + 
+  ggplot2::annotate("rect", xmin = 128, xmax = 192, ymin = 0, ymax = 64, 
            fill = "transparent", color = "red", size = 1) 
 # save
-save_point(p, "raster_MEX_12C14N-12C" ,width = 16, height = 14, unit = "cm", on_build = TRUE)
+save_point("raster_MEX_12C14N-12C", gg_MEX_raster2[[2]], width = 16, height = 14, unit = "cm", on_build = TRUE)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C14N", "12C"), ")--grid-cell combination plot (MEX)."), out.width="80%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs",  "raster_MEX_12C14N-12C", ext = "png")
-   )
+ knitr::include_graphics("figures/raster_MEX_12C14N-12C.png")
 ```
 
 
@@ -224,14 +224,12 @@ gg_point(
   ion1_R = "13C", ion2_R = "12C" # isotope ratio
   ) 
 # save
-save_point(last_plot(), "point_MEX_ROI9", width = 12, height = 8, unit = "cm", on_build = TRUE)
+save_point("point_MEX_ROI9", last_plot(), width = 12, height = 8, unit = "cm", on_build = TRUE)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("In-depth analysis of the potential influence of anomolous ", point::R_labeller("12C", "40Ca16O"), " values on the ",  point::R_labeller("13C", "12C")," (MEX)."), out.width="50%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs",  "point_MEX_ROI9", ext = "png")
-   )
+ knitr::include_graphics("figures/point_MEX_ROI9.png")
 ```
 
 
@@ -249,12 +247,12 @@ gg_point(
   ion1_R = "13C",  ion2_R = "12C"
   ) 
 # save
-save_point(last_plot(), "point_MEX_ROI2", width = 12, height = 8, unit = "cm", on_build = TRUE)
+save_point("point_MEX_ROI2", last_plot(), width = 12, height = 8, unit = "cm", on_build = TRUE)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("In-depth analysis of the potential influence of anomolous ", point::R_labeller("12C14N", "12C"), " values on the ",  point::R_labeller("13C", "12C")," (MEX)."), out.width="50%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs",  "point_MEX_ROI2", ext = "png")
-   )
+ knitr::include_graphics("figures/point_MEX_ROI2.png")
 ```
+
+# References

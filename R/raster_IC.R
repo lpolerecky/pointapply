@@ -29,8 +29,8 @@ gg_cnts <- function(IC, ion1, ion2, ttl, viri, height = 256, width = 256,
                      height, width, grid.nm) %>%
     mutate(R = !!Xt1 / !!Xt2)
 
-  ggplot(IC, aes(x = width, y = height)) +
-    geom_raster(aes(fill = R)) +
+  ggplot(IC, aes(x = .data$width, y = .data$height)) +
+    geom_raster(aes(fill = .data$R)) +
     scale_y_continuous(
       expression("height"~"("*mu*"m)"),
       limits = c(height + ifelse(compilation, grid_cell * 1.5, 0) + 1, 0),
@@ -46,15 +46,15 @@ gg_cnts <- function(IC, ion1, ion2, ttl, viri, height = 256, width = 256,
       labels = function(x) (x - 1) * scaler,
       expand = c(0, 0)
       ) +
-    scale_fill_viridis_c(
+    ggplot2::scale_fill_viridis_c(
       point::R_labeller(ion1, ion2, "expr"),
       option = viri
       ) +
-    coord_fixed() +
-    guides(fill = guide_colorbar(title.position = "top")) +
-    theme_classic() +
-    theme(
-      axis.title.y = element_text(hjust = ifelse(compilation, 0.65, 0.5)),
-      axis.title.x = element_text(hjust = ifelse(compilation, 0.35, 0.5))
+    ggplot2::coord_fixed() +
+    ggplot2::guides(fill = ggplot2::guide_colorbar(title.position = "top")) +
+    ggplot2::theme_classic() +
+    ggplot2::theme(
+      axis.title.y = ggplot2::element_text(hjust = ifelse(compilation, 0.65, 0.5)),
+      axis.title.x = ggplot2::element_text(hjust = ifelse(compilation, 0.35, 0.5))
       )
 }

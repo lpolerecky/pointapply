@@ -49,7 +49,7 @@ twodens <- function(IC, x, y, xlab, ylab, ttl, downsample, gr, x_lim = NULL,
         )
       )
     }
-    if (unit == "dim") lab <- label_value
+    if (unit == "dim") lab <- ggplot2::label_value
   } else {
     ran <- range(count(IC)$n)
   }
@@ -60,18 +60,32 @@ twodens <- function(IC, x, y, xlab, ylab, ttl, downsample, gr, x_lim = NULL,
   # calculate density
   IC <- mutate(
     IC,
-    h_x = if_else(MASS::bandwidth.nrd({{x}}) == 0, 0.1, MASS::bandwidth.nrd({{x}})),
-    h_y = if_else(MASS::bandwidth.nrd({{y}}) == 0, 0.1, MASS::bandwidth.nrd({{y}})),
-    dens = get_density({{x}}, {{y}}, h = c(h_x, h_y), n = log(ran[2]) / log(n()) * 100),
+    h_x = if_else(
+      MASS::bandwidth.nrd({{x}}) == 0,
+      0.1,
+      MASS::bandwidth.nrd({{x}})
+      ),
+    h_y = if_else(
+      MASS::bandwidth.nrd({{y}}) == 0,
+      0.1,
+      MASS::bandwidth.nrd({{y}})
+      ),
+    dens = get_density(
+      {{x}}, {{y}},
+      h = c(.data$h_x, .data$h_y),
+      n = log(ran[2]) / log(n()) * 100
+      ),
     # Adjust point alpha
     alpha_sc = (ran[1] / n()) / 4
   )
 
   p <- ggplot(IC, aes(x = {{x}}, y = {{y}}))
 
-  if (geom == "point")  p <- p + geom_point(aes(color = dens, alpha =  alpha_sc))
+  if (geom == "point") {
+    p <- p + geom_point(aes(color = .data$dens, alpha =  .data$alpha_sc))
+    }
   if (geom == "dens2d")  {
-    p <- p + stat_density_2d(
+    p <- p + ggplot2::stat_density_2d(
       aes(fill = ..ndensity..),
       geom = "raster",
       contour = FALSE,
@@ -102,13 +116,14 @@ twodens <- function(IC, x, y, xlab, ylab, ttl, downsample, gr, x_lim = NULL,
       x = xlab,
       y = ylab
       ) +
-    theme_bw() +
+    ggplot2::theme_bw() +
     themes_IC
-  if (!is.null(x_lim)) p <- p + xlim(x_lim)
-  if (!is.null(y_lim)) p <- p + xlim(y_lim)
+
+  if (!is.null(x_lim)) p <- p + ggplot2::xlim(x_lim)
+  if (!is.null(y_lim)) p <- p + ggplot2::xlim(y_lim)
 
   if (!is.null(rlang::get_expr(gr))) {
-    return(p + facet_wrap(vars(!!gr), labeller = lab, scales = facet_sc))
+    return(p + facet_wrap(vars(!!gr), labeller = lab, scales = .data$facet_sc))
     } else {
     return(p)
     }

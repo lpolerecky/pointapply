@@ -1,10 +1,13 @@
 #' Read matlab ion count data
 #'
 #' \code{read_matlab} Tabulate  and aggregate the ion count data contained in
-#' matlab files exported by LANS.
+#' matlab files exported by LANS. Matlab files are read with
+#' \code{R.matlab::\link[R.matlab:readMat]{readMat}}.
 #'
 #' @param directory Character string for path to the Matlab data-file
 #' @param plane Variable for the dimension over which to be aggregated
+#' @param title Character string for sample name.
+#' @param species Character string or vector with chemical species.
 #' @param grid_cell Integer indicating size of cells in pixels, only exponent of
 #' base two allowed (default = 64)
 #' @param output Character string for type of output; \code{"complete"} or
@@ -14,14 +17,11 @@
 #' measurement (default is the conversion used in this study).
 #'
 #' @return A \code{tibble::\link[tibble:tibble]{tibble}} containing the ion counts
-#' aggregated over the plane of choice, and if \code{output = "sum"}.
+#' aggregated over the plane of choice, if \code{output = "sum"}. If
+#' \code{output = "complete"} only works in combination with \code{grid_sel} and
+#' produces a pixel-by-pixel dataset for that grid-cell.
 #'
 #' @export
-#' @examples
-#' # Use get_matlab() to path to data bundled with this package
-#'
-#' # Pre-process real data as in the paper; Schobben, Kienhuis, Polerecky 2021
-#' read_matlab(get_matlab("2020-08-20-GLENDON"), plane = height, title = "MEX")
 read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
                         output = "sum", grid_sel = NULL, scaler = 40 / 256){
 
@@ -135,8 +135,8 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
         ) %>%
         group_by(!!!gr_var, depth) %>%
         summarise(
-          across(where(is.numeric), sum),
-          across(where(is.character), unique),
+          across(tidyselect::vars_select_helpers$where(is.numeric), sum),
+          across(tidyselect::vars_select_helpers$where(is.character), unique),
           .groups = "drop"
           )
       return(res)

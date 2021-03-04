@@ -55,13 +55,13 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
       height = .data$height,
       width = .data$width,
       R_depth = !!args[[ion1_thr]] / !!args[[ion2_thr]],
-      flag = if_else(R_depth >= thr, "inclusion", "matrix"),
+      flag = if_else(.data$R_depth >= thr, "inclusion", "matrix"),
       ntot = n()
       ) %>%
     group_by(flag) %>%
     mutate(
       pxl = n_distinct(.data$height, .data$width),
-      frac = pxl / ntot
+      frac = .data$pxl / .data$ntot
       ) %>%
     ungroup # pixels for domains and fraction
 
@@ -69,13 +69,13 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
   tb_inc <- left_join(IC, im_ROI, by = c("width", "height")) %>%
     group_by(.data$sample.nm, .data$species.nm, .data$flag, .data$depth) %>%
     summarise(
-      pxl = unique(pxl),
-      frac = unique(frac),
+      pxl = unique(.data$pxl),
+      frac = unique(.data$frac),
       N.pr = sum(!!N),
       .groups = "drop"
       ) %>%
     # count rates
-    mutate(Xt.pr = N.pr / (pxl * 1e-3))
+    mutate(!!Xt := .data$N.pr / (.data$pxl * 1e-3))
 
   # sum stats
   tb_Xt <- point::stat_Xt(tb_inc, sample.nm, flag, frac, .t = depth) %>%
@@ -88,9 +88,9 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
     ungroup()
 
   # label names
-  tb_wide <- cov_R(tb_Xt, ions, sample.nm, flag, frac) %>%
+  tb_wide <- point::cov_R(tb_Xt, ions, sample.nm, flag, frac) %>%
     mutate(
-      flag = paste(flag, paste("(f = ", sprintf(fmt = "%.3f", frac), ")"))
+      flag = paste(.data$flag, paste("(f = ", sprintf(fmt = "%.3f", .data$frac), ")"))
       )
 
   # ranges
@@ -115,12 +115,12 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
     list(a = point::ion_labeller(ion1_R, "expr"))
     )
 
-  ggplot(tb_wide, aes(x = !!M_Xt2, y = !!M_Xt1, fill = flag)) +
-    geom_errorbar(
+  ggplot(tb_wide, aes(x = !!M_Xt2, y = !!M_Xt1, fill = .data$flag)) +
+    ggplot2::geom_errorbar(
       aes(ymin = ifelse(!!lower1, !!lower1, 0), ymax = !!upper1),
       width = 0
       ) +
-    geom_errorbarh(
+    ggplot2::geom_errorbarh(
       aes(xmin = !!lower2, xmax = !!upper2),
       height = 0
       ) +
@@ -128,15 +128,15 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
     ggtitle(ttl) +
     scale_y_continuous(
       ylab,
-      expand = expansion(mult = c(0,0.1)),
+      expand = ggplot2::expansion(mult = c(0,0.1)),
       limits = range_y
       ) +
     scale_x_continuous(
       xlab,
-      expand = expansion(mult = c(0,0.1)),
+      expand = ggplot2::expansion(mult = c(0,0.1)),
       limits = range_x
       ) +
-    scale_fill_manual("", values = colors) +
+    ggplot2::scale_fill_manual("", values = colors) +
     themes_IC +
-    theme_bw()
+    ggplot2::theme_bw()
 }

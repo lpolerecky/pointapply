@@ -1,7 +1,4 @@
-\setcounter{section}{0}
-\setcounter{figure}{0}
-\setcounter{table}{0}
-\setcounter{equation}{0}
+\beginsupplement 
 
 # Supplementary Methods and Data
 
@@ -23,7 +20,7 @@ The matlab generated were loaded in the R environment with the function `readMat
 
 
 ```{r gridsketch, fig.cap=paste0("Layout and numbering of the ", SI(10, c("micro", "metre")), "$\\times$", SI(10, c("micro", "metre")), " grid-cell sizes of Figs \\ref{fig:MON} and \\ref{fig:MEX}, and Supplementary Fig. \\ref{fig:nitro1}.")}
-knitr::include_graphics(here("figures/grid_sketch.png"))
+knitr::include_graphics(here::here("figures/grid_sketch.png"))
 ```
 
 
@@ -72,22 +69,29 @@ The $\chi^2$ test statistic for ^13^C/^12^C analysis from the `r SI(10, c("micro
 # footnote
 ft <- paste0("See Fig. ", "(ref:foot3)", " for layout and numbering of grid-cells")
 # table of precision stats
-point::stat_R(tb_map_64, "13C", "12C", sample.nm, dim_name.nm, ROI.nm, .stat=c("M", "RSeM", "chi2"), .label = "latex") %>% 
-  rename(`analyte` = "sample.nm", `dimension` = "dim_name.nm", `grid-cell*` = "ROI.nm") %>% 
-  select(-R.nm) %>% 
+point::stat_R(map_sum_grid_64_all, "13C", "12C", sample.nm, dim_name.nm, 
+              grid.nm, .stat=c("M", "RSeM", "chi2"), .label = "latex") %>% 
+  dplyr::rename(`analyte` = "sample.nm", `dimension` = "dim_name.nm", 
+         `grid-cell*` = "grid.nm") %>% 
+  dplyr::select(-R.nm) %>% 
 # print  
   kableExtra::kable(
     booktabs = TRUE,  
     escape = FALSE,
     digits = c(1, 1, 1, 4, 1, 1),
-    caption = paste0("Internal precision of $^{13}$C/$^{12}$C analysis on a $10.00\\times$", SI(10, c("micro", "metre")), "-grid")
+    caption = 
+      paste0(
+        "Internal precision of $^{13}$C/$^{12}$C analysis on a $10.00\\times$", 
+        SI(10, c("micro", "metre")), 
+        "-grid"
+        )
     ) %>% 
   kableExtra::footnote(symbol =  ft,  threeparttable = TRUE, escape  = FALSE)
 ```
 
 
 ```{r accuracy, fig.cap="Comparison of F statistic for intra-isotopic variation with $\\chi^2$ test statistic for precision of the simulated data (see Section \\ref{sec:intra}). The bins; low, medium and high stand for ionization efficiency trend of $6-21$\\%, $22-37$\\%, $38-53$\\%, based on $\\hat{\\epsilon}_{X^{a}} - \\epsilon_{X^{a}}$."}
-knitr::include_graphics(here("figures/simu_precision.png"))
+knitr::include_graphics(here::here("figures/simu_precision.png"))
 ```
 
 
@@ -97,7 +101,7 @@ The validity of inter- and intra- isotope models is verified for the nanoSIMS ge
 
 
 ```{r QQdens, fig.cap="Normal Quantile-Quantile plot for aggregated studentized resiudals ($\\hat{e}_i^*$) for the different grid-cell sizes."}
-knitr::include_graphics(here("figures", "point_QQ.png"))
+knitr::include_graphics(here::here("figures", "point_QQ.png"))
 ```
 
 
@@ -105,7 +109,7 @@ The *scale location plot* (Fig. \@ref(fig:CVdens)) of $\hat{e}_i^*$, can also be
 
 
 ```{r CVdens, fig.cap="Scale-location plots for different grid-cell sizes.  Depicting the systematic relationships between $\\hat{e}_i^*$ and the independent value $^{13}$C (Heteroscedasticity) or the homogeneity of variance (Homoscedasticity)."}
-knitr::include_graphics(here("figures", "point_CV.png"))
+knitr::include_graphics(here::here("figures", "point_CV.png"))
 ```
 
 
@@ -113,7 +117,7 @@ Lastly, count data, from one measurement to another, should represent independen
 
 
 ```{r hyp, fig.cap="Overview of hypothesis test for the validation of the regression assumptions, based on studentized residuals, and including; Anderson-Darling tests for normality, Breusch-Pagan tests for homogeneity, two-sided one sample Student's t test with a $\\mu=0$ for the residuals, and Ljung-Box test for autocorrelation. In each panel, the frequency of the failure to reject the $H0$ is depicted for the different grid-cell sizes. The average count per grid-cell size is given on the secondary x-axis."}
-knitr::include_graphics(here("figures", "bar_over_class.png"))
+knitr::include_graphics(here::here("figures", "bar_over_class.png"))
 ```
 
 
@@ -123,7 +127,7 @@ Measuring under high ionisation efficiencies with an electron multiplier (EM) ca
 
 
 ```{r QSA, out.extra = "", fig.cap=paste0("Approximate test for Quasi simultaneous arrival wit a random effect linear regression model fitted with Maximum Likelihood Optimization and a grouping structure based on the  based on", SI(10, c("micro", "metre")), "$\\times$", SI(10, c("micro", "metre")), " grid-cell sizes. The fixed effect for the slopes of both models are highly significant ($p<0.001$).")}
-knitr::include_graphics(here("figures", "point_QSA.png"))
+knitr::include_graphics(here::here("figures", "point_QSA.png"))
 ```
 
 
@@ -133,7 +137,7 @@ Upon visual inspection, the `r point::R_labeller("12C-14N" , "12C")` map stood-o
 
 
 ```{r nitro1, fig.cap=paste0("Ion map (", point::R_labeller("12C-14N" , "12C"), ") projection and superimposed ", SI(10, c("micro", "metre")),  " by ", SI(10, c("micro", "metre")), " grid of highest-precision ", point::R_labeller("13C", "12C"), " (colored text labels) aggregated over the width, height and depth of the sedimentary carbonate (MEX). Combined intra- and inter-isotope variability is integrated as, respectively, significance stars and color of the $\\delta^{13}$C (", permille(NULL), " relative to $\\bar{\\bar{R}}$), where t-test statistics were used to allow the representation of single analyses (plane-specific $\\epsilon_{\\hat{\\bar{R}}}$ and LR test statistics in Table \\ref{tab:MEXtab}). The array encompasses 400 frames over the depth dimension (Section \\ref{sec:realdat}).")}
-knitr::include_graphics(here("figures", "raster_MEX_12C14N-12C.png"))
+knitr::include_graphics(here::here("figures", "raster_MEX_12C14N-12C.png"))
 ```
 
 
@@ -141,7 +145,7 @@ In contrast to patches of elevated  `r point::R_labeller("12C", "40Ca-16O")`, a 
 
 
 ```{r nitro2, fig.cap=paste0("Mean and variance ($s_{X}$; see Supplementary Eq. \\ref{eq:sd}) of $^{12}$C and  $^{13}$C from selected the grid-cell of Supplementary Fig. \\ref{fig:nitro1} demarcated by a red square, and filtered for ", point::R_labeller("12C-14N" , "12C"), " , based on a threshold value of $0.75$.") }
-knitr::include_graphics(here("figures", "point_MEX_ROI9.png"))
+knitr::include_graphics(here::here("figures", "point_MEX_ROI9.png"))
 ```
 
 

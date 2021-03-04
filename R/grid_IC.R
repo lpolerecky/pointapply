@@ -48,37 +48,37 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
     )
 
   # dataframe for high precision R
-  data <- dim_folds(ls, mean_height.mt, mean_width.mt, mean_depth.mt, ttl,
+  IC <- dim_folds(ls, mean_height.mt, mean_width.mt, mean_depth.mt, ttl,
                     "tile", res, grid_cell)
 
-  data <- mutate(
-    data,
+  IC <- mutate(
+    IC,
     del = (!!M_R /  !!GrM_R  - 1) * 1000,
-    t_score = abs(del / RS_R_inter),
-    sig_code = sig_coder(p_F, make_lab = FALSE),
-    del_lab = paste(sprintf("%.1f", del), sig_code)
+    t_score = abs(.data$del / .data$RS_R_inter),
+    sig_code = sig_coder(.data$p_F, make_lab = FALSE),
+    del_lab = paste(sprintf("%.1f",.data$del), .data$sig_code)
     ) %>%
-    rename(x = mean_width.mt, y = mean_height.mt)
+    rename(x = .data$mean_width.mt, y = .data$mean_height.mt)
 
-  gg_final <- function(data) {
+  gg_final <- function(IC) {
     gg_base +
       geom_tile(
-        data = data,
-        aes(x = x, y = y),
+        data = IC,
+        aes(x = .data$x, y = .data$y),
         fill = "transparent",
         color = "black",
         size = 1,
         inherit.aes = FALSE
         ) +
-      coord_fixed(clip = "off") +
+      ggplot2::coord_fixed(clip = "off") +
       depth_arrows(res, grid_cell) +
       geom_text(
-        data = data,
+        data = IC,
         aes(
-          x = x,
-          y = y,
-          color = t_score,
-          label = del_lab
+          x = .data$x,
+          y = .data$y,
+          color = .data$t_score,
+          label = .data$del_lab
           ),
         inherit.aes = FALSE
         ) +
@@ -89,37 +89,37 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
         labels = c(0.1, 0.01, 0.001),
         direction = 1,
         ) +
-      guides(color = guide_colorbar(title.position = "top")) +
+      ggplot2::guides(color = ggplot2::guide_colorbar(title.position = "top")) +
       labs(
         title = ttl,
         subtitle =
           substitute(
             "Intra-isotope var. Pr("*delta^13*"C (\u2030) > |F|):"~a,
-            list(a = miscutils::sig_coder())
+            list(a = sig_coder())
             )
          ) +
-      theme(
+      ggplot2::theme(
         legend.position = "top",
-        rect = element_rect(
+        rect =  ggplot2::element_rect(
           fill = "transparent",
           color = "transparent"
           ),
-        panel.background =  element_rect(
+        panel.background =   ggplot2::element_rect(
           fill = "transparent",
           color = "transparent"
           ),
-        axis.line = element_blank()
+        axis.line =  ggplot2::element_blank()
         ) +
       themes_IC
   }
 
   grid_loc <- list(
     geom_text(
-      data = data,
+      data = IC,
       aes(
-        x = x + grid_cell * 0.375,
-        y = y + grid_cell * 0.375,
-        label = ROI
+        x = .data$x + grid_cell * 0.375,
+        y = data$y + grid_cell * 0.375,
+        label = data$grid.nm
       ),
       size = 3,
       inherit.aes = FALSE
@@ -127,9 +127,9 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
   )
 
   if (grid_print) {
-    suppressWarnings(return(list(data, {print(gg_final(data) + grid_loc)})))
+    suppressWarnings(return(list(IC, {print(gg_final(IC) + grid_loc)})))
     } else {
-      suppressWarnings(return(list(data, print(gg_final(data)))))
+      suppressWarnings(return(list(IC, print(gg_final(IC)))))
       }
 }
 #' @rdname gg_effect
@@ -152,12 +152,12 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
       ) %>%
     purrr::map(tibble::add_column, sample.nm = "sketch")
 
-  df <- dim_folds(ls_sketch, height, width,  depth, "sketch", "tile", res,
-                  grid_cell)
-  ggplot(df, aes(x = width, y = height)) +
+  fold <- dim_folds(ls_sketch, height, width,  depth, "sketch", "tile", res,
+                    grid_cell)
+  ggplot(fold, aes(x = .data$width, y = .data$height)) +
     geom_tile(fill = "transparent", color = "black") +
-    geom_text(aes(label = grid.nm)) +
-    coord_fixed(clip = "off") +
+    geom_text(aes(label = .data$grid.nm)) +
+    ggplot2::coord_fixed(clip = "off") +
     depth_arrows(res, grid_cell) +
     scale_y_continuous(
       expression("height"~"("*mu*"m)"),
@@ -175,18 +175,18 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
       expand = c(0, 0)
       ) +
     ggtitle("Grid layout") +
-    theme_classic() +
-    theme(
+    ggplot2::theme_classic() +
+    ggplot2::theme(
       legend.position = "top",
-      rect = element_rect(
+      rect = ggplot2::element_rect(
         fill = "transparent",
         color = "transparent"
       ),
-      panel.background =  element_rect(
+      panel.background =  ggplot2::element_rect(
         fill = "transparent",
         color = "transparent"
       ),
-      axis.line = element_blank()
+      axis.line = ggplot2::element_blank()
     ) +
     themes_IC
 }
@@ -244,23 +244,23 @@ depth_arrows <- function(res, grid_cell) {
   text_level <- 1.074219 * res
 
   list(
-    annotate(
+    ggplot2::annotate(
       "segment",
       x = min_arrow,
       xend = max_arrow,
       y = direction,
       yend = direction,
-      arrow = arrow(length = unit(0.01, "npc"), type = "closed")
+      arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "npc"), type = "closed")
       ),
-    annotate(
+    ggplot2::annotate(
       "segment",
       x = direction,
       xend = direction,
       y = min_arrow,
       yend = max_arrow,
-      arrow = arrow(length = unit(0.01, "npc"), type = "closed")
+      arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "npc"), type = "closed")
       ),
-    annotate("text", x = res + grid_cell, y = text_level, label = "depth"),
-    annotate("text", x = text_level, y = res + grid_cell, label = "depth", angle = 90)
+    ggplot2::annotate("text", x = res + grid_cell, y = text_level, label = "depth"),
+    ggplot2::annotate("text", x = text_level, y = res + grid_cell, label = "depth", angle = 90)
     )
 }

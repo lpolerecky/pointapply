@@ -11,7 +11,14 @@ download_point(type = "all")
 
 write_point(obj, on_build = FALSE)
 
-save_point(ggplot, name, width, height, unit, on_build = FALSE)
+save_point(
+  name,
+  ggplot = ggplot2::last_plot(),
+  width,
+  height,
+  unit,
+  on_build = FALSE
+)
 
 load_point(type, name, grid_cell, return_name = FALSE, on_build)
 }
@@ -23,10 +30,10 @@ load_point(type, name, grid_cell, return_name = FALSE, on_build)
 \item{on_build}{Logical whether download is loaded during build
 (default = FALSE).}
 
-\item{ggplot}{ggplot object to be stored.}
-
 \item{name}{Character string for graphic based on ggplot or file to be
 loaded.}
+
+\item{ggplot}{ggplot object to be stored.}
 
 \item{width}{Numeric value for width of graphic based on ggplot.}
 

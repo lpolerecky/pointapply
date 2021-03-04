@@ -1,6 +1,8 @@
 ---
 title: "Sensitivity by simulation"
 output: rmarkdown::html_vignette
+bibliography: biblio.bib
+biblio-style: apalike
 vignette: >
   %\VignetteIndexEntry{Sensitivity by simulation}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,27 +23,26 @@ The R package `pointapply` contains the code and data to reconstruct the publica
 
 # Introduction 
 
-This vignette shows how ion count data of a Secondary Ion Mass Spectrometry (SIMS) isotope analysis is simulated, which forms the basis to test the intra- and inter isotope test as introduced in the paper (Section 4.1 *Simulated data*). The accompanying vignette *Visualise performance* (`vignette("performance")`) provide the code to plot these results (Figs 4--6).
+This vignette shows how ion count data of a Secondary Ion Mass Spectrometry (SIMS) isotope analysis is simulated, which forms the basis to test the intra- and inter isotope test as introduced in the paper (Section 4.1 *Simulated data*). The accompanying vignette *Visualise test performance* (`vignette("performance")`) provide the code to plot these results (Figs 4--6).
 
 The following packages are used for the simulation.
 
 
 ```{r setup, eval=TRUE}
-library(tidyverse)
 library(point) # regression diagnostics
-devtools::load_all(".") # library(pointapply) # load package
+library(pointapply) # load package
 ```
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- TRUE
+on_build <- FALSE
 ```  
 
 
-The performance of the intra- and inter-isotope tests, bundled in the R package `point`, are essentially tested with the simulated data.
+The performance of the intra- and inter-isotope tests, bundled in the R package `point`, are tested with the simulated (or synthetic) data.
 
 
-# Simulate intra-isotope data
+# Simulate intra-isotope variability data
 
 The first simulation is designed to assess the sensitivity of the intra-isotope variability test for two continuous variables; 1) ionization efficiency and, 2) the isotope offset between two components. The ionization efficiency is a systematic fluctuation in the emitted secondary ions, that should normally be mirrored in strength among both isotopes of the same element [@Fitzsimons2000a]. This effect might have a bearing on the intra-isotope variability test, as it is a regression-based method. The isotope offset encompasses two end-member components that cause intra-isotope variability in the analysis, and this is one of the foremost targets in this study. Hence, a range of 22.0‰ is chosen to mimic the divergent isotope composition of carbonate and organic carbon inclusion hosted in a predominant carbonate matrix as a realistic scenario for a SIMS isotope analyses. Whereas, the range in ionization efficiency is varied from 0 to 120%.
 
@@ -105,7 +106,7 @@ colors <- c("simulated Ri" = "black", "mean R" = "#FEB24C")
 ggplot(tb_cp, aes(x = Xt2, y = Xt1, group = name, color = "simulated Ri")) +
   geom_line() +
   facet_grid(cols = vars(name)) + 
-  geom_smooth(
+  ggplot2::geom_smooth(
     aes(color = "mean R", weight = 1 / Xt2), 
     method = "lm", 
     formula = y~x - 1
@@ -127,19 +128,17 @@ ggplot(tb_cp, aes(x = Xt2, y = Xt1, group = name, color = "simulated Ri")) +
     values = colors, 
     labels = c(expression(bar(R)), expression(R[i]))
     ) +
-  theme(legend.direction =  "vertical") +
+  ggplot2::theme(legend.direction =  "vertical") +
   ggtitle("Scenarios for intra-isotope variability") +
-  theme_bw()
+  ggplot2::theme_bw()
 
 # save and print
-save_point(last_plot(), "simu_intra_concept", width = 14, height = 5.5, unit = "cm", on_build)
+save_point("simu_intra_concept", last_plot(), width = 14, height = 5.5, unit = "cm", on_build)
 ```
 
 
-```{r echo=FALSE, eval=TRUE, fig.cap="Conceptual graphs for intra-R variation.", out.width="70%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "simu_intra_concept", ext = "png")
-   )
+```{r echo=FALSE, eval=TRUE, fig.cap="Conceptual sketches for intra-R variation.", out.width="70%"}
+ knitr::include_graphics("figures/simu_intra_concept.png")   
 ```
 
 
@@ -149,7 +148,7 @@ The function `simu_R()` of the `point` package is especially designed to simulat
 
 
 ```{r execintra}
-simu_sens_IC_intra <- purrr::pmap_dfr(ls_parms, simu_R, .reps = reps, 
+simu_sens_IC_intra <- purrr::pmap_dfr(ls_parms, point::simu_R, .reps = reps, 
                                       .ion1 = "13C", .ion2 = "12C", 
                                       .reference = "VPDB")
 ```
@@ -193,11 +192,11 @@ The Cook's D method is the default method of `diag_R()`, and is therefore simple
 
 ```{r CD}
 # diagnostics
-tb_dia <- diag_R(simu_sens_IC_intra, "13C", "12C", !!!grps, .N = N.sm, 
-                 .Xt = Xt.sm)
+tb_dia <- point::diag_R(simu_sens_IC_intra, "13C", "12C", !!!grps, .N = N.sm, 
+                        .Xt = Xt.sm)
 # evaluation of performance
-simu_CD_eval_intra <- eval_diag(tb_dia, "13C", "12C", !!!grps, .N = N.sm, 
-                                .Xt = Xt.sm, .output = "complete")
+simu_CD_eval_intra <- point::eval_diag(tb_dia, "13C", "12C", !!!grps, .N = N.sm, 
+                                       .Xt = Xt.sm, .output = "complete")
 # export
 write_point("simu_CD_eval_intra", on_build)
 ```
@@ -210,10 +209,11 @@ The $\sigma_R$-rejection method requires the `.method` to be set to `"Cameca"`. 
 
 ```{r CM}
 # diagnostics
-tb_dia <- diag_R(simu_sens_IC_intra , "13C", "12C", !!!grps, bl.nm, 
-                 .method = "Cameca", .N = N.sm, .Xt = Xt.sm)
+tb_dia <- point::diag_R(simu_sens_IC_intra , "13C", "12C", !!!grps, bl.nm, 
+                        .method = "Cameca", .N = N.sm, .Xt = Xt.sm)
 # evaluation of performance
-CM_eval <- eval_diag(tb_dia, "13C", "12C", !!!grps, .N = N.sm, .Xt = Xt.sm)
+CM_eval <- point::eval_diag(tb_dia, "13C", "12C", !!!grps, .N = N.sm, 
+                            .Xt = Xt.sm)
 # extract distinct groups omitting block-wise means
 simu_CM_eval_intra <- dplyr::distinct(CM_eval, !!!grps, .keep_all = TRUE)
 # export
@@ -256,7 +256,7 @@ Execution of the simulation (`simu_R()`) for inter-isotope data follows the same
 
 ```{r execinter}
 # execute
-simu_sens_IC_inter <- purrr::pmap_dfr(ls_parms, simu_R, .type = "ideal", 
+simu_sens_IC_inter <- purrr::pmap_dfr(ls_parms,  point::simu_R, .type = "ideal", 
                                       .reps = reps, .ion1 = "13C",
                                       .ion2 = "12C", .reference = "VPDB")
 ```
@@ -345,3 +345,6 @@ purrr::walk2(
   file_name = "simu_eval_inter"
   )
 ```
+
+
+# References

@@ -1,6 +1,8 @@
 ---
 title: "SIMS analytical artefacts"
 output: rmarkdown::html_vignette
+bibliography: biblio.bib
+biblio-style: apalike
 vignette: >
   %\VignetteIndexEntry{SIMS analytical artefacts}
   %\VignetteEngine{knitr::rmarkdown}
@@ -23,12 +25,12 @@ This vignette deals with the evaluation of the impact of systematic and random b
 
 ```{r setup, eval = TRUE}
 library(point) # regression diagnostics
-devtools::load_all(".") # library(pointapply) # load package
+library(pointapply) # load package
 ```
 
 
 ```{r bld, echo=FALSE}
-on_build <- TRUE
+on_build <- FALSE
 ```  
 
 
@@ -59,16 +61,16 @@ load_point("simu", "CD_eval_intra", NULL, return_name = FALSE, on_build)
 # Systematic biases
 ## Quasi Simulations Arrival (QSA)
 
-The combination of measuring under high ionisation efficiencies and the usage of electron multipliers (EM) for ion detection can lead to an artefact understood as the more-or-less (quasi) simultaneous arrival (QSA) of an incident ion at the detection device. Differentiation of the two secondary ions is thus not possible, and the ions are therefore counted as $1$ detection event by the machine. In the case of isotope systems this could theoretically lead to undersampling of the common isotope [@Slodzian2004]. An exact correction of undersampling induced by QSA can be a cumbersome undertaking, as such the R package `point` has a diagnostic tool that helps evaluate whether the ion count data is likely to have been compromised by this analytical artefact. The function `QSA_test()` fits a least-square linear model to the common isotope count rates (e.g. ^12^C) as a predictor, and the targeted isotope ratio (e.g. ^13^C/^12^C) as the independent variable. If undersampling would be present in the ion count data, then this would cause a significant positive linear trend of higher isotope ratios with higher count rates of the common isotope.
+The combination of measuring under high ionisation efficiencies and the usage of electron multipliers (EM) for ion detection can lead to an artefact understood as the more-or-less (quasi) simultaneous arrival (QSA) of an incident ion at the detection device. Differentiation of the two secondary ions is thus not possible, and the ions are therefore counted as $1$ detection event by the machine. In the case of isotope systems this could theoretically lead to under-sampling of the common isotope [@Slodzian2004]. An exact correction of under-sampling induced by QSA can be a cumbersome undertaking, as such the R package `point` has a diagnostic tool that helps evaluate whether the ion count data is likely to have been compromised by this analytical artefact. The function `QSA_test()` fits a least-square linear model to the common isotope count rates (e.g. ^12^C) as a predictor, and the targeted isotope ratio (e.g. ^13^C/^12^C) as the independent variable. If under-sampling would be present in the ion count data, then this would cause a significant positive linear trend of higher isotope ratios with higher count rates of the common isotope.
 
 
 ```{r QSA}
 # bind dataframes
 tb <- bind_rows(map_sum_grid_64_MEX$depth, map_sum_grid_64_MON$depth)
 # QSA test
-tb_QSA <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm, grid.nm, .nest = grid.nm)
+test_QSA_64_all <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm, grid.nm, .nest = grid.nm)
 # make mlm model line
-tb_QSA <- mutate(tb_QSA, hat_R = alpha_grid.nm + beta_grid.nm * Xt.pr.12C)
+test_QSA_64_all <- mutate(test_QSA_64_all, hat_R = alpha_grid.nm + beta_grid.nm * Xt.pr.12C)
 ```
 
 
@@ -84,7 +86,7 @@ xlab <- substitute(
 
 # plot
 QSA_dens <- twodens(
-  tb_QSA, 
+  test_QSA_64_all, 
   Xt.pr.12C,
   R_Xt.pr, 
   xlab, 
@@ -100,25 +102,51 @@ QSA_dens <- twodens(
 QSA_dens + geom_line(aes(y = hat_R)) 
 
 # save data
-write_point("tb_QSA", on_build )
+write_point("test_QSA_64_all", on_build )
  
 # save plot  
-save_point(last_plot(), "point_QSA", width = 12, height = 6, unit = "cm", on_build)
+save_point("point_QSA", last_plot(), width = 12, height = 6, unit = "cm", on_build)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="QSA test.", out.width="80%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "point_QSA", ext = "png")
-   )
+ knitr::include_graphics("figures/point_QSA.png")
 ```
 
 
-## Random bias
+# Random bias
 
 The random nature of secondary ions emitted from an analytical substrate (e.g. rock sample) during sputtering can be described by Poisson statistics, which can be used to predict the precision of pulsed ion counts (e.g. measurements with a *Cameca NanoSIMS 50L*) under ideal circumstances. More specifically, the variation can be deduced from the total counts of secondary ions. Usefully, we can compare these predictive values with the descriptive statistics; essentially estimates of the true population location (e.g. mean) and spread (variance).
 
-The reduced $\chi^2$ can be used to assess the machine performance and analyte homogeneity as it cross-validates the observed error estimate with the theoretical Poisson-based precision. For example, the reduced $\chi^2$ of an isotope ratio equates to:
+First we will calculate some standard predictive and descriptive statistics for the internal precision of SIMS single iona, with the `point` function `stat_Xt()`. See the documentation of this package `vignette("IC-precision", package = "point")` for an extensive overview of the complete functionality of these functions as well as the mathematics behind the statistics.
+
+
+```{r statXt}
+# single ion statistics
+stat_Xt_64_all <- purrr::map_dfr(
+  purrr::flatten(list(map_sum_grid_64_MEX, map_sum_grid_64_MON)),
+  ~stat_Xt(.x, file.nm, sample.nm, dim_name.nm, grid.nm)
+  )
+write_point("stat_Xt_64_all", on_build)
+head(stat_Xt_64_all)
+```
+
+
+The same can be done for the statistics of isotope analysis with appropriate error propagation with the function `stat_R()`.
+
+
+```{r statR}
+# single ion statistics
+stat_R_64_all <- purrr::map_dfr(
+  purrr::flatten(list(map_sum_grid_64_MEX, map_sum_grid_64_MON)),
+  ~stat_R(.x, "13C", "12C", file.nm, sample.nm, dim_name.nm, grid.nm)
+  )
+write_point("stat_R_64_all", on_build)
+head(stat_R_64_all)
+```
+
+
+The reduced $\chi^2$ can then be used to assess the machine performance and analyte homogeneity as it cross-validates the observed error estimate with the theoretical Poisson-based precision. For example, the reduced $\chi^2$ of an isotope ratio equates to:
 
 \begin{equation}
   \chi^2 = \left( \frac{s_{\bar{R}}} {\hat{s}_{\bar{R}}} \right)^2   
@@ -136,7 +164,7 @@ simu_CD_eval_intra <- simu_CD_eval_intra %>%
  filter(ion_trend > 6) %>% 
  mutate(ion_trend = 
           factor(
-            cut_width(ion_trend, 10), 
+            ggplot2::cut_width(ion_trend, 10), 
             labels = c("low", "medium", "high") 
             ) 
         )
@@ -166,9 +194,9 @@ ggplot(simu_CD_eval_intra, aes(x = chi2_R_Xt.sm, y = F_vl, color = force.nm)) +
     breaks = scales::pretty_breaks(4),
     ) +
   ggtitle("Precision vs. accuracy") +
-  theme_bw() +
+  ggplot2::theme_bw() +
   themes_IC +
-  theme(legend.position = "bottom") 
+  ggplot2::theme(legend.position = "bottom") 
 
 # save 
 save_point(last_plot(), "simu_precision", width = 14, height = 14, unit = "cm", on_build)
@@ -176,8 +204,8 @@ save_point(last_plot(), "simu_precision", width = 14, height = 14, unit = "cm", 
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="The sensitivity of precision and accuracy-based test statistics to intra-isotope variability.", out.width="80%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "simu_precision", ext = "png")
-   )
+ knitr::include_graphics("figures/simu_precision.png")
 ```
 
+
+# References

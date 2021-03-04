@@ -20,6 +20,10 @@ read_matlab(
 
 \item{plane}{Variable for the dimension over which to be aggregated}
 
+\item{title}{Character string for sample name.}
+
+\item{species}{Character string or vector with chemical species.}
+
 \item{grid_cell}{Integer indicating size of cells in pixels, only exponent of
 base two allowed (default = 64)}
 
@@ -33,15 +37,12 @@ measurement (default is the conversion used in this study).}
 }
 \value{
 A \code{tibble::\link[tibble:tibble]{tibble}} containing the ion counts
-aggregated over the plane of choice, and if \code{output = "sum"}.
+aggregated over the plane of choice, if \code{output = "sum"}. If
+\code{output = "complete"} only works in combination with \code{grid_sel} and
+produces a pixel-by-pixel dataset for that grid-cell.
 }
 \description{
 \code{read_matlab} Tabulate  and aggregate the ion count data contained in
-matlab files exported by LANS.
-}
-\examples{
-# Use get_matlab() to path to data bundled with this package
-
-# Pre-process real data as in the paper; Schobben, Kienhuis, Polerecky 2021
-read_matlab(get_matlab("2020-08-20-GLENDON"), plane = height, title = "MEX")
+matlab files exported by LANS. Matlab files are read with
+\code{R.matlab::\link[R.matlab:readMat]{readMat}}.
 }

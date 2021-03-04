@@ -1,6 +1,8 @@
 ---
 title: "Validation of regression assumptions"
 output: rmarkdown::html_vignette
+bibliography: biblio.bib
+biblio-style: apalike
 vignette: >
   %\VignetteIndexEntry{Validation of regression assumptions}
   %\VignetteEngine{knitr::rmarkdown}
@@ -8,36 +10,37 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   eval = FALSE
 )
-
 ```
+
+
+The R package `pointapply` contains the code and data to reconstruct the publication: Martin Schobben, Michiel Kienhuis, and Lubos Polerecky. 2021. *New methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry*, preprint on [Eartharxiv](https://eartharxiv.org/).
 
 
 # Introduction
 
+The validity of inter- and intra- isotope models is verified for the nanoSIMS-generated data by an assessment of the implicit assumptions of the linear regression model (Eq. (4) of the paper, and see below); normality, homogeneity and independence of residuals (see also `vignette("IC-diagnostics", package = "point")`). 
 
-The validity of inter- and intra- isotope models is verified for the nanoSIMS generated data by an assessment of the implicit assumptions of the linear regression model (Eq. (4) of the paper); normality, homogeneity and independence of residuals. 
-
+$$\text{The ideal linear R model:} \quad \hat{X}_i^b = \hat{R}X_i^a +  \hat{e}_i \text{.}$$
 
 
 In addition, the regression assumptions are used to aid the selection of the appropriate grid-cell size, as the underlying data structure of ion counts depends on this factor encompassed in the individual measurements of a conventional SIMS isotope analysis. In effect, the smaller the grid-cell (i.e. measurement time) the more the reduced counts will deviate from a normal (Gaussian distribution). This effect will affect at first counts of the rare isotope (i.e. ^13^C). 
 
-The function to perform regression diagnostics `diag_R()` is a core feature of the accompanying package `point`.
+The function to perform regression diagnostics `diag_R()` is a core feature of the accompanying package *point* [@point].
 
 
 ```{r setup, eval=TRUE}
 library(point) # regression diagnostics
-devtools::load_all(".") # library(pointapply) # load package
+library(pointapply) # load package
 ```
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- TRUE
+on_build <- FALSE
 ```  
 
 
@@ -64,8 +67,8 @@ grid_cell <- sapply(2:7, function(x) 2 ^ x)
 name <- c("MEX", "MON")
 # load
 name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE, on_build)
-# dataframe aggregated over depth
-tb <-purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
+# data frame aggregated over depth
+tb <- purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
 ```
 
 
@@ -77,8 +80,8 @@ The assumption of normality is tested on the studentized residuals ($\hat{e}_i^*
 
 
 ```{r QQ}
-tb_QQ <- diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm, 
-                grid.nm, .method = "QQ", .hyp = "norm", .output = "flag")
+tb_QQ <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm, 
+                       grid.nm, .method = "QQ", .hyp = "norm", .output = "flag")
 ```
 
 
@@ -88,8 +91,9 @@ For the next chunk of code, only the argument `.hyp` is changed to `ttest`. This
 
 
 ```{r mu}
-tb_mu <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
-                grid.nm, .method = "QQ", .hyp = "ttest", .output = "flag")
+tb_mu <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
+                       grid.nm, .method = "QQ", .hyp = "ttest", 
+                       .output = "flag")
 ```
 
 
@@ -99,8 +103,8 @@ Patterns in the homogeneity of $\hat{e}_i^*$ are another diagnostic feature for 
 
 
 ```{r CV}
-tb_CV <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
-                grid.nm, .method = "CV", .hyp = "bp", .output = "flag")
+tb_CV <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
+                       grid.nm, .method = "CV", .hyp = "bp", .output = "flag")
 ```
 
 
@@ -110,8 +114,8 @@ The independence of the distributions, or autocorrelation among measurements, is
 
 
 ```{r IR}
-tb_IR <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
-                grid.nm, .method = "IR", .hyp = "ljung", .output = "flag")  
+tb_IR <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, 
+                       grid.nm, .method = "IR", .hyp = "ljung", .output = "flag")  
 ```
 
 
@@ -138,60 +142,52 @@ The function `hyp_class()` constructs barplots showing the frequency of $H_0$ re
 
 ```{r QQclass}
 QQ_class <- hyp_class(tb_QQ, vc_N_13C, "Normality test") # barplot
-save_point(QQ_class, "bar_QQ_class" ,width = 7, height = 7, unit = "cm", on_build) # save
+save_point("bar_QQ_class", QQ_class, width = 7, height = 7, unit = "cm", on_build) # save
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Anderson-Darling normality test.", out.width="50%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "bar_QQ_class", ext = "png")
-   )
+ knitr::include_graphics("figures/bar_QQ_class.png")
 ```
 
 
 ```{r CVclass}
 CV_class <- hyp_class(tb_CV, vc_N_13C, "Breusch-Pagan test") # barplot
-save_point(CV_class, "bar_CV_class" ,width = 7, height = 7, unit = "cm",  on_build) # save
+save_point("bar_CV_class", CV_class, width = 7, height = 7, unit = "cm", on_build) # save
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Breusch-Pagan test.", out.width="50%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "bar_CV_class", ext = "png")
-   )
+ knitr::include_graphics("figures/bar_CV_class.png")
 ```
 
 
 ```{r muclass}
 mu_class <- hyp_class(tb_mu, vc_N_13C, "Student's t test") # barplot  
-save_point(mu_class, "bar_mu_class" ,width = 7, height = 7, unit = "cm",  on_build) # save
+save_point("bar_mu_class", mu_class, width = 7, height = 7, unit = "cm", on_build) # save
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Student's t test.", out.width="50%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "bar_mu_class", ext = "png")
-   )
+ knitr::include_graphics("figures/bar_mu_class.png")
 ```
 
 
 ```{r IRclass}
 IR_class <- hyp_class(tb_IR, vc_N_13C, "Ljung-box test")  # barplot
-save_point(IR_class, "bar_IR_class" ,width = 7, height = 7, unit = "cm",on_build) # save
+save_point("bar_IR_class", IR_class, width = 7, height = 7, unit = "cm",on_build) # save
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Ljung-box test.", out.width="50%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "bar_IR_class", ext = "png")
-   )
+ knitr::include_graphics("figures/bar_IR_class.png")
 ```
 
 
 ```{r class, echo=FALSE}
 # overview
 p <- gridExtra::grid.arrange(gridExtra::arrangeGrob(QQ_class, CV_class, ncol = 2), gridExtra::arrangeGrob(mu_class, IR_class, ncol = 2)) 
-png(filename = fs::path_package("pointapply", "paper/graphs", "bar_over_class", ext = "png"), width = 14, height = 14, units = "cm", res = 256)
+png(filename = "figures/bar_over_class.png", width = 14, height = 14, units = "cm", res = 256)
 grid::grid.draw(p)
 dev.off()
 
@@ -227,9 +223,7 @@ save_point(QQ_dens, name = "point_QQ", width = 12, height = 8, unit = "cm",
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Quantile--Quantile normality plot", out.width="75%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "point_QQ", ext = "png")
-   )
+ knitr::include_graphics("figures/point_QQ.png")
 ```
 
 
@@ -260,7 +254,8 @@ save_point(CV_dens, name = "point_CV", width = 12, height = 8, unit = "cm",
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Scale--location plot", out.width="75%"}
- knitr::include_graphics(
-   fs::path_package("pointapply", "paper/graphs", "point_CV", ext = "png")
-   )
+ knitr::include_graphics("figures/point_CV.png")
 ```
+
+
+# References

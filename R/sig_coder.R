@@ -29,7 +29,7 @@ sig_coder <- function(x = NULL, make_lab = TRUE) {
 
     p_finder <- function(x) {
       if (x == 0) return("***")
-      dplyr::pull(dplyr::filter(tb_sigs, upper >= x & lower < x), "sig_code")
+      dplyr::pull(dplyr::filter(tb_sigs, .data$upper >= x & .data$lower < x), "sig_code")
     }
     stars <- purrr::map_chr(unique(x), p_finder)
     stars <- rlang::set_names(stars, nm = unique(x))

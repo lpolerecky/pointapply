@@ -30,6 +30,6 @@ within its own directory (figures).
 }
 \description{
 \code{render_paper()} is a wrapper around
-\code{rmarkdown::\link[rmarkdown:rendersite]{rendersite}} which renders the
+\code{rmarkdown::\link[rmarkdown:render_site]{render_site}} which renders the
 paper of this study.
 }

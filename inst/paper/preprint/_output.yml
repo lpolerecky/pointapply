@@ -12,5 +12,5 @@ bookdown::pdf_book:
   latex_engine: xelatex
   base_format: rticles::arxiv_article
   includes:
-    in_header: ["units.sty", "preamble.tex"]
+    in_header: ["units.sty", "preamble.tex", "templates/supplement.tex"]
 

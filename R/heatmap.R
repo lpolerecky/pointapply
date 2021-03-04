@@ -40,13 +40,13 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
   # transformation of secondary axis
   if (!is.null(x_sec)){
     tr <- rayleigh_trans(trans_base, trans_n)
-    second_axis <- sec_axis(
+    second_axis <- ggplot2::sec_axis(
       trans = ~tr$transform(.) * -1 ,
       name = x_sec,
       breaks = scales::pretty_breaks(3)
       )
   } else {
-    second_axis <- waiver()
+    second_axis <- ggplot2::waiver()
     }
 
   # plot
@@ -58,7 +58,7 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
     p <- p + facet_grid(
       rows = vars(!!grp1),
       cols = vars(!!grp2),
-      labeller = label_parsed
+      labeller = ggplot2::label_parsed
       )
     }
 
@@ -74,18 +74,18 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
       expand = c(0, 0)
       ) +
     scale_fill_distiller("classification \n accuracy", palette = "YlOrRd") +
-    coord_fixed(ratio = rcts$r_cell[1]) +
-    geom_rect(
+    ggplot2::coord_fixed(ratio = rcts$r_cell[1]) +
+    ggplot2::geom_rect(
       data = rcts,
-      aes(xmin = xl, xmax = xu, ymin = yl, ymax = yu, color = col_type),
+      aes(xmin = .data$xl, xmax = .data$xu, ymin = .data$yl, ymax = .data$yu, color = .data$col_type),
       fill = "transparent",
       inherit.aes = FALSE
       ) +
-    scale_size(range= c(0.5, 1.5)) +
-    scale_color_identity() +
+    ggplot2::scale_size(range = c(0.5, 1.5)) +
+    ggplot2::scale_color_identity() +
     ggrepel::geom_text_repel(
       data = rcts,
-      aes(x = x, y = y, label = lbl),
+      aes(x = .data$x, y = .data$y, label = .data$lbl),
       inherit.aes = FALSE,
       size = 3,
       min.segment.length = 1e-3,
@@ -93,7 +93,7 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
       nudge_y = 25
       ) +
     labs(title = ttl, x = x_lab, y = y_lab) +
-    theme_bw() +
+    ggplot2::theme_bw() +
     themes_IC
 }
 #' @rdname heat_map
@@ -135,13 +135,13 @@ heat_sum <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
       group = {{stat}}
       )
     ) +
-  geom_rect(
+  ggplot2::geom_rect(
     data = tb_rec,
     aes(
-      xmin = xmin,
-      xmax = xmax,
-      ymin = ymin,
-      ymax = ymax
+      xmin = .data$xmin,
+      xmax = .data$xmax,
+      ymin = .data$ymin,
+      ymax = .data$ymax
       ),
     fill = def_cols[1],
     inherit.aes = FALSE
@@ -149,49 +149,49 @@ heat_sum <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
   geom_text(
     data = tb_txt,
     aes(
-      x = x,
-      y = y,
-      label = type.nm
+      x = .data$x,
+      y = .data$y,
+      label = .data$type.nm
       ),
     size = 3,
     inherit.aes = FALSE
     ) +
   geom_line() +
-  scale_linetype(guide = FALSE) +
+  ggplot2::scale_linetype(guide = FALSE) +
   geom_point(shape = 21) +
   # Rayleigh model secondary axis
   scale_x_continuous(
     breaks = seq(-20, 0,5),
     sec.axis =
-      sec_axis(
+      ggplot2::sec_axis(
         trans = ~tr$transform(.) * -1,
         x_sec,
         breaks = c(0.15, 0.1, 0.05)
       )
-  ) +
+    ) +
   scale_y_continuous(
     breaks = scales::pretty_breaks(3),
-    sec.axis =  dup_axis(name = y_sec),
+    sec.axis = ggplot2::dup_axis(name = y_sec),
     expand = c(-0.1, 0.1)
-  ) +
-  scale_fill_manual("", values = c("white", "grey")) +
+    ) +
+  ggplot2::scale_fill_manual("", values = c("white", "grey")) +
   facet_grid(
     rows = vars({{grp1}}),
     cols = vars({{grp2}}),
-    scale = "free_x",
+    scales = "free_x",
     space = "free_x"
     ) +
   labs(title = ttl, x = x_lab, y = y_lab) +
-  theme_bw() +
+  ggplot2::theme_bw() +
   themes_IC +
-  theme(
+  ggplot2::theme(
     legend.position = "right",
-    legend.key = element_blank(),
+    legend.key = ggplot2::element_blank(),
     strip.placement = 'outside',
-    strip.background.x = element_blank(),
-    strip.background.y = element_blank(),
-    strip.text.x = element_blank(),
-    strip.text.y = element_blank()
+    strip.background.x = ggplot2::element_blank(),
+    strip.background.y = ggplot2::element_blank(),
+    strip.text.x = ggplot2::element_blank(),
+    strip.text.y = ggplot2::element_blank()
     )
 
 }
@@ -207,12 +207,12 @@ rect_fun <- function(xaxis, yaxis){
     n_iso = n_distinct(xaxis),
     min_iso = min(xaxis),
     max_iso = max(xaxis),
-    var_iso = diff(c(max_iso, min_iso)),
+    var_iso = diff(c(.data$max_iso, .data$min_iso)),
     n_trend = n_distinct(yaxis),
     min_trend = min(yaxis),
     max_trend = max(yaxis),
-    var_trend = diff(c(max_trend, min_trend)),
-    r_cell = var_iso / var_trend
+    var_trend = diff(c(.data$max_trend, .data$min_trend)),
+    r_cell = .data$var_iso / .data$var_trend
   )
 
   # annotation for plot

@@ -13,8 +13,21 @@ publication: Martin Schobben, Michiel Kienhuis, and Lubos Polerecky.
 Mass Spectrometry*, preprint on [Eartharxiv](https://eartharxiv.org/).
 
 This paper assess the performance of the application of the `diag_R()`
-and `eval_diag` function of the sister package `point` in detecting
-isotope heterogeneity in natural substrates.
+and `eval_diag` function of the sister package *point* (Schobben, n.d.)
+in detecting isotope heterogeneity in natural substrates.
+
+# Data
+
+The data is stored on the
+[Zenodo](https://doi.org/10.5281/zenodo.4580159) repository *pointdata*.
+
+The data can be directly downloaded with `download_point()`, which is
+build around *zen4R* (Blondel 2020).
+
+``` r
+# Download
+pointapply::download_point()
+```
 
 # Render the paper
 
@@ -32,8 +45,7 @@ pointapply::render_paper(title = "Schobbenetal_SIMS_method",
 The construction of the R (R Core Team 2020) package *pointapply* and
 associated documentation was aided by the packages; *devtools* (H.
 Wickham, Hester, and Chang 2020), *roxygen2* (H. Wickham et al. 2020),
-*knitr* (Xie 2021 , 2015), *rmarkdown* (Allaire et al. 2020; Xie,
-Allaire, and Grolemund 2018).
+*here* (Müller 2020), and *fs* (Hester and Wickham 2020).
 
 The book: *R packages: organize, test, document, and share your code*,
 by
@@ -43,17 +55,28 @@ is a great guide for learning how to build packages.
 In addition, this package relies on a set of external packages from the
 tidyverse universe, including: *dplyr* (Wickham et al. 2021), *tidyr*
 (H. Wickham 2020b), *tibble* (Müller and Wickham 2021), *stringr*
-(Wickham 2019), *magrittr* (Bache and Wickham 2014), *ggplot2* (Wickham
-2016), and *purrr* (Henry and Wickham 2020a) for internal functioning.
+(Wickham 2019), *magrittr* (Bache and Wickham 2014), and *purrr* (Henry
+and Wickham 2020a) for data manipulation.
+
+Data plots are constructed with *ggplot2* (Wickham 2016), *ggrepel*
+(Slowikowski 2021), *RColorBrewer* (Neuwirth 2014), and *scales* (H.
+Wickham and Seidel 2020)
+
 The package *rlang* (Henry and Wickham 2020b) was used for tidy
 evaluation.
 
 Some specialised specialised packages where used, notably; *R.matlab*
 for loading the matlab LANS files (Bengtsson 2018) and *cubelyr* (H.
-Wickham 2020a) for flattening the 3D arrays.
+Wickham 2020a) for flattening the 3D arrays, and *MASS* (Venables and
+Ripley 2002) for 2D density estimates.
 
-The paper was written with *bookdown* (Xie 2020, 2016), *rticles*
-(Allaire et al. 2021) and *bibtex* (Francois 2017).
+The data download from Zenodo with an api is facilitated by *zen4R*
+(Blondel 2020).
+
+The documentation and paper was written with *knitr* (Xie 2021 , 2015),
+*rmarkdown* (Allaire et al. 2020; Xie, Allaire, and Grolemund 2018),
+*bookdown* (Xie 2020, 2016), *rticles* (Allaire et al. 2021) and
+*bibtex* (Francois 2017).
 
 ## Installation
 
@@ -131,6 +154,13 @@ Matlab from Within R*. <https://CRAN.R-project.org/package=R.matlab>.
 
 </div>
 
+<div id="ref-zen4R">
+
+Blondel, Emmanuel. 2020. *Zen4R: Interface to ’Zenodo’ Rest Api*.
+<https://CRAN.R-project.org/package=zen4R>.
+
+</div>
+
 <div id="ref-bibtex">
 
 Francois, Romain. 2017. “bibtex: Bibtex Parser.”
@@ -152,10 +182,31 @@ Features*. <https://CRAN.R-project.org/package=rlang>.
 
 </div>
 
+<div id="ref-fs">
+
+Hester, Jim, and Hadley Wickham. 2020. *Fs: Cross-Platform File System
+Operations Based on ’Libuv’*. <https://CRAN.R-project.org/package=fs>.
+
+</div>
+
+<div id="ref-here">
+
+Müller, Kirill. 2020. *Here: A Simpler Way to Find Your Files*.
+<https://CRAN.R-project.org/package=here>.
+
+</div>
+
 <div id="ref-tibble">
 
 Müller, Kirill, and Hadley Wickham. 2021. *Tibble: Simple Data Frames*.
 <https://CRAN.R-project.org/package=tibble>.
+
+</div>
+
+<div id="ref-RColorBrewer">
+
+Neuwirth, Erich. 2014. *RColorBrewer: ColorBrewer Palettes*.
+<https://CRAN.R-project.org/package=RColorBrewer>.
 
 </div>
 
@@ -164,6 +215,28 @@ Müller, Kirill, and Hadley Wickham. 2021. *Tibble: Simple Data Frames*.
 R Core Team. 2020. *R: A Language and Environment for Statistical
 Computing*. Vienna, Austria: R Foundation for Statistical Computing.
 <https://www.R-project.org/>.
+
+</div>
+
+<div id="ref-point">
+
+Schobben, Martin. n.d. *Point: Reading, Processing, and Analysing Raw
+Ion Count Data*.
+
+</div>
+
+<div id="ref-ggrepel">
+
+Slowikowski, Kamil. 2021. *Ggrepel: Automatically Position
+Non-Overlapping Text Labels with ’Ggplot2’*.
+<https://CRAN.R-project.org/package=ggrepel>.
+
+</div>
+
+<div id="ref-MASS">
+
+Venables, W. N., and B. D. Ripley. 2002. *Modern Applied Statistics with
+S*. Fourth. New York: Springer. <https://www.stats.ox.ac.uk/pub/MASS4/>.
 
 </div>
 
@@ -216,6 +289,13 @@ Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2021.
 Wickham, Hadley, Jim Hester, and Winston Chang. 2020. *Devtools: Tools
 to Make Developing R Packages Easier*.
 <https://CRAN.R-project.org/package=devtools>.
+
+</div>
+
+<div id="ref-scales">
+
+Wickham, Hadley, and Dana Seidel. 2020. *Scales: Scale Functions for
+Visualization*. <https://CRAN.R-project.org/package=scales>.
 
 </div>
 

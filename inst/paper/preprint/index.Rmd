@@ -45,22 +45,12 @@ always_allow_html: true
 
 
 ```{r bld, echo=FALSE}
-on_build <- TRUE
+on_build <- FALSE
 ```  
 
 
 ```{r path}
 here::i_am("index.Rmd")
-```
-
-
-```{r pkgs}
-# Required packages
-pkgs <- miscutils::pkg_refworker(
-  c("tidyverse", "Cairo", "bibtex", "point", "patchwork", "scales", "here", "units", "rmarkdown", "knitr", "R.matlab", "cubelyr", "kableExtra"),
-  "library.bib",
-  "biblio.bib"
-  )     
 ```
 
 
@@ -71,9 +61,9 @@ SI <- function(x, unit, not = "fl", word = knitr::pandoc_to("docx")) {
   if (not == "fl") x <- sprintf("%.2f", x)  
   if (not == "sc") x <- sprintf("%.2e", x)
   if (word) {
-    paste0(x, str_c(unit, collapse = "/")) 
+    paste0(x, stringr::str_c(unit, collapse = "/")) 
     } else {
-      paste0("$\\SI{",x,"}{\\", str_c(unit, collapse = "\\"),"}$")
+      paste0("$\\SI{",x,"}{\\", stringr::str_c(unit, collapse = "\\"),"}$")
       }
   }
 # deal with per mill latex vs doxc
@@ -94,15 +84,13 @@ options("kableExtra.html.bsTable" = TRUE)
 ```
 
 
-```{r label, options}
-devtools::load_all(".")
-```
-
-
 ```{r data}
 # raw data 64 pixels
 load_point("map_sum_grid", c("MEX", "MON"), 64, return_name = FALSE, on_build)
-map_sum_grid_64_all <- bind_rows(bind_rows(map_sum_grid_64_MEX), bind_rows(map_sum_grid_64_MEX))
+map_sum_grid_64_all <- dplyr::bind_rows(
+  dplyr::bind_rows(map_sum_grid_64_MEX), 
+  dplyr::bind_rows(map_sum_grid_64_MEX)
+  )
 # general statistics single ions for grid-cell 64 
 load_point("stat_Xt", "all", 64, return_name = FALSE, on_build)
 # general statistics isotope ratios for grid-cell 64 
@@ -116,9 +104,9 @@ load_point("diag", c("MEX", "MON"), 64, return_name = FALSE, on_build)
 
 ```{r filesizes}
 # filesizes
-fsize_intra <- file.info(here("data", "simu_sens_IC_intra.rda"))$size / 10^6
+fsize_intra <- file.info(here::here("data", "simu_sens_IC_intra.rda"))$size / 10^6
 ls_files <- lapply(1:10, function(x) paste0("simu_sens_IC_inter_", x, ".rda"))
-fsize_inter <- map_dbl(ls_files, ~file.info(here("data", .x))$size / 10^6) %>% 
+fsize_inter <- purrr::map_dbl(ls_files, ~file.info(here::here("data", .x))$size / 10^6) %>% 
   sum()
 ```
 
@@ -126,8 +114,8 @@ fsize_inter <- map_dbl(ls_files, ~file.info(here("data", .x))$size / 10^6) %>%
 ```{r sumfun}
 # filter select cast function
 var_mean <- function(data, plane, grid_cell, var) {
-  filter(data, dim_name.nm == plane, grid.nm %in% grid_cell) %>% 
-    pull({{var}}) %>% 
+  dplyr::filter(data, dim_name.nm == plane, grid.nm %in% grid_cell) %>% 
+    dplyr::pull({{var}}) %>% 
     mean() 
   }
 ```

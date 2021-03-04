@@ -12,18 +12,19 @@
 #' @export
 hyp_class <- function(IC, sec_vc, ttl) {
 
-  distinct(IC, grid_size.nm, grid.nm, .keep_all = TRUE) %>%
-    add_count(grid_size.nm, name = "ntot") %>%
-    count(grid_size.nm, hyp, ntot) %>%
-    mutate(freq = n / ntot) %>%
-    filter(stringr::str_detect(hyp, "H0")) %>%
-    ggplot(aes(x = grid_size.nm, y = freq)) +
+  IC <- distinct(IC, .data$grid_size.nm, .data$grid.nm, .keep_all = TRUE) %>%
+    add_count(.data$grid_size.nm, name = "ntot") %>%
+    count(.data$grid_size.nm, .data$hyp, .data$ntot) %>%
+    mutate(freq = .data$n / .data$ntot) %>%
+    filter(stringr::str_detect(.data$hyp, "H0"))
+
+  ggplot(IC, aes(x = .data$grid_size.nm, y = .data$freq)) +
     geom_bar(stat ="identity", position = "dodge") +
     scale_x_continuous(
       breaks = as.numeric(names(sec_vc)),
       trans = "log2",
       labels = scales::label_number(accuracy = 0.1),
-      sec.axis = dup_axis(
+      sec.axis = ggplot2::dup_axis(
         name = expression(bar(N)~"("^13*C*" count)"),
         labels = unname(sec_vc)
         )
@@ -33,6 +34,6 @@ hyp_class <- function(IC, sec_vc, ttl) {
       x = expression("grid-cell ("*mu*m^2*")"),
       y = expression("frequency H"[0])
       ) +
-    theme_classic() +
+    ggplot2::theme_classic() +
     themes_IC
 }

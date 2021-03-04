@@ -2,7 +2,7 @@
 output: 
   github_document:
     pandoc_args: --webtex=http://chart.apis.google.com/chart?cht=tx&chl=
-bibliography: dependencies.bib   
+bibliography: biblio.bib   
 ---
 
 <!--  use the --webtex argument in the YAML to render equations -->
@@ -41,14 +41,11 @@ Knit the paper
 rmarkdown::render_site(input = "paper/preprint", encoding = 'UTF-8')
 ```
 
-```{r pkgs echo=FALSE, message=FALSE, eval=FALSE}
+Alternatively use the function `pointapply::render_paper()` and specify the directory to save the paper.
 
-
+``` r
+# Knit
+pointapply::render_paper(title = "the_paper", output_dir = "mydir")
 ```
-
-
-## Credits
-
-The construction of the R [@rversion] package *point* and associated documentation was aided by the packages; *devtools* [@devtools], *roxygen2* [@roxygen2], *testthat* [@testthat], *knitr* [@knitr1 ; @knitr2], *rmarkdown* [@rmarkdown1; @rmarkdown2], and the superb guidance in the book: *R packages: organize, test, document, and share your code*, by @Wickham2015. In addition, this package relies on a set of external packages from the tidyverse universe, including: *dplyr* [@dplyr], *tidyr* [@tidyr], *tibble* [@tibble], *stringr* [@stringr], *readr* [@readr], *magrittr* [@magrittr], *ggplot2* [@ggplot2], *rlang* [@rlang], and *purrr* [@purrr] for internal functioning as well as specialised statistics; *polyaAeppli* [@polyaAeppli].
 
 
