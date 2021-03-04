@@ -1,0 +1,20 @@
+# secrets and environments
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.httr-oauth
+.Renviron
+
+# is anyway not kept in repo
+.Rinstignore
+
+# data which is uploaded to zenodo
+inst/extdata
+inst/paper/preprint/data
+data-raw/zenodo.R
+
+# files belonging to paper processing with custom render function
+inst/paper/preprint/*.log
+inst/paper/preprint/templates
+inst/paper/preprint/figures
