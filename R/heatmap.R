@@ -38,26 +38,26 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
   rcts <- rect_fun(xaxis = pull(simu, {{x}}), yaxis = pull(simu, {{y}}))
 
   # transformation of secondary axis
-  if (!is.null(x_sec)){
+  if (!is.null(x_sec)) {
     tr <- rayleigh_trans(trans_base, trans_n)
     second_axis <- ggplot2::sec_axis(
       trans = ~tr$transform(.) * -1 ,
       name = x_sec,
       breaks = scales::pretty_breaks(3)
       )
-  } else {
-    second_axis <- ggplot2::waiver()
-    }
+    } else {
+      second_axis <- ggplot2::waiver()
+      }
 
   # plot
-  p <- ggplot(simu, aes(x = {{x}}, y = {{y}}, fill = {{stat}})) +
+  p <- ggplot(simu, aes(x = {{ x }}, y = {{ y }}, fill = {{ stat }})) +
     geom_tile()
 
   # facets
   if (!all(purrr::map_lgl(list(grp1, grp2), ~is.null(rlang::get_expr(.x))))) {
     p <- p + facet_grid(
-      rows = vars(!!grp1),
-      cols = vars(!!grp2),
+      rows = vars(!! grp1),
+      cols = vars(!! grp2),
       labeller = ggplot2::label_parsed
       )
     }
@@ -77,7 +77,13 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
     ggplot2::coord_fixed(ratio = rcts$r_cell[1]) +
     ggplot2::geom_rect(
       data = rcts,
-      aes(xmin = .data$xl, xmax = .data$xu, ymin = .data$yl, ymax = .data$yu, color = .data$col_type),
+      aes(
+        xmin = .data$xl,
+        xmax = .data$xu,
+        ymin = .data$yl,
+        ymax = .data$yu,
+        color = .data$col_type
+        ),
       fill = "transparent",
       inherit.aes = FALSE
       ) +
@@ -93,8 +99,7 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
       nudge_y = 25
       ) +
     labs(title = ttl, x = x_lab, y = y_lab) +
-    ggplot2::theme_bw() +
-    themes_IC
+    themes_IC(base = ggplot2::theme_bw())
 }
 #' @rdname heat_map
 #'
@@ -128,11 +133,11 @@ heat_sum <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
   ggplot(
     simu,
     aes(
-      x = {{x}},
-      y = {{y}},
-      fill = {{stat}},
-      linetype = {{stat}},
-      group = {{stat}}
+      x = {{ x }},
+      y = {{ y }},
+      fill = {{ stat }},
+      linetype = { {stat }},
+      group = {{ stat }}
       )
     ) +
   ggplot2::geom_rect(
@@ -182,11 +187,10 @@ heat_sum <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
     space = "free_x"
     ) +
   labs(title = ttl, x = x_lab, y = y_lab) +
-  ggplot2::theme_bw() +
-  themes_IC +
+  themes_IC(base = ggplot2::theme_bw()) +
   ggplot2::theme(
-    legend.position = "right",
-    legend.key = ggplot2::element_blank(),
+  #   legend.position = "right",
+  #   legend.key = ggplot2::element_blank(),
     strip.placement = 'outside',
     strip.background.x = ggplot2::element_blank(),
     strip.background.y = ggplot2::element_blank(),

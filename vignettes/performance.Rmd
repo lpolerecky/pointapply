@@ -40,7 +40,7 @@ This vignette of the`pointapply` package showcases how the Figures 4--6 were cre
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- FALSE
+on_build <- TRUE
 ```  
 
 
@@ -73,7 +73,6 @@ simu_CD_eval_intra <- dplyr::distinct(simu_CD_eval_intra, M_R_Xt.sm,
 simu_inter <- load_point("simu", paste0("eval_inter_", 1:10), NULL, 
                          return_name = TRUE, on_build)
 ```
-
 
 
 # Evaluate model performance
@@ -113,19 +112,19 @@ In addition, the sensitivity range for ionization efficiency trend is converted 
 
 ```{r}
 # statistics on the single common isotope
-tb_Xt <- point::stat_Xt(
+tb_X <- point::stat_X(
   simu_sens_IC_intra, 
   trend.nm, 
   .N = N.sm, 
-  .Xt = Xt.sm, 
+  .X = Xt.sm, 
   .stat = c("RS", "hat_RS")
   ) %>% 
   filter(species.nm == "12C")
 
 # named vector
 vc_RS <- rlang::set_names(
-  tb_Xt$trend.nm,  
-  nm = sprintf("%.0f", tb_Xt$RS_Xt.sm -tb_Xt$hat_RS_Xt.sm)
+  tb_X$trend.nm,  
+  nm = sprintf("%.0f", tb_X$RS_Xt.sm - tb_X$hat_RS_N.sm)
   )
 ```
 
@@ -163,11 +162,12 @@ heat_map(
   x_lab = expression(
     "isotope variation in substrate ("* Delta[B - A] *" \u2030 )"
     ),
-  y_lab = "ionization efficiency trend (%)"
+  y_lab = "excess ionization (%)"
   )
 
 # save 
-save_point(last_plot(), "heat_sens_intra", width = 16, height = 14, unit = "cm", on_build = TRUE)
+save_point("heat_sens_intra", ggplot2::last_plot(), width = 16, height = 14, 
+           unit = "cm", on_build)
 ```
 
 
@@ -226,7 +226,8 @@ hline <- heat_sum(
   )
 
 # save and print
-save_point(hline, "line_sens_intra", width = 10, height = 10, unit = "cm", on_build = TRUE)
+save_point("line_sens_intra", hline, width = 10, height = 10, unit = "cm", 
+           on_build)
 ```
 
 
@@ -276,14 +277,15 @@ hmap2 <- heat_map(
   x_lab = expression(
     "isotope variation in substrate ("* Delta[B - A] *" \u2030 )"
     ),
-  y_lab = "ionization efficiency trend (%)",
+  y_lab = "excess ionization (%)",
   x_sec = expression(
     "fractional size of anomalous analyses (" * Delta[B - A] == -2 ~ "\u2030)"
     )
   )
 
 # save and print
-save_point(hmap2, "heat_sens_inter", width = 16, height = 14, unit = "cm", on_build = TRUE)
+save_point("heat_sens_inter", hmap2, width = 8, height = 7, unit = "cm", 
+           on_build)
 ```
 
 

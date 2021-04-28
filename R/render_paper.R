@@ -16,10 +16,12 @@
 #' the argument \code{copy_figures} the call returns figures in png format
 #' within its own directory (figures).
 #' @export
-render_paper <- function(title = "Schobbenetal_SIMS_method",
-                         output_dir = "/home/amandus/Documents/work/manuscripts/Schobbenetal_SIMS_method",
-                         copy_figures = TRUE,
-                         on_build = TRUE){
+render_paper <- function(
+  title = "Schobbenetal_SIMS_method",
+  output_dir = file.path("/home/amandus/Documents/work/manuscripts/Schobbenetal_SIMS_method"),
+  copy_figures = TRUE,
+  on_build = TRUE
+  ){
   # download data when needed
   if (!on_build) download_point()
 
@@ -29,17 +31,28 @@ render_paper <- function(title = "Schobbenetal_SIMS_method",
     IC <- usethis::proj_path("inst/extdata/data")
     templ <- usethis::proj_path("inst/paper/templates")
     figs <- usethis::proj_path("inst/paper/figures")
+    vig <- usethis::proj_path("vignettes/figures")
     } else {
       path <- fs::path_package("pointapply", "paper")
       IC <- fs::path_package("pointapply", "data")
       templ <- fs::path_package("pointapply", "paper/templates")
-      figs<- fs::path_package("pointapply", "paper/figures")
+      figs <- fs::path_package("pointapply", "paper/figures")
+      vig <- fs::path_package("pointapply", "vignettes/figures")
       }
 
+  # copy figures from vignettes
+  fs::dir_copy(vig, figs, overwrite = TRUE)
+
   # make links
-  if (!fs::file_exists(paste0(path, "/preprint/data"))) file.symlink(IC, paste0(path, "/preprint/data")) # data
-  if (!fs::file_exists(paste0(path, "/preprint/templates"))) file.symlink(templ, paste0(path, "/preprint/templates")) # templates
-  if (!fs::file_exists(paste0(path, "/preprint/figures"))) file.symlink(figs, paste0(path, "/preprint/figures")) # figures
+  if (!fs::file_exists(fs::path(path, "/preprint/data"))) {
+    file.symlink(IC, file.path(path, "/preprint/data")) # data
+  }
+  if (!fs::file_exists(fs::path(path, "/preprint/templates"))) {
+    file.symlink(templ, file.path(path, "/preprint/templates")) # templates
+  }
+  if (!fs::file_exists(fs::path(path, "/preprint/figures"))) {
+    file.symlink(figs, file.path(path, "/preprint/figures")) # figures
+  }
 
   # make bookdown_yml
   cat(
@@ -48,11 +61,11 @@ render_paper <- function(title = "Schobbenetal_SIMS_method",
     "rmd_files: [\"index.Rmd\", \"main.Rmd\", \"SI.Rmd\",  \"references.Rmd\"]",
     paste0("output_dir: ", output_dir) ,
     # "clean: [\"\"]",
-    file = paste(path, "preprint", "_bookdown.yml", sep = "/"),
+    file = fs::path(path, "preprint", "_bookdown.yml"),
     sep = "\n"
     )
   # render paper
-  rmarkdown::render_site(input = paste0(path, "/preprint"), encoding = 'UTF-8')
+  rmarkdown::render_site(input = fs::path(path, "/preprint"), encoding = 'UTF-8')
   # copy figures
-  fs::dir_copy(figs, paste(output_dir, "figures", sep = "/"), overwrite = TRUE)
+  fs::dir_copy(figs, fs::path(output_dir, "figures"), overwrite = TRUE)
 }

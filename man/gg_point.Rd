@@ -12,9 +12,11 @@ gg_point(
   thr,
   ion1_R,
   ion2_R,
-  Xt = Xt.pr,
-  N = N.rw,
-  colors = c("#FFEDA0", "#FEB24C")
+  colors = c("#FFEDA0", "#FEB24C"),
+  .X = Xt.pr,
+  .N = N.pr,
+  .species = species.nm,
+  .t = t.nm
 )
 }
 \arguments{
@@ -34,12 +36,12 @@ the map.}
 
 \item{ion2_R}{A character string constituting the common isotope ("12C").}
 
+\item{colors}{Color palette to identify matrix and inclusion (default =
+\code{ c("#FFEDA0", "#FEB24C")}).}
+
 \item{Xt}{Variable for ion count rates (default = Xt.pr).}
 
 \item{N}{Variable for ion counts (default = N.rw).}
-
-\item{colors}{Color palette to identify matrix and inclusion (default =
-\code{ c("#FFEDA0", "#FEB24C")}).}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.

@@ -30,7 +30,7 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE}
-on_build <- FALSE
+on_build <- TRUE
 ```  
 
 
@@ -66,15 +66,19 @@ The combination of measuring under high ionisation efficiencies and the usage of
 
 ```{r QSA}
 # bind dataframes
-tb <- bind_rows(map_sum_grid_64_MEX$depth, map_sum_grid_64_MON$depth)
+tb <- dplyr::bind_rows(map_sum_grid_64_MEX$depth, map_sum_grid_64_MON$depth)
 # QSA test
-test_QSA_64_all <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm, grid.nm, .nest = grid.nm)
+test_QSA_64_all <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm, 
+                                   grid.nm, .nest = grid.nm)
 # make mlm model line
-test_QSA_64_all <- mutate(test_QSA_64_all, hat_R = alpha_grid.nm + beta_grid.nm * Xt.pr.12C)
+test_QSA_64_all <- dplyr::mutate(
+  test_QSA_64_all, 
+  hat_R = alpha_grid.nm + beta_grid.nm * Xt.pr.12C
+  )
 ```
 
 
-The function `twodens` provided in this package is used to visualise the high denisty data.
+The function `gg_dens` provided in this package is used to visualise the high density data.
 
 
 ```{r}
@@ -85,7 +89,7 @@ xlab <- substitute(
   )
 
 # plot
-QSA_dens <- twodens(
+QSA_dens <- gg_dens(
   test_QSA_64_all, 
   Xt.pr.12C,
   R_Xt.pr, 
@@ -99,13 +103,14 @@ QSA_dens <- twodens(
   )
 
 # add lm line
-QSA_dens + geom_line(aes(y = hat_R)) 
+QSA_dens + ggplot2::geom_line(ggplot2::aes(y = hat_R)) 
 
 # save data
-write_point("test_QSA_64_all", on_build )
+write_point("test_QSA_64_all", on_build)
  
 # save plot  
-save_point("point_QSA", last_plot(), width = 12, height = 6, unit = "cm", on_build)
+save_point("point_QSA", ggplot2::last_plot(), width = 12, height = 8, 
+           unit = "cm", on_build)
 ```
 
 
@@ -123,12 +128,12 @@ First we will calculate some standard predictive and descriptive statistics for 
 
 ```{r statXt}
 # single ion statistics
-stat_Xt_64_all <- purrr::map_dfr(
+stat_X_64_all <- purrr::map_dfr(
   purrr::flatten(list(map_sum_grid_64_MEX, map_sum_grid_64_MON)),
-  ~stat_Xt(.x, file.nm, sample.nm, dim_name.nm, grid.nm)
+  ~stat_X(.x, file.nm, sample.nm, dim_name.nm, grid.nm)
   )
-write_point("stat_Xt_64_all", on_build)
-head(stat_Xt_64_all)
+write_point("stat_X_64_all", on_build)
+head(stat_X_64_all)
 ```
 
 
@@ -168,6 +173,8 @@ simu_CD_eval_intra <- simu_CD_eval_intra %>%
             labels = c("low", "medium", "high") 
             ) 
         )
+# down-sample
+simu_CD_eval_intra <- slice_sample(simu_CD_eval_intra, prop = 0.01)
 ```
   
   
@@ -194,12 +201,11 @@ ggplot(simu_CD_eval_intra, aes(x = chi2_R_Xt.sm, y = F_vl, color = force.nm)) +
     breaks = scales::pretty_breaks(4),
     ) +
   ggtitle("Precision vs. accuracy") +
-  ggplot2::theme_bw() +
-  themes_IC +
-  ggplot2::theme(legend.position = "bottom") 
+  themes_IC(base = ggplot2::theme_bw()) 
 
 # save 
-save_point(last_plot(), "simu_precision", width = 14, height = 14, unit = "cm", on_build)
+save_point("simu_precision", ggplot2::last_plot(), width = 14, height = 14, 
+           unit = "cm", on_build)
 ```
 
 

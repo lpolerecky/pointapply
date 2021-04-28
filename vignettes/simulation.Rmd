@@ -35,16 +35,83 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- FALSE
+on_build <- TRUE
 ```  
 
 
-The performance of the intra- and inter-isotope tests, bundled in the R package `point`, are tested with the simulated (or synthetic) data.
+The performance of the intra- and inter-isotope tests, bundled in this package, are tested with the simulated (or synthetic) data.
 
 
 # Simulate intra-isotope variability data
 
-The first simulation is designed to assess the sensitivity of the intra-isotope variability test for two continuous variables; 1) ionization efficiency and, 2) the isotope offset between two components. The ionization efficiency is a systematic fluctuation in the emitted secondary ions, that should normally be mirrored in strength among both isotopes of the same element [@Fitzsimons2000a]. This effect might have a bearing on the intra-isotope variability test, as it is a regression-based method. The isotope offset encompasses two end-member components that cause intra-isotope variability in the analysis, and this is one of the foremost targets in this study. Hence, a range of 22.0‰ is chosen to mimic the divergent isotope composition of carbonate and organic carbon inclusion hosted in a predominant carbonate matrix as a realistic scenario for a SIMS isotope analyses. Whereas, the range in ionization efficiency is varied from 0 to 120%.
+The first simulation is designed to assess the sensitivity of the intra-isotope variability test for two continuous variables; 1) ionization efficiency and, 2) the isotope offset between two components. The ionization efficiency is a systematic fluctuation in the emitted secondary ions, that should normally be mirrored in strength among both isotopes of the same element [@Fitzsimons2000a]. The ionization effect will have a bearing on the intra-isotope variability test, as it is a regression-based method, where variance of the independent variable yields more precise estimation of the coefficients in the linear model.
+
+```{r estimates}
+
+# stable ionization efficiency
+stable_ion <- point::simu_R(0, "ideal", "13C", "12C", "VPDB", 1) %>% 
+  mutate(type.nm = "stable ionization efficiency")
+# fluctuating ionization efficiency
+fluc_ion <- point::simu_R(20, "ideal", "13C", "12C", "VPDB", 1)  %>% 
+  mutate(type.nm = "fluctuating ionization efficiency")
+
+ion_eff <- bind_rows(stable_ion, fluc_ion)
+
+tb_X <- stat_X(ion_eff, type.nm, .X = Xt.sm, .N = N.sm, .stat = c("M", "S", "hat_S"))
+
+gg_dens(
+  point::cov_R(ion_eff, c("12C", "13C"), type.nm), 
+  x = Xt.sm.12C, 
+  y = Xt.sm.13C, 
+  xlab = expression(X^a~"(count sec"^"-"*")"), 
+  ylab = expression(X^b~"(count sec"^"-"*")"), 
+  ttl = "Excess ionization",
+  y_lim = c(240, 450),
+  gr = type.nm, 
+  facet_sc = "free"
+  ) +
+  ggplot2::geom_smooth(
+    method = "lm", 
+    formula = y ~ x - 1, 
+    color = "black", 
+    se = FALSE, 
+    linetype = 2
+    ) +
+  ggplot2::geom_errorbarh(
+    data = filter(tb_X, species.nm == "12C"), 
+    aes(xmin = M_Xt.sm - S_Xt.sm, xmax = M_Xt.sm + S_Xt.sm, y = 250),
+    height = 10, 
+    inherit.aes = FALSE
+    ) +
+  ggplot2::geom_errorbarh(
+    data = filter(tb_X, species.nm == "12C"), 
+    aes(xmin = M_Xt.sm - hat_S_N.sm, xmax = M_Xt.sm + hat_S_N.sm, y = 265),
+    height = 10, 
+    inherit.aes = FALSE
+    ) +
+  ggrepel::geom_text_repel(
+    data = filter(tb_X, species.nm == "12C"), 
+    aes(x = M_Xt.sm - S_Xt.sm, y = 250, label = "true"),
+    nudge_x = -10,
+    size = 3
+    ) +
+  ggrepel::geom_text_repel(
+    data = filter(tb_X, species.nm == "12C"), 
+    aes(x = M_Xt.sm - hat_S_N.sm, y = 265, label = "predicted"),
+    nudge_x = -10,
+    size = 3
+    )
+
+# save and print
+save_point("ionization_concept", last_plot(), width = 14, height = 10, 
+           unit = "cm", on_build)
+```
+
+```{r echo=FALSE, eval=TRUE, fig.cap="Conceptual sketches for ionization efficiency.", out.width="70%"}
+knitr::include_graphics("figures/ionization_concept.png")   
+```
+
+The isotope offset encompasses two end-member components that cause intra-isotope variability in the analysis, and this is one of the foremost targets in this study. Hence, a range of 22.0‰ is chosen to mimic the divergent isotope composition of carbonate and organic carbon inclusion hosted in a predominant carbonate matrix as a realistic scenario for a SIMS isotope analyses. Whereas, the range in ionization efficiency is varied from 0 to 120%.
 
 
 ## Parameters
@@ -128,9 +195,9 @@ ggplot(tb_cp, aes(x = Xt2, y = Xt1, group = name, color = "simulated Ri")) +
     values = colors, 
     labels = c(expression(bar(R)), expression(R[i]))
     ) +
-  ggplot2::theme(legend.direction =  "vertical") +
   ggtitle("Scenarios for intra-isotope variability") +
-  ggplot2::theme_bw()
+  themes_IC(base = ggplot2::theme_bw())
+
 
 # save and print
 save_point("simu_intra_concept", last_plot(), width = 14, height = 5.5, unit = "cm", on_build)
@@ -138,7 +205,7 @@ save_point("simu_intra_concept", last_plot(), width = 14, height = 5.5, unit = "
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Conceptual sketches for intra-R variation.", out.width="70%"}
- knitr::include_graphics("figures/simu_intra_concept.png")   
+knitr::include_graphics("figures/simu_intra_concept.png")   
 ```
 
 

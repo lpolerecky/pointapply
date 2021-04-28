@@ -2,14 +2,20 @@
 
 High-accuracy isotope analyses are a cornerstone of Earth and biological sciences, which can be used to trace chemical reactions in living systems, phase transitions and mineral formation. In turn, this fundament of science builds on our ability to construct a framework of analytes with known values, so-called Reference Materials (RMs), ensuring consistency in the accuracy between experiments and observations at different points in time and under varying laboratory settings [@Verkouteren2004]. A lack of RMs, and uncertainties in RM value assignment, are a bottleneck for new techniques exploring the limits of isotope analysis, such as Secondary Ion Mass Spectrometry (SIMS). The superior spatial resolution of SIMS has many potential applications, and especially commercial large geometry machines (e.g. Cameca^TM^ 1270 and 1280)  and the nanoSIMS [@Slodzian1992], which allow high-precision isotope analyses on light elements, have stimulated many implementations in the field of geology [e.g. @Rollion-Bard2007; @Fike2008; @Kozdon2009a; @Wacey2011; @Kilburn2015a; @Wei2015; @Lin2016]. But successful application of SIMS in geological applications heavily relies on the RM, requiring a whole new suite of mineral-based RMs validated at the nano- to micro-scale for the targeted isotope system [@Jochum2008]. For example, a certified RM for the carbon isotope composition of carbonate minerals at the nano- to micro-scale does not exist at the point of writing this work.
 
-Unfortunately, much is still unknown about the spatial scales at which isotopic variations manifest themselves in natural (but also artificial) substrates. Surveys suggest that many mineral-based RMs exhibit variations in isotopic composition at specific spatial dimensions [@Verkouteren2004; @Jochum2008]. On top of that, the SIMS technique, as opposed to e.g. conventional Gasbench-isotope ratio mass spectrometry (IRMS), is indiscriminate towards impurities in the analyte. In the case of producing a carbonate-based RM, this means that not only ^13^C/^12^C variations within the crystal lattice, or between carbonate minerals, are a cause of concern, but also matrix impurities, such as organic carbon, with generally relatively ^12^C-enriched signatures compared to the host carbonate, and therefore the composite SIMS-based ^13^C/^12^C analysis ($n$-series of measurements) could give a biased view (intra-isotope variation; Fig. \@ref(fig:sketch)). Whereas, acid-digestion during the Gasbench-IRMS procedure minimises such mixing effects of carbonate-hosted organic carbon [however, see @Oehlerich2013]. The assigned (averaged) value and uncertainty of an RM is based on a set (or $m$-series) of analysis (Table \@ref(tab:nomenclature)), where inter-isotope variation in the set of analyses (Fig. \@ref(fig:sketch)) can skew both the averaged value and uncertainty, if the underlying data structure does not approach a Gaussian distribution. In turn, this inter-isotope variance might be again the product of unobserved intra-isotope variability.
+Unfortunately, much is still unknown about the spatial scales at which isotopic variations manifest themselves in minerals. Surveys suggest that many mineral-based RMs exhibit variations in isotopic composition at specific spatial dimensions [@Verkouteren2004; @Jochum2008]. On top of that, the SIMS technique, as opposed to e.g. conventional gas-sourced isotope ratio mass spectrometry (IRMS) on carbonate (by means of acid digestion; e.g., gasbench or Kiel Carbonate Device), is indiscriminate towards impurities in the analyte. In the case of producing a carbonate-based RM, this means that not only ^13^C/^12^C variations within the crystal lattice, or between carbonate minerals, are a cause of concern, but also matrix impurities, such as organic carbon, with generally relatively ^13^C-depleted signatures compared to the host carbonate, and therefore the composite SIMS-based ^13^C/^12^C analysis ($n$-series of measurements) could give a biased view (intra-isotope variation; Fig. \@ref(fig:sketch)). Whereas, acid-digestion during the Gasbench-IRMS procedure minimises such mixing effects of carbonate-hosted organic carbon [however, see @Oehlerich2013]. The assigned (averaged) value and uncertainty of an RM is based on a set (or $m$-series) of analysis (Table \@ref(tab:nomenclature)), where inter-isotope variation in the set of analyses (Fig. \@ref(fig:sketch)) can skew both the averaged value and uncertainty, if the underlying data structure does not approach a Gaussian distribution. In turn, this inter-isotope variance might be again the product of unobserved intra-isotope variability.
+
+
+```{r sketch, out.width="75%", fig.cap="Conceptual model of isotopic heterogeneity in the analyte substrate can lead to intra- and inter-isotope variability when unobscured (visible on surface) and obscured from view (inclusion at depth)."}
+knitr::include_graphics(here::here("figures/intra_vs_inter_sec_ions.png"))
+```
+
 
 There are many other potential biases associated with SIMS isotope analyses, besides material heterogeneity, which can roughly be divided in artefacts related to secondary ion production, transmission and detection. Two important processes occur during the secondary ion production by the analyte bombardment with primary ions; a random bias where quantum mechanics dictates the chance of an atom being ejected as an ion [@Schroeer1973; @Shimizu1982], and a kinetic effect causing fractionation among isotopes of the same element and thus representing a systematic bias [@Slodzian1980; @Shimizu1982; @Eiler1997a]. During transmission of the secondary ion through the vacuum of the machine a multitude of systematic biasses can occur relating to ion interferences, the optics for beam alignment, and interference by e.g. parasitic magnetic fields (caused by e.g. the ion pumps) in the mass spectrometer [@Shimizu1982; @Schuhmacher2004; @Hervig2006]. Finally, the detection of incident secondary ions with the counting device can cause a systematic bias [@Rudat1979; @Schuhmacher2004; @Slodzian2004]. Analytical corrections can be made for some of these systematic biases, such as the distinct time-interval of electronic paralysis (or "deadtime") of ion detection devices known as electron multipliers (EM) [@Fitzsimons2000a; @Kilburn2015a]. 
 
 The fundamental imprecision in secondary ion generation is accommodated by increasing the number of observations (increasing the $n$-series of measurements), thus optimizing the precision of an analysis [@Fitzsimons2000a; @Kilburn2015a]. The remainder of previous cited systematic biases at the source and during transmission, typically exhibited as variations on a daily basis, and among different laboratories, are collectively known as the Instrumental Mass Fractionation (IMF) [@Shimizu1982; @Eiler1997a]. These biases, furthermore, show a strong correlation with the material being analysed (matrix effect) [@Slodzian1980; @Eiler1997a], and are therefore routinely corrected by normalization with a matrix-matched RM measured along with the target material [@Fitzsimons2000a; @Kilburn2015a]. Enhancing again the notion that RM development, and thus the evaluation of material heterogeneity, is at the core of SIMS method development. Hence, we aim at developing new methods to assess the accuracy of SIMS analyses by tackling the fundamental uncertainty of material heterogeneity, and evaluate whether diagnostic signatures of isotope variability can be extracted from ion count data.
 
 
-```{r nomenclature}
+```{r nomenclature, eval=FALSE}
 # table of nomenclature
 nomclat <- tibble::tibble(
   name = c("$N$", "$X$","$R$", "sample", "analyte",  
@@ -36,17 +42,29 @@ kableExtra::kable(
 ```
 
 
-Existing techniques to detect variability in isotope composition in SIMS-generated ion count data involve a univariate approach to detect anomalous $R$ at the scale of measurements and analyses (Cameca^TM^ Software) (Table \@ref(tab:nomenclature)). These techniques consist of a threshold value validation, based on a measure of dispersion, generally a band of two times the standard deviation around the mean. But due to the generally high variation among measurements in a $n$-series of measurements, this technique is perhaps not particularly specific under all conditions, and thus conspicuous values might be part of the inherent random variation related to the ionization process. Hence, we propose an alternative bivariate technique that could resolve these limitations (Fig. \@ref(fig:sketch)). In extension, we use inference statistic to make statements about the probability whether the secondary ions are the product of a homogeneous analyte in the case of single analysis and a complete study (Table \@ref(tab:nomenclature)).
-
-
-```{r sketch, out.width="75%", fig.cap="Conceptual model of isotopic heterogeneity in the analyte substrate can lead to intra- and inter-isotope variability when unobscured (visible on surface) and obscured from view (inclusion at depth)."}
-knitr::include_graphics(here::here("figures/intra_vs_inter_sec_ions.png"))
-```
+Existing techniques to detect variability in isotope composition in SIMS-generated ion count data involve a univariate approach to detect anomalous $R$ at the scale of measurements and analyses (Cameca^TM^ Software) (Table \@ref(tab:nomenclature)). These techniques consist of a threshold value validation, based on a measure of dispersion, generally a band of two times the standard deviation around the mean. But due to the generally high variation among measurements in a $n$-series of measurements, this technique is perhaps not particularly specific under all conditions, and thus conspicuous values might be part of the inherent random variation related to the aforementioned ionization process. Hence, we propose an alternative bivariate regression based technique that could resolve these limitations (Fig. \@ref(fig:sketch)). In extension, we use inference statistic to make statements about the probability whether the secondary ions are likely to be the product of a homogeneous analyte in the case of single analyses and complete studies (Table \@ref(tab:nomenclature)).
 
 
 # Theory {#sec:theory}
 
-Under ideal circumstances (without sample heterogeneity and under optimal instrumental conditions), variation in a SIMS isotope ratio is only a consequence of the random nature of the emission of secondary ions. The latter is a consequence of similar ionization potentials for isotopes of the the same element, and this results in a positive and proportional relationship among count rates for isotope species. Hence the paired count rate measurements in one analysis of isotope species $a$ holds auxiliary information which is correlated with isotope species $b$. This enables so-called ratio estimation of matched pairs of variables, where the ratio estimate can be used to predict the count rates of $X_b$ through a linear combination with the observed count rate of $X_a$. 
+Under ideal circumstances (in the absence of analyte heterogeneity and under optimal instrumental conditions), variation in SIMS isotope ratios are only a consequence of the random nature of the emission of secondary ions. The latter is a consequence of similar ionization potentials for isotopes of the the same element, and this results in a positive and proportional relationship among count rates for isotope species [@Fitzsimons2000a]. Hence the paired count rate measurements in one analysis of isotope species $a$ holds auxiliary information which is correlated with isotope species $b$. This information can be illustrated as a scatterplot and by fitting a linear model (Fig. \@ref(fig:ionization)). Note, that these ideal linear “homogeneous” models represent an analyte of the same isotopic composition in both panels. The difference in the density of the data points is the result of differences in the ionization efficiency throughout an analytical run.
+
+
+```{r ionization, fig.cap="Synthetic dataset of SIMS isotope count rates for an analtyical run with stable ionization and fluctuating ionization. Derivation of the model coefficient follows below"}
+knitr::include_graphics(here::here("figures/ionization_concept.png"))
+```
+
+Fluctuations in ionization efficiency in an $n$-series of measurements can be parameterized as the difference between the relative standard deviation of the common isotope $\epsilon_{X^{a}}$ ("true" in Fig. \@ref(fig:ionization)) and the theoretical relative standard deviation $\hat{\epsilon}_{N^{a}}$ ("predicted" in Fig. \@ref(fig:ionization)). This "excess ionization":
+
+\begin{equation}
+\text{excess ionization} = \epsilon_{X^{a}} - \hat{\epsilon}_{N^{a}} \text{,}  (\#eq:excess)
+\end{equation}
+
+is an important property of the methods for detecting isotopic heterogeneity as introduced in this work. The theoretical standard deviation of equation \@ref(eq:excess) is based on Poisson statistics [Supplementary Section \@ref(sec:precision); @Fitzsimons2000a for derivations].
+
+Returning to our example (Fig. \@ref(fig:sketch)), 
+
+Now we will turn to the matter of deriving coefficients for this ideal linear model for SIMS isotope count rates. The correlated auxiliarry information among isotope species enables so-called ratio estimation of matched pairs of variables, where the ratio estimate can be used to predict the count rates of $X_b$ through a linear combination with the observed count rate of $X_a$. 
 
 \begin{equation}
 E \left(X_i^b \mid X_i^a \right) = RX_i^a \qquad \text{if} \qquad R > 0 (\#eq:linR)
@@ -76,20 +94,22 @@ The error term ('residuals'; $e_i$) of this linear function are assumed to be no
  \hat{e}_i =  X_i^b - \hat{R}X_i^a  \qquad \text{with} \quad  \hat{\sigma}^2 = \frac{1}{n-1}\sum_{i=1}^{n} (X_i^b - \hat{R}X_i^a)^{2} \text{.} (\#eq:resR)
 \end{equation}
 
-Minimization of $\hat{\sigma}^2$ by the Ordinary Least Squares (OLS) method forms the basis for finding the optimal parameter set for the ordinary linear regression model [e.g. @Zuur2008; @Fox2018]. Furthermore, the unexplained portion of the model has the convenient property that it helps measure the goodness of the model fit on the observed count rates. It thus follows, that $\hat{e}_{i}$ yields information about $\hat{R} \sim R$, and that unusual values for $\hat{e}_{i}$ might indicate an isotopically heterogeneous source. The characteristic of $\hat{e}_{i}$ of the linear model fitted by the ratio method (also known as regression diagnostics or residual analysis) forms the basis for the here-introduced methods. 
+<!-- Minimization of $\hat{\sigma}^2$ by the Ordinary Least Squares (OLS) method forms the basis for finding the optimal parameter set for the ordinary linear regression model [e.g. @Zuur2008; @Fox2018]. Furthermore,  -->
+
+The unexplained portion of the model has the convenient property that it helps measure the goodness of the model fit on the observed count rates. It thus follows, that $\hat{e}_{i}$ yields information about $\hat{R} \sim R$, and that unusual values for $\hat{e}_{i}$ might indicate an isotopically heterogeneous source. The characteristic of $\hat{e}_{i}$ of the linear model fitted by the ratio method (also known as regression diagnostics or residual analysis) forms the basis for the here-introduced methods to detect isotopic heterogeneity. 
 
 
 # Methods
 
 ## Regression diagnostics {#sec:RegDia}
 
-Residual analyses diagnoses problems with a linear model by interrogation and transformation of the data. Hence these methods yield estimates about the datapoints that could have unduly influenced the coefficient $\hat{R}$ in Equation \@ref(eq:linmodR). Outliers detected in linear regression can therefore be described as an observation with a response variable (isotope species; $X_i^b$) that is conditionally unusual when regarding the independent variable (isotope species; $X_i^a$). This in contrast to the traditional univariate outliers identified by threshold cut-off $R_c$ values for $R_i$, usually the standard deviation about the ratio of means (Eq. \@ref(eq:estR), which is different from the standard deviation with errors propagated from single ion count rates [Supplementary Section \@ref(sec:precision), @Fitzsimons2000a]
+Residual analyses diagnoses problems with a linear model by interrogation and transformation of the data. Hence these methods yield estimates about the data points that could have unduly influenced the coefficient $\hat{R}$ in Equation \@ref(eq:linmodR). Outliers detected in linear regression can therefore be described as an observation with a response variable (isotope species; $X_i^b$) that is conditionally unusual when regarding the independent variable (isotope species; $X_i^a$). This in contrast to the traditional univariate outliers identified by threshold cut-off $R_c$ values for $R_i$, usually the standard deviation about the ratio of means (Eq. \@ref(eq:estR), which is different from the standard deviation with errors propagated from single ion count rates [Supplementary Section \@ref(sec:precision), @Fitzsimons2000a]
 
 \begin{equation}
 R_c =\sqrt{\frac{\sum_{i=1}^{n}  \left(  R_{i} - \bar{R} \right)^{2} } {n-1} } (\#eq:cameca)
 \end{equation}
 
-This method is, for instance, implemented in the Cameca^TM^ software, and is henceforward referred to as $\sigma_R$-rejection. The bivariate method is more complex as the mere identification of outlyingness of a datapoint in a linear model does not necessarily classify as an datapoint that could influence the coefficient $\hat{R}$. If, for example, an observation falls close to the mean of the independent variable, then these datapoints have minimal leverage on the coefficients. Leverage can be formulated as the distance from the mean of the independent value  which is proportional to weight the value ($h_i$) has on the response value [e.g. @Fox2018].
+This method is, for instance, implemented in the Cameca^TM^ software, and is henceforward referred to as $\sigma_R$-rejection. The bivariate method is more complex as the mere identification of outlyingness of a data point in a linear model does not necessarily classify as an data point that could influence the coefficient $\hat{R}$. If, for example, an observation falls close to the mean of the independent variable, then these data points have minimal leverage on the coefficients. Leverage can be formulated as the distance from the mean of the independent value  which is proportional to weight the value ($h_i$) has on the response value [e.g. @Fox2018].
 
 \begin{equation}
 h_{i} = \frac{1}{n} + \frac{(X_{i}^{a} - \bar{X}^{a})^{2}}{\sum_{j=1}^{n}(X_{j}^{a} - \bar{X}^{a})^{2}} (\#eq:lev)
@@ -256,7 +276,7 @@ knitr::include_graphics(here::here("figures/heat_sens_inter.png"))
 
 ## Application to natural substrates
 
-The natural substrates used to test the methods represent widely diverging end-members of carbonate minerals as found at Earth's surface, and, perhaps, expectedly encompass different forms of ^13^C/^12^C variability, mineralogy and phases. Whereas the mineralogy is uniform over the analysed surface (e.g. `r point::R_labeller("12C", "40Ca-16O")` of Fig. \@ref(fig:MON)), a large $\delta^{13}$C gradient from values higher than `r permille(15, sign = TRUE)` to an average of `r permille(var_mean(diag_64_MON, "depth", 13:16, del), sign = TRUE)` (relative to $\bar{\bar{R}}$) marks the the width of the analysed area from left to right. Counts aggregated over the width of the array further show that 3 out of 4 grid-cells record a significant, to highly significant, F statistic, suggesting that the gradient is also detectable as intra-isotope variability. Inter-isotope variance is significant for counts aggregated over the height and depth, but variance is lowest and non-significant perpendicular to the $R$ gradient (Table \@ref(tab:MONtab)). This cross-validation highlights the power of the test statistics, as the combination of intra- and inter-isotope variability, superimposed on the ion map (Fig. \@ref(fig:MON)), provides two independent, but complementary test results, both supporting high $R$ variability. In addition, the range of variance (Table \@ref(tab:MONtab)) is higher than the internal precision (Section \@ref(sec:realdat) and Supplementary Section \@ref(sec:precision)), further supporting the inference of the existence of a real isotopic gradient in the analyte. 
+The natural substrates used to test the methods represent widely diverging end-members of carbonate minerals as found at Earth's surface, and, perhaps, expectedly encompass different forms of ^13^C/^12^C variability, mineralogy and phases. Whereas the mineralogy is uniform over the analysed surface (e.g. `r point::R_labeller("12C", "40Ca-16O")` of Fig. \@ref(fig:MON)), a large $\delta^{13}$C gradient from values higher than `r permille(15, sign = TRUE)` to an average of `r permille(11, sign = TRUE)` (relative to $\bar{\bar{R}}$) marks the the width of the analysed area from left to right. Counts aggregated over the width of the array further show that 3 out of 4 grid-cells record a significant, to highly significant, F statistic, suggesting that the gradient is also detectable as intra-isotope variability. Inter-isotope variance is significant for counts aggregated over the height and depth, but variance is lowest and non-significant perpendicular to the $R$ gradient (Table \@ref(tab:MONtab)). This cross-validation highlights the power of the test statistics, as the combination of intra- and inter-isotope variability, superimposed on the ion map (Fig. \@ref(fig:MON)), provides two independent, but complementary test results, both supporting high $R$ variability. In addition, the range of variance (Table \@ref(tab:MONtab)) is higher than the internal precision (Section \@ref(sec:realdat) and Supplementary Section \@ref(sec:precision)), further supporting the inference of the existence of a real isotopic gradient in the analyte. 
 
 
 ```{r MON, fig.cap=paste0("Ion map (", point::R_labeller("12C", "40Ca-16O"), ") projection and superimposed ", SI(10, c("micro", "metre")), " by ", SI(10, c("micro", "metre")), " grid of highest-precision ", point::R_labeller("13C", "12C"), " (colored text labels) aggregated over the width, height and depth of the crystalline calcite (MON). Combined intra- and inter-isotope variability is integrated as, respectively, significance stars and color of the $\\delta^{13}$C (", permille(NULL), " relative to $\\bar{\\bar{R}}$), where t-test statistics were used to allow the representation of single analyses (plane-specific $\\epsilon_{\\hat{\\bar{R}}}$ and LR test statistics in Table \\ref{tab:MONtab}). The array encompasses 400 frames over the depth dimension (Section \\ref{sec:realdat}).")}
@@ -269,43 +289,28 @@ knitr::include_graphics(here::here("figures/raster_MON_12C-40Ca16O.png"))
 
 ```{r MONtab}
 # conventional calculation of variance
-stat_R_ext_64_all <- point::stat_R(stat_Xt_64_all, "13C", "12C", file.nm, 
-                                   sample.nm, dim_name.nm, .N = Ntot_Xt.pr, 
-                                   .Xt = M_Xt.pr)
-
+stat_R_ext_64_all <- point::stat_R(map_sum_grid_64_all, "13C", "12C",  
+                                   sample.nm, dim_name.nm, grid.nm, 
+                                   .nest = grid.nm, .stat = c("M", "RS"),
+                                   .label = "latex")
 # table of stats MON
-diag_64_MON <-  dplyr::distinct(
-  diag_64_MON, 
-  dim_name.nm, M_R.grid.nm, RS_R_inter, p_inter
+tb_dia <- dplyr::left_join(
+  dplyr::filter(stat_R_ext_64_all, sample.nm == "MON"), 
+  diag_64_MON,
+  by = "dim_name.nm"
   ) %>% 
-  dplyr::left_join(
-    dplyr::filter(stat_R_ext_64_all, sample.nm == "MON"), 
-    by = "dim_name.nm"
-    ) %>% 
-  dplyr::transmute(
-    dim_name.nm = unique(dim_name.nm),
-    M_R.grid.nm = sprintf("%.4f",  M_R.grid.nm),
-    RS_R_inter = sprintf("%.1f", RS_R_inter),
-    p_inter = sig_coder(p_inter, make_lab = FALSE),
-    M = sprintf("%.4f", M_R_M_Xt.pr),
-    RS_R = sprintf("%.1f", RS_R_M_Xt.pr)
-    )
-# column names
-col_nm <- c(
-  "", 
-  pull(point::names_model[c(4, 7, 10), ], "latex"),
-  point::stat_labeller("R", "M", type ="external"), 
-  point::stat_labeller("R", "RS", type ="external") 
-  )
+  select(-c(sample.nm, ratio.nm)) %>% 
+  rename(` ` = "dim_name.nm") 
+
 # footnote
 ft <- paste0("See caption of Fig. ", "(ref:foot1)", " for the associated value 
              ranges of the significance stars")
 # print
 kableExtra::kbl(
-  diag_64_MON, 
-  col.names = col_nm, 
+  tb_dia, 
   booktabs = TRUE,  
   escape = FALSE, 
+  digits = c(0, 4, 1, 4, 1, 0, 2),
   caption = "Mixed effect model parameters and significance of the random 
   component, based on a likelihood ratio test wih the restricted model, and 
   supplemented with conventional descriptive statistics" 
@@ -327,25 +332,23 @@ knitr::include_graphics(here::here("figures/raster_MEX_12C-40Ca16O.png"))
 
 ```{r MEXtab}
 # table of stats MEX
-diag_64_MEX <- dplyr::distinct(diag_64_MEX, dim_name.nm, M_R.grid.nm, RS_R_inter, p_inter) %>% 
-  dplyr::left_join(dplyr::filter(stat_R_ext_64_all, sample.nm == "MEX"), by = "dim_name.nm") %>% 
-  dplyr::transmute(
-    dim_name.nm = unique(dim_name.nm),
-    M_R.grid.nm = sprintf("%.4f",  M_R.grid.nm),
-    RS_R_inter = sprintf("%.1f", RS_R_inter),
-    p_inter = sig_coder(p_inter, make_lab = FALSE),
-    M = sprintf("%.4f", M_R_M_Xt.pr),
-    RS_R = sprintf("%.1f", RS_R_M_Xt.pr)
-    )
+tb_dia <- dplyr::left_join(
+  dplyr::filter(stat_R_ext_64_all, sample.nm == "MEX"), 
+  diag_64_MEX,
+  by = "dim_name.nm"
+  ) %>% 
+  select(-c(sample.nm, ratio.nm)) %>% 
+  rename(` ` = "dim_name.nm") 
+
 # footnote
 ft <- paste0("See caption of Fig. ", "(ref:foot2)", " for the associated value 
              ranges of the significance stars")
 # print
 kableExtra::kbl(
-  diag_64_MEX, 
-  col.names = col_nm, 
+  tb_dia, 
   booktabs = TRUE,  
   escape = FALSE,
+  digits = c(0, 4, 1, 4, 1, 0, 2),
   caption = "Mixed effect model parameters and significance of the random 
   component, based on a likelihood ratio test wih the restricted model, and
   supplemented with conventional descriptive statistics"
@@ -368,7 +371,7 @@ Few studies have focused on the underlying data structure of SIMS ion count data
 
 Surprisingly, superficial mineralogical/textural variation, such as organic inclusions in the MEX analyte, do not have to correspond to higher variation in $R$ (^13^C/^12^C), at least, at the spatial scale of the SIMS analyses. Contrary, samples with a seemingly homogeneous composition (such as MON) can exhibit large variations in isotopic composition, where this observation corresponds to findings of earlier studies [e.g. @Eiler1997a]. In extension, the presented techniques, although intended for high precision isotope analysis, might even prove to be beneficial for the visualization of lateral scale variability, routinely employed during imaging studies [@Polerecky2012]. Although such applications would be limited to isotope ratios of the same element. 
 
-There are also some important limitations to the here-presented techniques. Fluctuations in the efficiency of secondary ion extraction, that do not impact the uncertainty of isotope ratios [Supplementary Section \@ref(sec:precision) and @Fitzsimons2000a], are, however, crucial to the validity of intra-isotope test (Fig. \@ref(fig:effect)). Nonetheless, this important limitation of the intra-isotope test does not seem to be of large significance, as fluctuations in ionization efficiency by charge build-up and sputter pit development seem hardly preventable in real world applications. This is also observable in the here-produced data where an approximation of the ionization, based on the common isotope (as $\epsilon_{X^{a}} - \hat{\epsilon}_{N^{a}}$) is `r sprintf(fmt =  "%.1f", mean(dplyr::pull(dplyr::mutate(dplyr::filter(stat_Xt_64_all, sample.nm == "MON"), ion = RS_Xt.pr - hat_RS_Xt.pr), ion)))`% for MEX and `r sprintf(fmt =  "%.1f", mean(dplyr::pull(dplyr::mutate(dplyr::filter(stat_Xt_64_all, sample.nm == "MEX"), ion = RS_Xt.pr - hat_RS_Xt.pr), ion)))`% for MON. Nonetheless, to minimize erroneous identification of $R$ variability, the R package *point* has a build-in warning for these conditions. If the analysis approaches near-to-stability of ionization efficiency, the program cautions the user about the limited reliability of the F statistic for the intra-isotope test. Moreover, the results underscore that there might even be a benefit in inducing deliberate systematic fluctuation in the ionization in order to optimize high-precision SIMS isotope analyses.
+There are also some important limitations to the here-presented techniques. Fluctuations in the efficiency of secondary ion extraction, that do not impact the uncertainty of isotope ratios [Supplementary Section \@ref(sec:precision) and @Fitzsimons2000a], are, however, crucial to the validity of intra-isotope test (Fig. \@ref(fig:effect)). Nonetheless, this important limitation of the intra-isotope test does not seem to be of large significance, as fluctuations in ionization efficiency by charge build-up and sputter pit development seem hardly preventable in real world applications. This is also observable in the here-produced data where an approximation of the ionization, based on the common isotope (as $\epsilon_{X^{a}} - \hat{\epsilon}_{N^{a}}$) is `r sprintf(fmt =  "%.1f", mean(dplyr::pull(dplyr::mutate(dplyr::filter(stat_X_64_all, sample.nm == "MON"), ion = RS_Xt.pr - hat_RS_N.pr), ion)))`% for MEX and `r sprintf(fmt =  "%.1f", mean(dplyr::pull(dplyr::mutate(dplyr::filter(stat_X_64_all, sample.nm == "MEX"), ion = RS_Xt.pr - hat_RS_N.pr), ion)))`% for MON. Nonetheless, to minimize erroneous identification of $R$ variability, the R package *point* has a build-in warning for these conditions. If the analysis approaches near-to-stability of ionization efficiency, the program cautions the user about the limited reliability of the F statistic for the intra-isotope test. Moreover, the results underscore that there might even be a benefit in inducing deliberate systematic fluctuation in the ionization in order to optimize high-precision SIMS isotope analyses.
 
 Besides validating the sensitivity, the study on real-world substrates suggest that simulated scenarios of intra-isotope variability (Section \@ref(sec:simulation)) are accurate representations of analytical conditions. Although the MEX sample does not provide a good test-case for the effectiveness of the intra- and inter-isotope tests, it did yield some insights into how an anomalous matrix (when compared to background conditions) can influence ion count data.  Ionization of organic inclusions within a predominant carbonate matrix, such as observed for MEX, plot in a distinct region of Figure \@ref(fig:MEXinc). Therefore, if an analysis contains a sufficiently large matrix- and isotopically anomalous component (i.e. high leverage and influential outliers), then this is likely to be detected by the intra-isotope test as introduced here. To conclude, detection of intra- and inter-isotope variability by the tools bundled in the easily accessible R package *point*, could provide information crucial to a fundamental understanding of micro-scale isotopic variations. This aspect is still largely shrouded by the technical challenges involved with the SIMS technique, and a lack of mineral-based RMs validated for isotopic homogeneity at these spatial resolutions.
 

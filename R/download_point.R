@@ -34,25 +34,26 @@ download_point <- function (type = "all") {
 
   # get the data
   if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
-    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4580159", path = path_ext)
-  }
+    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4580159",
+                                        path = path_ext)
+    }
 
   if (type == "all" | type == "raw") {
-  # extract matlab
-  ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
-  purrr::walk(
-    ls_mat,
-    ~unzip(.x, exdir = tools::file_path_sans_ext(.x), junkpaths = TRUE)
-    )
-  }
+    # extract matlab
+    ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
+    purrr::walk(
+      ls_mat,
+      ~unzip(.x, exdir = tools::file_path_sans_ext(.x), junkpaths = TRUE)
+      )
+    }
 
   if (type == "all" | type == "processed") {
-  # purge data
-  purrr::walk(list.files(path_int, full.names = TRUE), file.remove)
-  # extract data (.rda format)
-  ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
-  unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
-  }
+    # purge data
+    purrr::walk(list.files(path_int, full.names = TRUE), file.remove)
+    # extract data (.rda format)
+    ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
+    unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
+    }
 }
 #' @rdname download_point
 #'
@@ -65,29 +66,31 @@ write_point <- function (obj, on_build = FALSE) {
       path <- fs::path_package("pointapply", "data",  obj, ext = "rda")
       }
   envir <- parent.frame()
-  args <- rlang::list2(obj, file = path, envir = envir, compress = "xz", version = 2)
+  args <- rlang::list2(obj, file = path, envir = envir, compress = "xz",
+                       version = 2)
 
   rlang::exec("save", !!!args)
 }
 #' @rdname download_point
 #'
 #' @export
-save_point <- function (name, ggplot = ggplot2::last_plot(), width, height, unit, on_build = FALSE) {
+save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
+                        unit, on_build = FALSE) {
 
   if (on_build) {
-    path <- usethis::proj_path("vignettes/figures")
-    } else {
-      path <- fs::path_package("pointapply", "paper/figures")
+    path <- usethis::proj_path()
+      } else {
+      path <- fs::path_package("pointapply")
       }
 
-  # symlink
-  if (on_build & !fs::file_exists(usethis::proj_path("inst/paper/figures"))) {
-    file.symlink(path, paste0(usethis::proj_path(), "/inst/paper/figures"))
-  }
-
-  args <- rlang::list2(filename = fs::path(path, name, ext = "png"), plot = ggplot, width = width, height = height, unit = unit)
-  rlang::exec("ggsave", !!!args)
-
+  args <- rlang::list2(
+    filename = fs::path(path, "vignettes/figures", name, ext = "png"),
+    plot = ggplot,
+    width = width,
+    height = height,
+    unit = unit
+    )
+  rlang::exec("ggsave", !!! args)
 }
 #' @rdname download_point
 #'

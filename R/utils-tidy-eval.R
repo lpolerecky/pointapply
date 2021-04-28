@@ -41,7 +41,7 @@
 #' @md
 #' @name tidyeval
 #' @keywords internal
-#' @importFrom rlang expr enquo enquos sym syms .data := as_name as_label list2 parse_expr parse_exprs exec set_names
+#' @importFrom rlang expr enquo enquos sym syms .data := as_name as_label list2 parse_expr parse_exprs exec set_names get_expr expr_text set_expr parse_quo quo_get_env is_symbol
 #' @aliases expr enquo enquos sym syms .data := as_name as_label
 #' @export expr enquo enquos sym syms .data := as_name as_label
 NULL

@@ -29,7 +29,7 @@ link-citations: yes
 always_allow_html: true
 ---
 
-```{r setup, echo=FALSE}
+```{r setup, include=FALSE}
 # Default knitr options
 	knitr::opts_chunk$set(
 	  echo = FALSE, 
@@ -45,7 +45,7 @@ always_allow_html: true
 
 
 ```{r bld, echo=FALSE}
-on_build <- FALSE
+on_build <- TRUE
 ```  
 
 
@@ -89,10 +89,10 @@ options("kableExtra.html.bsTable" = TRUE)
 load_point("map_sum_grid", c("MEX", "MON"), 64, return_name = FALSE, on_build)
 map_sum_grid_64_all <- dplyr::bind_rows(
   dplyr::bind_rows(map_sum_grid_64_MEX), 
-  dplyr::bind_rows(map_sum_grid_64_MEX)
+  dplyr::bind_rows(map_sum_grid_64_MON)
   )
 # general statistics single ions for grid-cell 64 
-load_point("stat_Xt", "all", 64, return_name = FALSE, on_build)
+load_point("stat_X", "all", 64, return_name = FALSE, on_build)
 # general statistics isotope ratios for grid-cell 64 
 load_point("stat_R", "all", 64, return_name = FALSE, on_build)
 # QSA data
@@ -106,7 +106,9 @@ load_point("diag", c("MEX", "MON"), 64, return_name = FALSE, on_build)
 # filesizes
 fsize_intra <- file.info(here::here("data", "simu_sens_IC_intra.rda"))$size / 10^6
 ls_files <- lapply(1:10, function(x) paste0("simu_sens_IC_inter_", x, ".rda"))
-fsize_inter <- purrr::map_dbl(ls_files, ~file.info(here::here("data", .x))$size / 10^6) %>% 
+fsize_inter <- purrr::map_dbl(
+  ls_files, 
+  ~file.info(here::here("data", .x))$size / 10^6) %>% 
   sum()
 ```
 
@@ -115,7 +117,7 @@ fsize_inter <- purrr::map_dbl(ls_files, ~file.info(here::here("data", .x))$size 
 # filter select cast function
 var_mean <- function(data, plane, grid_cell, var) {
   dplyr::filter(data, dim_name.nm == plane, grid.nm %in% grid_cell) %>% 
-    dplyr::pull({{var}}) %>% 
+    dplyr::pull({{ var }}) %>% 
     mean() 
   }
 ```

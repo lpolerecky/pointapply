@@ -15,8 +15,12 @@ gg_effect(
   res = 256,
   grid_cell = 64,
   scaler = 40/256,
-  Xt = "Xt.pr",
-  grid = "grid.nm"
+  .X = Xt.pr,
+  .N = N.pr,
+  .species = species.nm,
+  .t = t.nm,
+  .ion1 = "13C",
+  .ion2 = "12C"
 )
 
 gg_sketch(res = 256, grid_cell = 64, scaler = 40/256)

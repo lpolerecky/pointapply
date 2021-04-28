@@ -73,7 +73,7 @@ point::stat_R(map_sum_grid_64_all, "13C", "12C", sample.nm, dim_name.nm,
               grid.nm, .stat=c("M", "RSeM", "chi2"), .label = "latex") %>% 
   dplyr::rename(`analyte` = "sample.nm", `dimension` = "dim_name.nm", 
          `grid-cell*` = "grid.nm") %>% 
-  dplyr::select(-R.nm) %>% 
+  dplyr::select(-ratio.nm) %>% 
 # print  
   kableExtra::kable(
     booktabs = TRUE,  

@@ -73,7 +73,7 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
                             grid_cell = grid_cell, dim_names = dim_names)
 
     # flatten matlab-file and grid matrix and combine
-    df_2d <- purrr::map2(
+    IC_2d <- purrr::map2(
       list(matfile, grid_layout),
       c("N.rw", "grid.nm"),
       ~flatten_matrix(.x, var =.y)
@@ -83,7 +83,7 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
     if (output == "sum") {
       # aggregate counts over dim fore each grid
       res <- accumulate_cnts(
-        df_2d = df_2d,
+        IC_2d = IC_2d,
         sum_plane = !! plane,
         title = title,
         species = species,
@@ -97,14 +97,14 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
 
     if (output == "complete") {
       # complete counts from selected grid-cells
-      res <- filter(df_2d, grid.nm == grid_sel) %>%
+      res <- filter(IC_2d, grid.nm == grid_sel) %>%
         mutate(
           sample.nm = title,
           N.rw = as.double(N.rw),
           t.nm = 1e-3 * !! plane,
           species.nm = species,
           file.nm = file_name
-        )
+          )
       return(res)
       }
   }
@@ -112,7 +112,7 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
   if (grid_cell == 1) {
     # aggregate counts over dim fore each pixel i.e. raster image
     res <- image_cnts(
-      df_3d = matfile,
+      IC_3d = matfile,
       plane = plane,
       title = title,
       species = species,
@@ -133,7 +133,7 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
           dim_size[sapply(gr_var, as_name)]
           )
         ) %>%
-        group_by(!!!gr_var, depth) %>%
+        group_by(!!! gr_var, depth) %>%
         summarise(
           across(tidyselect::vars_select_helpers$where(is.numeric), sum),
           across(tidyselect::vars_select_helpers$where(is.character), unique),
@@ -146,13 +146,13 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
 }
 
 # image counts
-image_cnts <- function(df_3d, plane, title, species, file_name){
+image_cnts <- function(IC_3d, plane, title, species, file_name){
 
   plane <- as_name(plane)
   # dim for aggregation
   dim_vc <- list(height = c(2, 3), width = c(1, 3), depth = c(1, 2))
 
-  exec("apply", df_3d, c(unname(unlist(dim_vc[plane]))), sum) %>%
+  exec("apply", IC_3d, c(unname(unlist(dim_vc[plane]))), sum) %>%
     flatten_matrix(var = "N.rw") %>%
     mutate(
       grid.nm = row_number(),
@@ -166,7 +166,7 @@ image_cnts <- function(df_3d, plane, title, species, file_name){
 }
 
 # summarise count statistics over plane for each grid-specifically
-accumulate_cnts <- function(df_2d, sum_plane, title, species, file_name, grid,
+accumulate_cnts <- function(IC_2d, sum_plane, title, species, file_name, grid,
                             scaler, dim_names){
 
   sum_plane <- enquo(sum_plane)
@@ -176,8 +176,7 @@ accumulate_cnts <- function(df_2d, sum_plane, title, species, file_name, grid,
     !(sapply(dim_vars, as_name) %in% as_name(sum_plane))
     )]
 
-  df_2d <- df_2d %>%
-    group_by(!!! gr_var, grid.nm) %>%
+  IC_2d <-group_by(IC_2d, !!! gr_var, grid.nm) %>%
     summarise(
       dim_name.nm = as_name(sum_plane),
       grid_size.nm = (grid * scaler) ^ 2,
@@ -195,8 +194,7 @@ accumulate_cnts <- function(df_2d, sum_plane, title, species, file_name, grid,
     ungroup() %>%
     rename(dim.nm = !! sum_plane)
   # fold metadata
-  point::fold(df_2d, ".mt")
-
+  point::fold(IC_2d, ".mt")
 }
 
 # if plane is depth ROI dims should be 2^x
@@ -207,9 +205,9 @@ grid_gen <- function(dims, plane, grid_cell, dim_names, expand = TRUE) {
   # ROI size
   if (plane == "depth") {
     grid <- matrix(1, grid_cell, grid_cell)
-  } else {
-    grid <- matrix(1, grid_cell, dims[3])
-  }
+    } else {
+      grid <- matrix(1, grid_cell, dims[3])
+      }
   # raster matrix
   rs <- rs_matrix(dims = dims, grid_cell = grid_cell, plane = plane)
 
@@ -232,31 +230,28 @@ rs_matrix <- function(dims, grid_cell, plane = "depth") {
       dims[1] / grid_cell
     )
     return(rs)
-  }
+    }
   if (plane == "height") {
     rs <- matrix(1:(dims[1] / grid_cell))
     return(rs)
-  }
+    }
   if (plane == "width") {
     rs <- matrix(1:(dims[2] / grid_cell))
     return(rs)
-  }
+    }
 }
 
 # label array dims
 dim_labeller <- function(rs, plane = NULL, dims) {
-
   # dimensions
   if(!is.null(plane)) dims <- dims[!dims %in% plane]
   dimnames(rs) <- purrr::map2(dims, dim(rs), ~paste(.x, 1:.y, sep = "_")) %>%
     set_names(nm = dims)
   return(rs)
-
 }
 
 # reduce cube to tibble
 flatten_matrix <- function(cube, var) {
-
   as_tibble(cubelyr::as.tbl_cube(cube, met_name = var)) %>%
     mutate(
       across(

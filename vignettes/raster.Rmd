@@ -30,7 +30,7 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- FALSE
+on_build <- TRUE
 ```  
 
 
@@ -72,13 +72,15 @@ The function `gg_cnts()` is designed for plotting of ion count ratios, i.e. the 
 ```{r raster}
 gg_cnts(map_raster_image_MEX$depth, "12C14N", "12C", ttl = "MEX", viri = "D")
 # save
-save_point("simple_raster_Mex_12C-14N-12C", last_plot(), width = 10, height = 8, unit = "cm", on_build = TRUE)
+save_point("simple_raster_Mex_12C-14N-12C", last_plot(), width = 10, height = 8, 
+           unit = "cm", on_build = TRUE)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Simple ion ratio map (MEX).", out.width="80%"}
- knitr::include_graphics("figures/simple_raster_Mex_12C-14N-12C.png")
+knitr::include_graphics("figures/simple_raster_Mex_12C-14N-12C.png")
 ```
+
 
 ## Combination plot
 
@@ -89,17 +91,9 @@ The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the da
 # diagnostics
 ls_diag <- purrr::map(
   map_sum_grid_64_MON,
-  point::diag_R, "13C", "12C", dim_name.nm, sample.nm, file.nm, grid.nm
+  ~point::diag_R(.x, "13C", "12C", dim_name.nm, sample.nm, file.nm, grid.nm, 
+                 .nest = grid.nm, .output = "complete")
   )
-# evaluate diagnostics (unfold for metadata)
-ls_eval <- purrr::map(
-  ls_diag,
-  ~point::unfold(
-    point::eval_diag(.x, "13C", "12C", dim_name.nm, sample.nm, file.nm, grid.nm, 
-              .nest = grid.nm),
-    "metadata"
-    )
-  ) 
 ```
 
 
@@ -112,17 +106,18 @@ In the first example (Fig. 7), high-precision grid-cells for ^13^C/^12^C is comb
 
 ```{r grid1}
 # combination plot
-diag_64_MON <- gg_effect(ls_eval, map_raster_image_MON, "MON", "12C-40Ca16O", viri = "B")
+diag_64_MON <- gg_effect(ls_diag, map_raster_image_MON, "MON", "12C-40Ca16O", 
+                         viri = "B")
 # save plot
-save_point("raster_MON_12C-40Ca16O", diag_64_MON[[2]], width = 16, height = 14, unit = "cm", on_build)
+save_point("raster_MON_12C-40Ca16O", ggplot2::last_plot(), width = 16, height = 14, 
+           unit = "cm", on_build)
 # save data
-diag_64_MON <- diag_64_MON[[1]]
 write_point("diag_64_MON", on_build)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C", "40Ca16O"), ")--grid-cell combination plot (MON)."), out.width="80%"}
- knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
+knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
 ```
 
 
@@ -135,16 +130,8 @@ The same procedure is repeated for the MEX analyte, starting by performing the i
 # diagnostics
 ls_diag <- purrr::map(
   map_sum_grid_64_MEX,
-  point::diag_R, "13C", "12C", dim_name.nm, sample.nm, file.nm, grid.nm
-  )
-# evaluate diagnostics (unfold for metadata)
-ls_eval <- purrr::map(
-  ls_diag,
-  ~point::unfold(
-    point::eval_diag(.x, "13C", "12C", dim_name.nm, sample.nm, file.nm, grid.nm, 
-              .nest = grid.nm),
-    "metadata"
-    )
+  ~point::diag_R(.x, "13C", "12C", dim_name.nm, sample.nm, file.nm, grid.nm, 
+                 .nest = grid.nm, .output = "complete")
   ) 
 ```
 
@@ -154,26 +141,26 @@ Thereafter, the ion ratio map (`r point::R_labeller("12C", "40Ca16O")`) is combi
 ```{r grid2}
 # combination plot (organic C enrichment)
 diag_64_MEX  <- gg_effect(
-  ls_eval, 
+  ls_diag, 
   map_raster_image_MEX, 
   "MEX", 
   "12C-40Ca16O", 
   viri = "B"
   )
 # rectangle identifying area of in depth analyses (see below)
-diag_64_MEX[[2]] <- diag_64_MEX[[2]] + 
+p <- ggplot2::last_plot() + 
   ggplot2::annotate("rect", xmin = 0, xmax = 64, ymin = 64, ymax = 128, 
            fill = "transparent", color = "red", size = 1)
 # save plot
-save_point("raster_MEX_12C-40Ca16O", diag_64_MEX[[2]], width = 16, height = 14, unit = "cm", on_build = TRUE)
+save_point("raster_MEX_12C-40Ca16O", p, width = 16, height = 14, unit = "cm", 
+           on_build)
 # save data
-diag_64_MEX <- diag_64_MEX[[1]]
 write_point("diag_64_MEX", on_build)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C", "40Ca16O"), ")--grid-cell combination plot (MEX)."), out.width="80%"}
- knitr::include_graphics("figures/raster_MEX_12C-40Ca16O.png")
+knitr::include_graphics("figures/raster_MEX_12C-40Ca16O.png")
 ```
 
 
@@ -186,23 +173,24 @@ The same procedure for MEX is repeated, but then with `r point::R_labeller("12C1
 ```{r}
 # combination plot (nitrogen enrichment)
 gg_MEX_raster2 <- gg_effect(
-  ls_eval, 
+  ls_diag, 
    map_raster_image_MEX, 
   "MEX", 
   "12C14N-12C", 
   viri = "D"
   )
 # rectangle identifying area of in depth analyses  (see below)
-gg_MEX_raster2[[2]] <- gg_MEX_raster2[[2]] + 
+p <- ggplot2::last_plot() + 
   ggplot2::annotate("rect", xmin = 128, xmax = 192, ymin = 0, ymax = 64, 
            fill = "transparent", color = "red", size = 1) 
 # save
-save_point("raster_MEX_12C14N-12C", gg_MEX_raster2[[2]], width = 16, height = 14, unit = "cm", on_build = TRUE)
+save_point("raster_MEX_12C14N-12C", p, width = 16, 
+           height = 14, unit = "cm", on_build)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C14N", "12C"), ")--grid-cell combination plot (MEX)."), out.width="80%"}
- knitr::include_graphics("figures/raster_MEX_12C14N-12C.png")
+knitr::include_graphics("figures/raster_MEX_12C14N-12C.png")
 ```
 
 
@@ -222,9 +210,10 @@ gg_point(
   image = map_raster_image_MEX$depth, # raster image
   ion1_thr = "12C", ion2_thr = "40Ca16O", thr = 20, # ion ratio for filtering
   ion1_R = "13C", ion2_R = "12C" # isotope ratio
-  ) 
+  )
 # save
-save_point("point_MEX_ROI9", last_plot(), width = 12, height = 8, unit = "cm", on_build = TRUE)
+save_point("point_MEX_ROI9", ggplot2::last_plot(), width = 9, height = 10, 
+           unit = "cm", on_build)
 ```
 
 
@@ -247,7 +236,8 @@ gg_point(
   ion1_R = "13C",  ion2_R = "12C"
   ) 
 # save
-save_point("point_MEX_ROI2", last_plot(), width = 12, height = 8, unit = "cm", on_build = TRUE)
+save_point("point_MEX_ROI2", ggplot2::last_plot(), width = 9, height = 10, 
+           unit = "cm", on_build)
 ```
 
 

@@ -27,14 +27,16 @@
 #' @export
 gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
                       res = 256, grid_cell = 64, scaler = 40 / 256,
-                      Xt = "Xt.pr", grid = "grid.nm"){
+                      label = "latex", .X = Xt.pr, .N = N.pr,
+                      .species = species.nm, .t = t.nm, .ion1 = "13C",
+                      .ion2 = "12C"){
 
-  M_R <- rlang::parse_expr(paste("M_R", Xt, sep = "_"))
-  GrM_R <- rlang::parse_expr(paste("M_R", grid, sep = "."))
+  args <- enquos(.X = .X, .N = .N, .species = .species, .t = .t)
+  args <- arg_builder(all_args(args, .ion1, .ion2, chr = FALSE), "model")
 
-  im <- dim_folds(ls_im, height, width, depth, ttl, "raster", res, grid_cell)
+    im <- dim_folds(ls_im, height, width, depth, ttl, "raster", res, grid_cell)
 
-  # base rater image for ion ratios
+  # base raster image for ion ratios
   gg_base <- gg_cnts(
     im,
     stringr::str_split(ratio, "-", simplify = TRUE)[,1],
@@ -47,16 +49,18 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
     compilation = TRUE
     )
 
-  # dataframe for high precision R
-  IC <- dim_folds(ls, mean_height.mt, mean_width.mt, mean_depth.mt, ttl,
-                    "tile", res, grid_cell)
+  # unfold metadata
+  ls <- purrr::map(ls, point::unfold)
+  # data frame for high precision R
+  IC <- dim_folds(ls, mean_height.mt, mean_width.mt, mean_depth.mt, ttl, "tile",
+                  res, grid_cell)
 
   IC <- mutate(
     IC,
-    del = (!!M_R /  !!GrM_R  - 1) * 1000,
-    t_score = abs(.data$del / .data$RS_R_inter),
-    sig_code = sig_coder(.data$p_F, make_lab = FALSE),
-    del_lab = paste(sprintf("%.1f",.data$del), .data$sig_code)
+    del = (!! args[["M_R"]] /  !! args[["hat_M_M_R"]]  - 1) * 1000,
+    t_score = abs(.data$del / !! args[["hat_RS_M_R"]]),
+    sig_code = sig_coder(!! args[["p_R"]], make_lab = FALSE),
+    del_lab = paste(sprintf("%.1f", .data$del), .data$sig_code)
     ) %>%
     rename(x = .data$mean_width.mt, y = .data$mean_height.mt)
 
@@ -70,7 +74,7 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
         size = 1,
         inherit.aes = FALSE
         ) +
-      ggplot2::coord_fixed(clip = "off") +
+      # ggplot2::coord_fixed(clip = "off") +
       depth_arrows(res, grid_cell) +
       geom_text(
         data = IC,
@@ -98,19 +102,8 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
             list(a = sig_coder())
             )
          ) +
-      ggplot2::theme(
-        legend.position = "top",
-        rect =  ggplot2::element_rect(
-          fill = "transparent",
-          color = "transparent"
-          ),
-        panel.background =   ggplot2::element_rect(
-          fill = "transparent",
-          color = "transparent"
-          ),
-        axis.line =  ggplot2::element_blank()
-        ) +
-      themes_IC
+      themes_IC() +
+      ggplot2::theme(axis.line = ggplot2::element_blank())
   }
 
   grid_loc <- list(
@@ -126,10 +119,28 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
     )
   )
 
-  if (grid_print) {
-    suppressWarnings(return(list(IC, {print(gg_final(IC) + grid_loc)})))
+  if (! is.null(label)) {
+    # latex
+    tb_model <- filter(
+      point::names_model,
+      .data$type == "Restricted Maximum Likelihood optimization"
+      )
+    # Model args augment
+    model_args <- args[paste(tb_model$name, tb_model$derived, sep = "_")]
+    ls_latex <- set_names(
+      sapply(model_args, as_name),
+      tex_labeller(tb_model, tb_model$name, label)
+      )
     } else {
-      suppressWarnings(return(list(IC, print(gg_final(IC)))))
+      ls_latex <- sapply(model_args, as_name)
+      }
+
+  if (grid_print) {
+    {print(gg_final(IC) + grid_loc)}
+    return(distinct(select(IC, .data$dim_name.nm, !!! ls_latex)))
+    } else {
+      suppressWarnings(print(gg_final(IC)))
+      return(distinct(select(IC, .data$dim_name.nm, !!! ls_latex)))
       }
 }
 #' @rdname gg_effect
@@ -188,7 +199,7 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
       ),
       axis.line = ggplot2::element_blank()
     ) +
-    themes_IC
+    themes_IC(base = ggplot2::theme_bw())
 }
 
 #-------------------------------------------------------------------------------
@@ -221,18 +232,16 @@ dim_folds <- function(ls, dim1, dim2, dim3, ttl, geom, res, grid_cell){
     ls <- purrr::map_at(
       ls,
       "height",
-      ~{mutate(.x, !! dim1  := !! dim3 + res + grid_cell / 2) %>%
+      ~{mutate(.x, !! dim1 := !! dim3 + res + grid_cell / 2) %>%
           select(-!! dim3)}
-    ) %>%
+      ) %>%
       purrr::map_at(
         "width",
-        ~{mutate(.x, !! dim2  := !! dim3 + res + grid_cell / 2) %>%
+        ~{mutate(.x, !! dim2 := !! dim3 + res + grid_cell / 2) %>%
             select(-!! dim3)}
-      )
+        )
   }
-
   bind_rows(ls)
-
 }
 
 
@@ -264,3 +273,126 @@ depth_arrows <- function(res, grid_cell) {
     ggplot2::annotate("text", x = text_level, y = res + grid_cell, label = "depth", angle = 90)
     )
 }
+
+# Build new quosures and names for calcs
+arg_builder <- function(args, stat, ion = NULL, append = NULL){
+
+  if (stat == "X") arg_names <- point::names_stat_X
+  if (stat == "R") arg_names <- point::names_stat_R
+  if (stat == "model") arg_names <- point::names_model
+
+  if (stat == "model") pre <-  NULL else pre  <- "."
+
+  # no origin of variable names
+  if (!"origin" %in% colnames(arg_names)) arg_names$origin <- NA_character_
+
+  arg_names <- mutate(
+    arg_names,
+    origin = if_else(is.na(.data$origin), .data$derived, .data$origin),
+    label =
+      if_else(
+        .data$origin == .data$derived,
+        paste0(paste(.data$name, .data$origin, sep = "_"), append),
+        paste0(paste(.data$name, .data$derived, sep = "_"), append)
+      ),
+    name =
+      if_else(
+        .data$origin == .data$derived,
+        .data$name,
+        paste(.data$name, .data$derived, sep = "_")
+      )
+  )
+
+  # quosure update
+  args <- purrr::map2(
+    arg_names$origin,
+    arg_names$name,
+    ~quo_updt(args[[paste0(pre, .x)]], pre = .y)
+  )
+  # wide format with ions
+  if (!is.null(ion)) args <- purrr::map(args, quo_updt, post = ion)
+  # set names
+  set_names(args, nm = arg_names$label)
+}
+
+# Function which updates quosures for subsequent tidy evaluation
+quo_updt <- function(my_q, pre = NULL, post = NULL, update_post = FALSE){
+
+  # Get expressions
+  old_expr <- get_expr(my_q)
+  # Get text
+  old_chr <- expr_text(old_expr)
+
+  # Update
+  if (update_post & stringr::str_detect(old_chr , "\\.") ){
+    old_chr <- stringr::str_split(old_chr, "\\.")[[1]][1]
+  }
+
+  # Separators
+  if (is.null(pre) & is.null(post)) {
+    warning("Quosure not updated")
+    return(my_q)
+  }
+  if (!is.null(pre) & is.null(post)) {
+    new_chr <- paste0(pre, "_", old_chr)
+  }
+  if (is.null(pre) & !is.null(post)) {
+    new_chr <- paste0(old_chr, ".", post)
+  }
+  if (!is.null(pre) & !is.null(post)) {
+    new_chr <- paste0(pre, "_", old_chr, ".", post)
+  }
+
+  # New expression from character (remove whitespace)
+  new_expr <- parse_expr(stringr::str_replace_all(new_chr, " ", ""))
+  # Update old quosure
+  set_expr(my_q, new_expr)
+}
+
+# Select arguments
+all_args <- function(args, ion1, ion2, except = NULL, chr = TRUE) {
+  args_Xt <- purrr::flatten(
+    purrr::map2(
+      c(ion1, ion2),
+      seq_along(c(ion1, ion2)),
+      ~arg_builder(args, "X", .x, .y)
+    )
+  )
+  args_R <- list2(
+    !!! arg_builder(args, "R"),
+    R = quo_updt(args[[".X"]], pre = "R"),
+    ratio = parse_quo("ratio.nm", env = quo_get_env(args[[".X"]]))
+  )
+  args <- append(args_Xt, args_R)
+  if (isTRUE(chr)) {
+    vc_args <- sapply(args, as_name)
+    return(vc_args[!vc_args %in% except])
+  } else {
+    return(args)
+  }
+}
+
+# latex labeller function
+tex_labeller <- function(vars, stat, label){
+  if (!"origin" %in% colnames(vars)) vars$origin <- vars$derived
+  names_vars <- filter(vars, .data$name %in% stat) %>%
+    # if variable has a stat component
+    mutate(
+      derived =
+        if_else(
+          stringr::str_detect(.data$derived, "[[:punct:]]"),
+          stringr::str_extract("M_R", "(?<=[[:punct:]])[[:alpha:]]"),
+          .data$derived
+        )
+    )
+  purrr::pmap_chr(
+    list(
+      var = names_vars$derived,
+      org = names_vars$origin,
+      stat = names_vars$name
+    ),
+    stat_labeller,
+    label = label
+  )
+}
+

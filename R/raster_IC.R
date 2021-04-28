@@ -50,7 +50,7 @@ gg_cnts <- function(IC, ion1, ion2, ttl, viri, height = 256, width = 256,
       point::R_labeller(ion1, ion2, "expr"),
       option = viri
       ) +
-    ggplot2::coord_fixed() +
+    ggplot2::coord_fixed(clip = "off") +
     ggplot2::guides(fill = ggplot2::guide_colorbar(title.position = "top")) +
     ggplot2::theme_classic() +
     ggplot2::theme(

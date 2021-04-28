@@ -35,7 +35,7 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- FALSE
+on_build <- TRUE
 ```  
 
 
@@ -44,7 +44,7 @@ The package *point* [@point] is especially designed to perform the intra- and in
 
 # Download data
 
-The raw ion count data is generated with Look\@NanoSIMS [@Polerecky2012]as LANS and comes in matlab format. The *point* R package [@point] requires these raw data files first to be downloaded from the external [Zenodo](https://doi.org/10.5281/zenodo.4580159) repository with the function `download_point()`. 
+The raw ion count data is generated with Look\@NanoSIMS [@Polerecky2012]as LANS and comes in matlab format. Raw data files should first be downloaded from the external [Zenodo](https://doi.org/10.5281/zenodo.4580159) repository with the function `download_point()`. Consecutively, these raw data files can be transformed into the right format with the  *point* R package [@point]. 
 
 
 ```{r data}
@@ -101,7 +101,8 @@ The grid-cell size has important consequences for the data structure of the ion 
 # generate sketch of grid layout
 gg_sketch() 
 # save
-save_point("grid_sketch", ggplot2::last_plot(), width = 12, height = 12, unit = "cm", on_build)
+save_point("grid_sketch", ggplot2::last_plot(), width = 12, height = 12, 
+           unit = "cm", on_build)
 ```
 
 
@@ -122,7 +123,8 @@ plane_fun <- function(directory, grid_cell, title, file_name, species = NULL){
     ls_planes, 
     ~read_matlab(directory = directory, plane = !!(.x), title = title, 
                  species = species, grid_cell = grid_cell)
-    ) %>% rlang::set_names(nm = sapply(ls_planes, rlang::as_name))
+    ) %>% 
+    rlang::set_names(nm = sapply(ls_planes, rlang::as_name))
   # make corrections, check point package for documentation
   ls_pr <- purrr::map(ls_rw, ~point::cor_IC(.x, .bl_t = 0, .det = "EM"))
   name <- paste(file_name, grid_cell, title, sep = "_")
@@ -134,13 +136,24 @@ plane_fun <- function(directory, grid_cell, title, file_name, species = NULL){
 # execute
 purrr::walk(
   vc_px, 
-  ~plane_fun(get_matlab("2020-08-20-GLENDON"), .x, "MEX", "map_sum_grid",  c("12C", "13C"))
+  ~plane_fun(
+    get_matlab("2020-08-20-GLENDON"), 
+    .x, 
+    "MEX", 
+    "map_sum_grid",  
+    c("12C", "13C")
+    )
   )
 purrr::walk(
   vc_px, 
-  ~plane_fun(get_matlab("2020-08-28-GLENDON"), .x, "MON", "map_sum_grid",  c("12C", "13C"))
+  ~plane_fun(
+    get_matlab("2020-08-28-GLENDON"), 
+    .x, 
+    "MON", 
+    "map_sum_grid",  
+    c("12C", "13C")
+    )
   )
-
 ```
 
 

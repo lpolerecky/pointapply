@@ -34,6 +34,5 @@ hyp_class <- function(IC, sec_vc, ttl) {
       x = expression("grid-cell ("*mu*m^2*")"),
       y = expression("frequency H"[0])
       ) +
-    ggplot2::theme_classic() +
-    themes_IC
+    themes_IC(base = ggplot2::theme_classic())
 }

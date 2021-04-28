@@ -20,30 +20,28 @@
 #' @return \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
-gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
-                     ion1_R, ion2_R, Xt = Xt.pr, N = N.rw,
-                     colors = c("#FFEDA0", "#FEB24C")) {
+gg_point <- function(IC, image, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
+                     colors = c("#FFEDA0", "#FEB24C"), .X = Xt.pr, .N = N.pr,
+                     .species = species.nm, .t = t.nm) {
   # unique ions
   ions <- unique(c(ion1_thr, ion2_thr, ion1_R, ion2_R))
-  Xt <- enquo(Xt) # of the ion image
-  N <- enquo(N) # raw count of the full stack
-  args <- purrr::map(
-    ions,
-    ~rlang::parse_expr(paste(rlang::as_name(Xt), .x , sep = "."))
-    ) %>%
+  # user-supplied variables
+  args <- enquos(.X = .X, .N = .N, .species = .species, .t = .t)
+  # variables for threshold ion ratio
+  args_thr <- arg_builder(args, "X")
+  # variables for isotope ratio
+  args_R <- all_args(args, ion1_R, ion2_R, chr = FALSE)
+  # ions
+  args_ion <- purrr::map(ions, ~quo_updt(args[[".X"]], post = .x)) %>%
     rlang::set_names(nm = ions)
-  M_Xt <- rlang::parse_expr(paste("M", rlang::as_name(Xt), sep = "_"))
-  S_Xt <- rlang::parse_expr(paste("S", rlang::as_name(Xt), sep = "_"))
-  M_Xt1 <- rlang::parse_expr(
-    paste("M", rlang::as_name(args[[ion1_R]]), sep = "_")
-    )
-  M_Xt2 <- rlang::parse_expr(
-    paste("M", rlang::as_name(args[[ion2_R]]), sep = "_")
-    )
-  lower1 <- rlang::parse_expr(paste("lower", ion1_R , sep = "."))
-  lower2 <- rlang::parse_expr(paste("lower", ion2_R , sep = "."))
-  upper1 <- rlang::parse_expr(paste("upper", ion1_R , sep = "."))
-  upper2 <- rlang::parse_expr(paste("upper", ion2_R , sep = "."))
+
+  N.rw <- quo_updt(args[[".N"]], post = "rw", update_post = TRUE)
+
+  # ratio bounds
+  lower1 <- quo_updt(args[[".X"]], pre = "lower", post = ion1_R)
+  lower2 <- quo_updt(args[[".X"]], pre = "lower", post = ion2_R)
+  upper1 <- quo_updt(args[[".X"]], pre = "upper", post = ion1_R)
+  upper2 <- quo_updt(args[[".X"]], pre = "upper", post = ion2_R)
 
   im_ROI <-filter(
     image,
@@ -54,16 +52,17 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
     summarise(
       height = .data$height,
       width = .data$width,
-      R_depth = !!args[[ion1_thr]] / !!args[[ion2_thr]],
+      R_depth = !! args_ion[[ion1_thr]] / !! args_ion[[ion2_thr]],
       flag = if_else(.data$R_depth >= thr, "inclusion", "matrix"),
       ntot = n()
       ) %>%
     group_by(flag) %>%
+    # pixels for domains and fractions
     mutate(
       pxl = n_distinct(.data$height, .data$width),
       frac = .data$pxl / .data$ntot
       ) %>%
-    ungroup # pixels for domains and fraction
+    ungroup()
 
   # combine image and counts
   tb_inc <- left_join(IC, im_ROI, by = c("width", "height")) %>%
@@ -71,31 +70,39 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
     summarise(
       pxl = unique(.data$pxl),
       frac = unique(.data$frac),
-      N.pr = sum(!!N),
+      !! args[[".N"]] := sum(!! N.rw),
       .groups = "drop"
       ) %>%
     # count rates
-    mutate(!!Xt := .data$N.pr / (.data$pxl * 1e-3))
+    mutate(!! args[[".X"]] := !! args[[".N"]] / (.data$pxl * 1e-3))
 
   # sum stats
-  tb_Xt <- point::stat_Xt(tb_inc, sample.nm, flag, frac, .t = depth) %>%
+  tb_X <- point::stat_X(tb_inc, sample.nm, flag, frac, .t = depth) %>%
     group_by(.data$flag, .data$species.nm) %>%
     mutate(
       t.nm = row_number(),
-      lower = !!M_Xt - !!S_Xt,
-      upper = !!M_Xt + !!S_Xt
+      "lower_{{.X}}" :=
+        if_else(
+          !! args_thr[["M_X"]] - 2 * !! args_thr[["S_X"]] < 0,
+          0,
+          !! args_thr[["M_X"]] - 2 * !! args_thr[["S_X"]]
+          ),
+      "upper_{{.X}}" := !! args_thr[["M_X"]] + 2 * !! args_thr[["S_X"]]
       ) %>%
     ungroup()
 
   # label names
-  tb_wide <- point::cov_R(tb_Xt, ions, sample.nm, flag, frac) %>%
+  tb_wide <- point::cov_R(tb_X, ions, sample.nm, flag, frac) %>%
     mutate(
-      flag = paste(.data$flag, paste("(f = ", sprintf(fmt = "%.3f", .data$frac), ")"))
+      flag = paste(
+        .data$flag,
+        paste("(f = ", sprintf(fmt = "%.3f", .data$frac), ")")
+        )
       )
 
   # ranges
-  range_x <- c(0, max(pull(tb_wide, !!upper2)))
-  range_y <- c(0, max(pull(tb_wide, !!upper1)))
+  range_x <- c(0, max(pull(tb_wide, !! upper2)))
+  range_y <- c(0, max(pull(tb_wide, !! upper1)))
 
   # plot title
   ttl <- substitute(
@@ -115,28 +122,30 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr,
     list(a = point::ion_labeller(ion1_R, "expr"))
     )
 
-  ggplot(tb_wide, aes(x = !!M_Xt2, y = !!M_Xt1, fill = .data$flag)) +
+  ggplot(
+    tb_wide,
+    aes(x = !! args_R[["M_X2"]], y = !! args_R[["M_X1"]], fill = .data$flag)
+    ) +
     ggplot2::geom_errorbar(
-      aes(ymin = ifelse(!!lower1, !!lower1, 0), ymax = !!upper1),
+      aes(ymin = ifelse(!! lower1, !! lower1, 0), ymax = !! upper1),
       width = 0
       ) +
     ggplot2::geom_errorbarh(
-      aes(xmin = !!lower2, xmax = !!upper2),
+      aes(xmin = !! lower2, xmax = !! upper2),
       height = 0
       ) +
     geom_point(shape = 21, size = 5) +
     ggtitle(ttl) +
     scale_y_continuous(
       ylab,
-      expand = ggplot2::expansion(mult = c(0,0.1)),
+      expand = ggplot2::expansion(mult = c(0, 0.1)),
       limits = range_y
       ) +
     scale_x_continuous(
       xlab,
-      expand = ggplot2::expansion(mult = c(0,0.1)),
+      expand = ggplot2::expansion(mult = c(0, 0.1)),
       limits = range_x
       ) +
     ggplot2::scale_fill_manual("", values = colors) +
-    themes_IC +
-    ggplot2::theme_bw()
-}
+    themes_IC(base = ggplot2::theme_bw())
+  }
