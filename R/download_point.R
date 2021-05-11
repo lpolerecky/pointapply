@@ -29,16 +29,38 @@
 #' @export
 download_point <- function (type = "all") {
 
-  path <- fs::path_package("pointapply", "data")
+  path_int <- fs::path_package("pointapply", "data")
+  # create extdata if no existing
+  if (!fs::dir_exists(fs::path(fs::path_package("pointapply"), "extdata"))) {
+    fs::dir_create(fs::path_package("pointapply"), "extdata")
+    }
+  path_ext <- fs::path_package("pointapply", "extdata")
+
+  # check if dirs are present in extdata
+  lgl_ext <- purrr::map_lgl(
+    c("2020-08-28-GLENDON", "2020-08-20-GLENDON"),
+    ~fs::dir_exists(fs::path(path_ext, .x))
+    )
+  # check if reda files are present in data
+  lgl_int <- purrr::map_lgl(
+    list.files(path_int, pattern = ".rda$"),
+    ~fs::file_exists(fs::path(path_int, .x))
+    )
+
+  if (all(lgl_int, lgl_ext)) return(invisible())
+
+  # purge other data
+  purrr::walk(list.files(path_int, full.names = TRUE), file.remove)
 
   # get the data
-  if (length(list.files(path, pattern = ".zip$")) == 0) {
-    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4580159", path = path)
+  if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
+    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4580159",
+                                        path = path_ext)
     }
 
   if (type == "all" | type == "raw") {
     # extract matlab
-    ls_mat <- list.files(path, pattern = "GLENDON.zip$", full.names = TRUE)
+    ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
     purrr::walk(
       ls_mat,
       ~unzip(.x, exdir = tools::file_path_sans_ext(.x), junkpaths = TRUE)
@@ -46,11 +68,9 @@ download_point <- function (type = "all") {
     }
 
   if (type == "all" | type == "processed") {
-    # purge data
-    purrr::walk(list.files(path, full.names = TRUE), file.remove)
     # extract data (.rda format)
-    ls_dat <- list.files(path, pattern = "data.zip", full.names = TRUE)
-    unzip(ls_dat, exdir = path, junkpaths = TRUE)
+    ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
+    unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
     }
 }
 #' @rdname download_point

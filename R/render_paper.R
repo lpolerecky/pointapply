@@ -27,7 +27,7 @@ render_paper <- function(
   ){
 
   # download data when needed
-  if (!on_build) download_point()
+  if (!on_build & download_point()) download_point()
 
   # paths
   if (on_build) {
