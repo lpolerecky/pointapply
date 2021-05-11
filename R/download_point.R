@@ -43,11 +43,8 @@ download_point <- function (type = "all") {
     c("2020-08-28-GLENDON", "2020-08-20-GLENDON"),
     ~fs::dir_exists(fs::path(path_ext, .x))
     )
-  # check if reda files are present in data
-  lgl_int <- purrr::map_lgl(
-    list.files(path_int, pattern = ".rda$"),
-    ~fs::file_exists(fs::path(path_int, .x))
-    )
+  # check if rda files are present in data
+  lgl_int <- length(list.files(path_int, pattern = ".rda$")) > 0
 
   if (all(lgl_int, lgl_ext)) return(invisible())
 
