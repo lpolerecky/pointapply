@@ -264,8 +264,8 @@ tb_dia <- dplyr::left_join(
   diag_64_MON,
   by = "dim_name.nm"
   ) %>% 
-  select(-c(sample.nm, ratio.nm)) %>% 
-  rename(` ` = "dim_name.nm") 
+  dplyr::select(-c(sample.nm, ratio.nm)) %>% 
+  dplyr::rename(` ` = "dim_name.nm") 
 
 # footnote
 ft <- "AIC = Akaike Information Criterion"
@@ -301,8 +301,8 @@ tb_dia <- dplyr::left_join(
   diag_64_MEX,
   by = "dim_name.nm"
   ) %>% 
-  select(-c(sample.nm, ratio.nm)) %>% 
-  rename(` ` = "dim_name.nm") 
+  dplyr::select(-c(sample.nm, ratio.nm)) %>% 
+  dplyr::rename(` ` = "dim_name.nm") 
 
 # footnote
 ft <- "AIC = Akaike Information Criterion"
