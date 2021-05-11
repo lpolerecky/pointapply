@@ -9,7 +9,7 @@ bookdown::pdf_book:
     - --citation-abbreviations=templates/abbreviations.json
   toc: false
   keep_tex: true
-  latex_engine: xelatex
+  # latex_engine: xelatex
   base_format: rticles::arxiv_article
   includes:
     in_header: ["units.sty", "preamble.tex", "templates/supplement.tex"]

@@ -2,11 +2,11 @@
 title: "New methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry"
 authors:
   - name: Martin Schobben
-    thanks: "Corresponding author (alternative email: schobbenmartin@gmail.com)."
+    thanks: "Corresponding author"
     department: Department of Earth Sciences 
     affiliation: Utrecht University
     location: Utrecht
-    email: m.a.n.schobben@uu.nl
+    email: schobbenmartin@gmail.com
   - name: Michiel Kienhuis  
     department: Department of Earth Sciences 
     affiliation: Utrecht University
@@ -18,13 +18,13 @@ authors:
     location: Utrecht
     email: l.polerecky@uu.nl
 abstract: |
-  The premise of SIMS isotope studies on geological and biological materials is to detect isotope variability between measurement spots of an analytical substrate (inter-isotope variability). However, much is unknown about the spatial scales at which isotopic variability might manifest itself. Considering the indiscriminate secondary ion generation with SIMS, it is often unknown how isotope variability is comprised within one analysis at a single spot (intra-isotope variability). This has important consequences for the averaged isotope value derived from a routine data reduction protocol for a single analysis. It thus follows, that this averaged value can either represent a  truly  homogeneous end-member, or a mixture of two or more components with widely different isotope values. Here, we present a novel method for the detection of both intra- and inter- SIMS isotope variability, based on common regression methods. Homogeneous end-members are a prerequisite when, e.g., searching for reference materials, but also for the understanding biological and geological processes at a microscopic scale. The here-presented methods are bundled in the R package point for convenient application in future studies.
+  The premise of Secondary Ion Mass Spectrometry (SIMS) isotope studies on geological and biological materials is to detect isotope variability between measurement spots of an analytical substrate (inter-isotope variability). However, much is unknown about the spatial scales at which isotopic variability might manifest itself. Considering the indiscriminate secondary ion generation with SIMS, it is often unknown how isotope variability is comprised within one analysis at a single spot (intra-isotope variability). This has important consequences for the averaged isotope value derived from a routine data reduction protocol for a single analysis. It thus follows, that this averaged value can either represent a  truly  homogeneous end-member, or a mixture of two or more components with widely different isotope values. Here, we present a novel method for the detection of both intra- and inter- SIMS isotope variability, based on common regression methods. Homogeneous end-members are a prerequisite when searching for reference materials, but also for the understanding biological and geological processes at a microscopic scale. The here-presented methods are bundled in the R package `point` [Schobben M. 2021, Point: Reading, processing, and analysing raw ion count data. (\href{https://doi.org/10.5281/zenodo.4633104}{DOI: 10.5281/zenodo.4633104})] for convenient application in future studies.
 keywords:
-  - Reference Materials, Isotope data analysis, Chemometrics, Minerals
+  - Reference Materials, Isotope analysis, Chemometrics
 site: bookdown::bookdown_site
 documentclass: book
-bibliography: biblio.bib
-biblio-style: "apalike"
+bibliography: ["SIMS_method.bib", "packages.bib", "rversion.bib"]
+csl: templates/elsevier-vancouver-author-date.csl
 link-citations: yes
 always_allow_html: true
 ---
@@ -49,11 +49,6 @@ on_build <- TRUE
 ```  
 
 
-```{r path}
-here::i_am("index.Rmd")
-```
-
-
 ```{r units}
 # latex unit SIUnitx package
 SI <- function(x, unit, not = "fl", word = knitr::pandoc_to("docx")) {
@@ -66,7 +61,7 @@ SI <- function(x, unit, not = "fl", word = knitr::pandoc_to("docx")) {
       paste0("$\\SI{",x,"}{\\", stringr::str_c(unit, collapse = "\\"),"}$")
       }
   }
-# deal with per mill latex vs doxc
+# deal with per mill latex vs docx
 permille <- function(x, sign = FALSE, word = knitr::pandoc_to("docx")){
   if (sign) x <- sprintf("%+.1f", x)  else x <- sprintf("%.1f", x)  
   if (word) {

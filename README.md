@@ -1,20 +1,17 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # pointapply
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
-The R package `pointapply` contains the code and data to reconstruct the
+The R package *pointapply* contains the code and data to reconstruct the
 publication: Martin Schobben, Michiel Kienhuis, and Lubos Polerecky.
 2021. *New methods to detect isotopic heterogeneity with Secondary Ion
 Mass Spectrometry*, preprint on [Eartharxiv](https://eartharxiv.org/).
 
 This paper assess the performance of the application of the `diag_R()`
-and `eval_diag` function of the sister package *point* (Schobben, n.d.)
-in detecting isotope heterogeneity in natural substrates.
+function of the sister package *point* (Schobben 2021) in detecting
+isotope heterogeneity in natural substrates.
 
 # Data
 
@@ -42,41 +39,41 @@ pointapply::render_paper(title = "Schobbenetal_SIMS_method",
 
 ## Credits
 
-The construction of the R (R Core Team 2020) package *pointapply* and
-associated documentation was aided by the packages; *devtools* (H.
-Wickham, Hester, and Chang 2020), *roxygen2* (H. Wickham et al. 2020),
-*here* (Müller 2020), and *fs* (Hester and Wickham 2020).
+The construction of the R (R Core Team 2021) package *pointapply* and
+associated documentation was aided by the packages; *devtools* (Wickham,
+Hester, and Chang 2021), *roxygen2* (Wickham, Danenberg, et al. 2020),
+and *fs* (Hester and Wickham 2020).
 
 The book: *R packages: organize, test, document, and share your code*,
-by
-(<span class="citeproc-not-found" data-reference-id="Wickham2015">**???**</span>)
-is a great guide for learning how to build packages.
+by (**Wickham2015?**) is a great guide for learning how to build
+packages.
 
 In addition, this package relies on a set of external packages from the
 tidyverse universe, including: *dplyr* (Wickham et al. 2021), *tidyr*
-(H. Wickham 2020b), *tibble* (Müller and Wickham 2021), *stringr*
-(Wickham 2019), *magrittr* (Bache and Wickham 2014), and *purrr* (Henry
-and Wickham 2020a) for data manipulation.
+(Wickham 2021), *tibble* (Müller and Wickham 2021), *stringr* (Wickham
+2019), *magrittr* (Bache and Wickham 2020), and *purrr* (Henry and
+Wickham 2020a) for data manipulation.
 
-Data plots are constructed with *ggplot2* (Wickham 2016), *ggrepel*
-(Slowikowski 2021), *RColorBrewer* (Neuwirth 2014), and *scales* (H.
-Wickham and Seidel 2020)
+Data plots are constructed with *ggplot2* (Wickham, Chang, et al. 2020;
+Wickham 2016), *ggrepel* (Slowikowski 2021), *RColorBrewer* (Neuwirth
+2014), and *scales* (Wickham and Seidel 2020)
 
 The package *rlang* (Henry and Wickham 2020b) was used for tidy
 evaluation.
 
 Some specialised specialised packages where used, notably; *R.matlab*
-for loading the matlab LANS files (Bengtsson 2018) and *cubelyr* (H.
-Wickham 2020a) for flattening the 3D arrays, and *MASS* (Venables and
-Ripley 2002) for 2D density estimates.
+for loading the matlab LANS files (Bengtsson 2018) and *cubelyr*
+(Wickham 2020) for flattening the 3D arrays, and *MASS* (Ripley 2021;
+Venables and Ripley 2002) for 2D density estimates.
 
 The data download from Zenodo with an api is facilitated by *zen4R*
 (Blondel 2020).
 
-The documentation and paper was written with *knitr* (Xie 2021 , 2015),
-*rmarkdown* (Allaire et al. 2020; Xie, Allaire, and Grolemund 2018),
-*bookdown* (Xie 2020, 2016), *rticles* (Allaire et al. 2021) and
-*bibtex* (Francois 2017).
+The documentation and paper was written with *knitr* (Xie 2021b, 2014,
+2015), *rmarkdown* (Allaire, Xie, McPherson, et al. 2021; Xie, Allaire,
+and Grolemund 2018; Xie, Dervieux, and Riederer 2020), *bookdown* (Xie
+2021a, 2016), *rticles* (Allaire, Xie, R Foundation, et al. 2021) and
+*bibtex* (Francois 2020).
 
 ## Installation
 
@@ -96,9 +93,9 @@ coherent story line.
 
 **Data:**
 
-  - Synthetic data for validation of model performance and Figure 2
-    (`vignette("simulation")`).
-  - Real data reading and processing and Supplementary Figure 1
+-   Synthetic data for validation of model performance and Figure 2 and
+    3 and Supplementary Figure 1 (`vignette("simulation")`).
+-   Real data reading and processing and Supplementary Figure 2
     (`vignette("data")`).
 
 Because of the excessive file-sizes of ion count data, the data is
@@ -107,176 +104,185 @@ and can be accessed with the function `download_point()`.
 
 **Figures:**
 
-  - Evaluation of model performance; Figures 4–6
+-   Evaluation of model performance; Figures 4 and 5
     (`vignette("performance")`).
-  - Raster images and scatter plots of real SIMS
-    <sup>13</sup>C/<sup>12</sup>C analyses; Figures 7–9 and
+-   Raster images and scatter plots of real SIMS
+    <sup>13</sup>C/<sup>12</sup>C analyses; Figures 6–8 and
     Supplementary Figures 7 and 8 (`vignette("raster")`).
-  - Regression diagnostics; Figure 3 and Supplementary Figures 3–5
+-   Regression diagnostics; Supplementary Figures 3–5
     (`vignette("regression")`).
-  - Accuracy of SIMS isotope analysis; Figure 3 and Supplementary
-    Figures 2 and 6 (`vignette("accuracy")`).
+-   Accuracy of SIMS isotope analysis; Supplementary Figures 3 and 7
+    (`vignette("accuracy")`).
 
 # References
 
-<div id="refs" class="references">
+<div id="refs" class="references csl-bib-body hanging-indent">
 
-<div id="ref-rmarkdown1">
+<div id="ref-rmarkdown" class="csl-entry">
 
 Allaire, JJ, Yihui Xie, Jonathan McPherson, Javier Luraschi, Kevin
 Ushey, Aron Atkins, Hadley Wickham, Joe Cheng, Winston Chang, and
-Richard Iannone. 2020. *Rmarkdown: Dynamic Documents for R*.
-<https://github.com/rstudio/rmarkdown>.
+Richard Iannone. 2021. *Rmarkdown: Dynamic Documents for r*.
+<https://CRAN.R-project.org/package=rmarkdown>.
 
 </div>
 
-<div id="ref-rticles">
+<div id="ref-rticles" class="csl-entry">
 
 Allaire, JJ, Yihui Xie, R Foundation, Hadley Wickham, Journal of
 Statistical Software, Ramnath Vaidyanathan, Association for Computing
-Machinery, et al. 2021. *Rticles: Article Formats for R Markdown*.
-<https://CRAN.R-project.org/package=rticles>.
+Machinery, et al. 2021. *Rticles: Article Formats for r Markdown*.
+<https://github.com/rstudio/rticles>.
 
 </div>
 
-<div id="ref-magrittr">
+<div id="ref-magrittr" class="csl-entry">
 
-Bache, Stefan Milton, and Hadley Wickham. 2014. “magrittr: A
-Forward-Pipe Operator for R.”
-<https://cran.r-project.org/package=magrittr>.
-
-</div>
-
-<div id="ref-R.matlab">
-
-Bengtsson, Henrik. 2018. *R.matlab: Read and Write Mat Files and Call
-Matlab from Within R*. <https://CRAN.R-project.org/package=R.matlab>.
+Bache, Stefan Milton, and Hadley Wickham. 2020. *Magrittr: A
+Forward-Pipe Operator for r*.
+<https://CRAN.R-project.org/package=magrittr>.
 
 </div>
 
-<div id="ref-zen4R">
+<div id="ref-R.matlab" class="csl-entry">
 
-Blondel, Emmanuel. 2020. *Zen4R: Interface to ’Zenodo’ Rest Api*.
-<https://CRAN.R-project.org/package=zen4R>.
-
-</div>
-
-<div id="ref-bibtex">
-
-Francois, Romain. 2017. “bibtex: Bibtex Parser.”
-<https://cran.r-project.org/package=bibtex>.
+Bengtsson, Henrik. 2018. *R.matlab: Read and Write MAT Files and Call
+MATLAB from Within r*. <https://github.com/HenrikBengtsson/R.matlab>.
 
 </div>
 
-<div id="ref-purrr">
+<div id="ref-zen4R" class="csl-entry">
+
+Blondel, Emmanuel. 2020. *zen4R: Interface to Zenodo REST API*.
+<https://github.com/eblondel/zen4R>.
+
+</div>
+
+<div id="ref-bibtex" class="csl-entry">
+
+Francois, Romain. 2020. *Bibtex: Bibtex Parser*.
+<https://github.com/romainfrancois/bibtex>.
+
+</div>
+
+<div id="ref-purrr" class="csl-entry">
 
 Henry, Lionel, and Hadley Wickham. 2020a. *Purrr: Functional Programming
 Tools*. <https://CRAN.R-project.org/package=purrr>.
 
 </div>
 
-<div id="ref-rlang">
+<div id="ref-rlang" class="csl-entry">
 
-———. 2020b. *Rlang: Functions for Base Types and Core R and ’Tidyverse’
+———. 2020b. *Rlang: Functions for Base Types and Core r and Tidyverse
 Features*. <https://CRAN.R-project.org/package=rlang>.
 
 </div>
 
-<div id="ref-fs">
+<div id="ref-fs" class="csl-entry">
 
 Hester, Jim, and Hadley Wickham. 2020. *Fs: Cross-Platform File System
-Operations Based on ’Libuv’*. <https://CRAN.R-project.org/package=fs>.
+Operations Based on Libuv*. <https://CRAN.R-project.org/package=fs>.
 
 </div>
 
-<div id="ref-here">
-
-Müller, Kirill. 2020. *Here: A Simpler Way to Find Your Files*.
-<https://CRAN.R-project.org/package=here>.
-
-</div>
-
-<div id="ref-tibble">
+<div id="ref-tibble" class="csl-entry">
 
 Müller, Kirill, and Hadley Wickham. 2021. *Tibble: Simple Data Frames*.
 <https://CRAN.R-project.org/package=tibble>.
 
 </div>
 
-<div id="ref-RColorBrewer">
+<div id="ref-RColorBrewer" class="csl-entry">
 
 Neuwirth, Erich. 2014. *RColorBrewer: ColorBrewer Palettes*.
 <https://CRAN.R-project.org/package=RColorBrewer>.
 
 </div>
 
-<div id="ref-rversion">
+<div id="ref-rversion" class="csl-entry">
 
-R Core Team. 2020. *R: A Language and Environment for Statistical
+R Core Team. 2021. *R: A Language and Environment for Statistical
 Computing*. Vienna, Austria: R Foundation for Statistical Computing.
 <https://www.R-project.org/>.
 
 </div>
 
-<div id="ref-point">
+<div id="ref-MASS" class="csl-entry">
 
-Schobben, Martin. n.d. *Point: Reading, Processing, and Analysing Raw
+Ripley, Brian. 2021. *MASS: Support Functions and Datasets for Venables
+and Ripley’s MASS*. <http://www.stats.ox.ac.uk/pub/MASS4/>.
+
+</div>
+
+<div id="ref-point" class="csl-entry">
+
+Schobben, Martin. 2021. *Point: Reading, Processing, and Analysing Raw
 Ion Count Data*.
 
 </div>
 
-<div id="ref-ggrepel">
+<div id="ref-ggrepel" class="csl-entry">
 
 Slowikowski, Kamil. 2021. *Ggrepel: Automatically Position
-Non-Overlapping Text Labels with ’Ggplot2’*.
-<https://CRAN.R-project.org/package=ggrepel>.
+Non-Overlapping Text Labels with Ggplot2*.
+<https://github.com/slowkow/ggrepel>.
 
 </div>
 
-<div id="ref-MASS">
+<div id="ref-MASS2002" class="csl-entry">
 
 Venables, W. N., and B. D. Ripley. 2002. *Modern Applied Statistics with
-S*. Fourth. New York: Springer. <https://www.stats.ox.ac.uk/pub/MASS4/>.
+s*. Fourth. New York: Springer. <https://www.stats.ox.ac.uk/pub/MASS4/>.
 
 </div>
 
-<div id="ref-ggplot2">
+<div id="ref-ggplot22016" class="csl-entry">
 
 Wickham, Hadley. 2016. *Ggplot2: Elegant Graphics for Data Analysis*.
 Springer-Verlag New York. <https://ggplot2.tidyverse.org>.
 
 </div>
 
-<div id="ref-stringr">
+<div id="ref-stringr" class="csl-entry">
 
-———. 2019. “stringr: Simple, Consistent Wrappers for Common String
-Operations.” <https://cran.r-project.org/package=stringr>.
-
-</div>
-
-<div id="ref-cubelyr">
-
-———. 2020a. *Cubelyr: A Data Cube ’Dplyr’ Backend*.
-<https://CRAN.R-project.org/package=cubelyr>.
+———. 2019. *Stringr: Simple, Consistent Wrappers for Common String
+Operations*. <https://CRAN.R-project.org/package=stringr>.
 
 </div>
 
-<div id="ref-tidyr">
+<div id="ref-cubelyr" class="csl-entry">
 
-———. 2020b. *Tidyr: Tidy Messy Data*.
+———. 2020. *Cubelyr: A Data Cube Dplyr Backend*.
+<https://github.com/hadley/cubelyr>.
+
+</div>
+
+<div id="ref-tidyr" class="csl-entry">
+
+———. 2021. *Tidyr: Tidy Messy Data*.
 <https://CRAN.R-project.org/package=tidyr>.
 
 </div>
 
-<div id="ref-roxygen2">
+<div id="ref-ggplot2" class="csl-entry">
+
+Wickham, Hadley, Winston Chang, Lionel Henry, Thomas Lin Pedersen,
+Kohske Takahashi, Claus Wilke, Kara Woo, Hiroaki Yutani, and Dewey
+Dunnington. 2020. *Ggplot2: Create Elegant Data Visualisations Using the
+Grammar of Graphics*. <https://CRAN.R-project.org/package=ggplot2>.
+
+</div>
+
+<div id="ref-roxygen2" class="csl-entry">
 
 Wickham, Hadley, Peter Danenberg, Gábor Csárdi, and Manuel Eugster.
-2020. *Roxygen2: In-Line Documentation for R*.
+2020. *Roxygen2: In-Line Documentation for r*.
 <https://CRAN.R-project.org/package=roxygen2>.
 
 </div>
 
-<div id="ref-dplyr">
+<div id="ref-dplyr" class="csl-entry">
 
 Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2021.
 *Dplyr: A Grammar of Data Manipulation*.
@@ -284,55 +290,72 @@ Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2021.
 
 </div>
 
-<div id="ref-devtools">
+<div id="ref-devtools" class="csl-entry">
 
-Wickham, Hadley, Jim Hester, and Winston Chang. 2020. *Devtools: Tools
-to Make Developing R Packages Easier*.
+Wickham, Hadley, Jim Hester, and Winston Chang. 2021. *Devtools: Tools
+to Make Developing r Packages Easier*.
 <https://CRAN.R-project.org/package=devtools>.
 
 </div>
 
-<div id="ref-scales">
+<div id="ref-scales" class="csl-entry">
 
 Wickham, Hadley, and Dana Seidel. 2020. *Scales: Scale Functions for
 Visualization*. <https://CRAN.R-project.org/package=scales>.
 
 </div>
 
-<div id="ref-knitr2">
+<div id="ref-knitr2014" class="csl-entry">
 
-Xie, Yihui. 2015. *Dynamic Documents with R and Knitr*. 2nd ed. Boca
-Raton, Florida: Chapman; Hall/CRC. <https://yihui.org/knitr/>.
+Xie, Yihui. 2014. “Knitr: A Comprehensive Tool for Reproducible Research
+in R.” In *Implementing Reproducible Computational Research*, edited by
+Victoria Stodden, Friedrich Leisch, and Roger D. Peng. Chapman;
+Hall/CRC. <http://www.crcpress.com/product/isbn/9781466561595>.
 
 </div>
 
-<div id="ref-bookdown2">
+<div id="ref-knitr2015" class="csl-entry">
+
+———. 2015. *Dynamic Documents with R and Knitr*. 2nd ed. Boca Raton,
+Florida: Chapman; Hall/CRC. <https://yihui.org/knitr/>.
+
+</div>
+
+<div id="ref-bookdown2016" class="csl-entry">
 
 ———. 2016. *Bookdown: Authoring Books and Technical Documents with R
 Markdown*. Boca Raton, Florida: Chapman; Hall/CRC.
-<https://github.com/rstudio/bookdown>.
+<https://bookdown.org/yihui/bookdown>.
 
 </div>
 
-<div id="ref-bookdown1">
+<div id="ref-bookdown" class="csl-entry">
 
-———. 2020. *Bookdown: Authoring Books and Technical Documents with R
-Markdown*. <https://github.com/rstudio/bookdown>.
-
-</div>
-
-<div id="ref-knitr1">
-
-———. 2021. *Knitr: A General-Purpose Package for Dynamic Report
-Generation in R*. <https://yihui.org/knitr/>.
+———. 2021a. *Bookdown: Authoring Books and Technical Documents with r
+Markdown*. <https://CRAN.R-project.org/package=bookdown>.
 
 </div>
 
-<div id="ref-rmarkdown2">
+<div id="ref-knitr" class="csl-entry">
+
+———. 2021b. *Knitr: A General-Purpose Package for Dynamic Report
+Generation in r*. <https://yihui.org/knitr/>.
+
+</div>
+
+<div id="ref-rmarkdown2018" class="csl-entry">
 
 Xie, Yihui, J. J. Allaire, and Garrett Grolemund. 2018. *R Markdown: The
 Definitive Guide*. Boca Raton, Florida: Chapman; Hall/CRC.
 <https://bookdown.org/yihui/rmarkdown>.
+
+</div>
+
+<div id="ref-rmarkdown2020" class="csl-entry">
+
+Xie, Yihui, Christophe Dervieux, and Emily Riederer. 2020. *R Markdown
+Cookbook*. Boca Raton, Florida: Chapman; Hall/CRC.
+<https://bookdown.org/yihui/rmarkdown-cookbook>.
 
 </div>
 
