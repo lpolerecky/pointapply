@@ -1,11 +1,16 @@
 Package: pointapply
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Title: Package to apply point functionality to real and synthetic data
+Year: 2021
+Version: 0.1.0.9000
+Authors@R: 
+    person(given = "Martin", 
+           family = "Schobben", 
+           email = "schobbenmartin@gmail.com",
+           role = "cre", 
+           comment = c(ORCID = "0000-0001-8560-0037"))
+Maintainer: Martin Schobben <schobbenmartin@gmail.com>
+Description: This package accompanies the paper: New methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry, by Martin Schobben, Michiel Kienhuis, and Lubos Polerecky. This paper revolves around the point function diag_R() which allows an assessment of isotopic heterogeneity in SIMS analyses. The package ensures the complete reproduction of this work.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
