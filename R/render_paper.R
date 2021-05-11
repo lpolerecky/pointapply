@@ -27,7 +27,7 @@ render_paper <- function(
   ){
 
   # download data when needed
-  if (!on_build & download_point()) download_point()
+  if (!on_build) download_point()
 
   # paths
   if (on_build) {
@@ -49,7 +49,7 @@ render_paper <- function(
   fs::link_create(IC, fs::path(path,  type_ms, "data")) # data
   fs::file_copy(
     pkg,
-    fs::path(path,  type_ms, "packages", ext = "bib"),
+    fs::path(path, type_ms, "packages", ext = "bib"),
     overwrite = TRUE
     ) # bib
   fs::file_copy(
