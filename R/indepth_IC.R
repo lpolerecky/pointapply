@@ -1,7 +1,7 @@
 #' In-depth analysis of one grid_cell
 #'
-#' \code{gg_effect} This plot function is used to produce the scatterplots of
-#' Figure 9 and Supplementary Figure 8.
+#' \code{gg_effect} This plot function is used to produce the scatter plots of
+#' Figure 8 and Supplementary Figure 9.
 #'
 #' @param IC Ion count data.
 #' @param image Data frame for ion raster map.
@@ -12,16 +12,18 @@
 #' @param thr Numeric threshold value for filter selection.
 #' @param ion1_R A character string constituting the rare isotope ("13C").
 #' @param ion2_R A character string constituting the common isotope ("12C").
-#' @param Xt Variable for ion count rates (default = Xt.pr).
-#' @param N Variable for ion counts (default = N.rw).
-#' @param colors Color palette to identify matrix and inclusion (default =
-#' \code{ c("#FFEDA0", "#FEB24C")}).
+#' @param colors Colour palette to identify matrix and inclusion (default =
+#' \code{ c("#8E063B", "#023FA5")}).
+#' @param .X Variable for ion count rates (default = Xt.pr).
+#' @param .N Variable for ion counts (default = N.pr).
+#' @param .species Variable for species names (default = species.nm).
+#' @param .t Variable for time increment (default = t.nm).
 #'
 #' @return \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
 gg_point <- function(IC, image, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
-                     colors = c("#FFEDA0", "#FEB24C"), .X = Xt.pr, .N = N.pr,
+                     colors = c("#8E063B", "#023FA5"), .X = Xt.pr, .N = N.pr,
                      .species = species.nm, .t = t.nm) {
   # unique ions
   ions <- unique(c(ion1_thr, ion2_thr, ion1_R, ion2_R))
@@ -93,12 +95,16 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
 
   # label names
   tb_wide <- point::cov_R(tb_X, ions, sample.nm, flag, frac) %>%
-    mutate(
-      flag = paste(
-        .data$flag,
-        paste("(f = ", sprintf(fmt = "%.3f", .data$frac), ")")
-        )
+    mutate(component = if_else(.data$flag == "inclusion", "B", "A"))
+  labels <- purrr::pmap(
+    list(a = tb_wide$flag, b = tb_wide$component, c = tb_wide$frac),
+    function(a, b, c) {
+      substitute(
+        a ~"("*italic(f)[b] == c*")",
+        list(a = a , b = b, c = sprintf(fmt = "%.3f", c))
       )
+      }
+  )
 
   # ranges
   range_x <- c(0, max(pull(tb_wide, !! upper2)))
@@ -114,11 +120,11 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
 
   # labels for ion count rates
   xlab <- substitute(
-    a ~ "(ct sec"^"-"*")",
+    a ~ "(count sec"^"-"*")",
     list(a = point::ion_labeller(ion2_R, "expr"))
     )
   ylab <- substitute(
-    a ~ "(ct sec"^"-"*")",
+    a ~ "(count sec"^"-"*")",
     list(a = point::ion_labeller(ion1_R, "expr"))
     )
 
@@ -139,13 +145,18 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
     scale_y_continuous(
       ylab,
       expand = ggplot2::expansion(mult = c(0, 0.1)),
-      limits = range_y
+      limits = range_y,
+      labels = scales::label_scientific(2),
+      breaks = scales::pretty_breaks(3)
       ) +
     scale_x_continuous(
       xlab,
       expand = ggplot2::expansion(mult = c(0, 0.1)),
-      limits = range_x
+      limits = range_x,
+      labels = scales::label_scientific(2),
+      breaks = scales::pretty_breaks(3)
       ) +
-    ggplot2::scale_fill_manual("", values = colors) +
-    themes_IC(base = ggplot2::theme_bw())
+    ggplot2::scale_fill_manual("", values = colors, labels = labels) +
+    themes_IC(base = ggplot2::theme_bw()) +
+    ggplot2::theme(legend.direction = "vertical")
   }

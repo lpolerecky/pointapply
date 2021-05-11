@@ -101,104 +101,6 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
     labs(title = ttl, x = x_lab, y = y_lab) +
     themes_IC(base = ggplot2::theme_bw())
 }
-#' @rdname heat_map
-#'
-#' @export
-heat_sum <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
-                     y_lab, x_sec, y_sec, trans_base = -20, trans_n = 6){
-
-  # default colors
-  def_cols <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")
-
-  # transformation of secondary axis
-  tr <- rayleigh_trans(trans_base, trans_n)
-
-  # specificity background rectangle
-  tb_rec <-tibble(
-    xmin = -1.5,
-    xmax = 1.5,
-    ymin = -0.1,
-    ymax = 1.1,
-    flag = "Specificity"
-    )
-
-  # background labels
-  tb_txt <- tibble(
-    x = rep(-17, 2),
-    y = rep(0.25, 2),
-    type.nm = c("asymmetric", "symmetric"),
-    flag = rep("Sensitivity", 2)
-    )
-
-  ggplot(
-    simu,
-    aes(
-      x = {{ x }},
-      y = {{ y }},
-      fill = {{ stat }},
-      linetype = { {stat }},
-      group = {{ stat }}
-      )
-    ) +
-  ggplot2::geom_rect(
-    data = tb_rec,
-    aes(
-      xmin = .data$xmin,
-      xmax = .data$xmax,
-      ymin = .data$ymin,
-      ymax = .data$ymax
-      ),
-    fill = def_cols[1],
-    inherit.aes = FALSE
-    ) +
-  geom_text(
-    data = tb_txt,
-    aes(
-      x = .data$x,
-      y = .data$y,
-      label = .data$type.nm
-      ),
-    size = 3,
-    inherit.aes = FALSE
-    ) +
-  geom_line() +
-  ggplot2::scale_linetype(guide = FALSE) +
-  geom_point(shape = 21) +
-  # Rayleigh model secondary axis
-  scale_x_continuous(
-    breaks = seq(-20, 0,5),
-    sec.axis =
-      ggplot2::sec_axis(
-        trans = ~tr$transform(.) * -1,
-        x_sec,
-        breaks = c(0.15, 0.1, 0.05)
-      )
-    ) +
-  scale_y_continuous(
-    breaks = scales::pretty_breaks(3),
-    sec.axis = ggplot2::dup_axis(name = y_sec),
-    expand = c(-0.1, 0.1)
-    ) +
-  ggplot2::scale_fill_manual("", values = c("white", "grey")) +
-  facet_grid(
-    rows = vars({{grp1}}),
-    cols = vars({{grp2}}),
-    scales = "free_x",
-    space = "free_x"
-    ) +
-  labs(title = ttl, x = x_lab, y = y_lab) +
-  themes_IC(base = ggplot2::theme_bw()) +
-  ggplot2::theme(
-  #   legend.position = "right",
-  #   legend.key = ggplot2::element_blank(),
-    strip.placement = 'outside',
-    strip.background.x = ggplot2::element_blank(),
-    strip.background.y = ggplot2::element_blank(),
-    strip.text.x = ggplot2::element_blank(),
-    strip.text.y = ggplot2::element_blank()
-    )
-
-}
 
 #-------------------------------------------------------------------------------
 # not exportet
@@ -251,11 +153,7 @@ rect_fun <- function(xaxis, yaxis){
       dims_sim$max_trend - ((dims_sim$var_trend / dims_sim$n_trend) / 2), # het
       dims_sim$min_trend - ((dims_sim$var_trend / dims_sim$n_trend) / 2) # em
     ),
-    lbl = c(
-      "homogeneous",
-      "heterogeneous",
-      "stable ionization"
-    ),
+    lbl = c("specificity", "sensitivity", "stable ionization"),
     col_type = c("black", "black", "red"),
     r_cell = dims_sim$r_cell
   )
@@ -272,7 +170,10 @@ rayleigh_trans <- function(base, frac){
   rayleigh_t <- function(x) (sign(x) * sqrt(abs(x / base))) / frac
   rayleigh_i <- function(x) ((base * x) ^ 2 * sign(x)) * frac
 
-  scales::trans_new(paste0("rayleigh", format(base), "-",format(frac)) , rayleigh_t, rayleigh_i)
+  scales::trans_new(
+    paste0("rayleigh", format(base), "-",format(frac)),
+    rayleigh_t,
+    rayleigh_i
+    )
 
 }
-

@@ -23,13 +23,15 @@
 #' Options are  \code{"point"} for normal scatter plots, and \code{"dens2d"} for
 #' density contour lines.
 #' @param facet_sc The \code{scales} parameter of `ggplot2::facet_grid`
+#' @param flag A variable representing a flag for outliers.
 #'
 #' @return \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
-gg_dens <- function(IC, x, y, xlab = ggplot2::waiver(), ylab = ggplot2::waiver(), ttl = "", gr = NULL, downsample = 1,
-                    x_lim = NULL, y_lim = NULL, unit = "dim", sds = 22,
-                    geom = "point", facet_sc = "fixed", flag = NULL){
+gg_dens <- function(IC, x, y, xlab = ggplot2::waiver(),
+                    ylab = ggplot2::waiver(), ttl = "", gr = NULL,
+                    downsample = 1, x_lim = NULL, y_lim = NULL, unit = "dim",
+                    sds = 22, geom = "point", facet_sc = "fixed", flag = NULL){
 
   gr <- enquo(gr)
   set.seed(sds)
@@ -97,12 +99,14 @@ gg_dens <- function(IC, x, y, xlab = ggplot2::waiver(), ylab = ggplot2::waiver()
       name = xlab,
       expand = c(0, 0),
       limits = x_lim,
+      labels = scales::label_scientific(2),
       breaks = scales::pretty_breaks(3)
       ) +
     scale_y_continuous(
       name = ylab,
       expand = c(0, 0),
       limits = y_lim,
+      labels = scales::label_scientific(2),
       breaks = scales::pretty_breaks(3)
       ) +
     ggtitle(ttl) +
@@ -115,8 +119,7 @@ gg_dens <- function(IC, x, y, xlab = ggplot2::waiver(), ylab = ggplot2::waiver()
      }
 }
 
-
-# denisty calculation function (https://themockup.blog/posts/2020-08-28-heatmaps-in-ggplot2/)
+# density calculation function (https://themockup.blog/posts/2020-08-28-heatmaps-in-ggplot2/)
 get_density <- function(x, y, h, n) {
   density_out <- MASS::kde2d(x, y, h, n)
   int_x <- findInterval(x, density_out$x)
@@ -126,7 +129,7 @@ get_density <- function(x, y, h, n) {
 }
 
 dens_point <- function (p, flag, IC, width) {
-  # colors
+  # colours
   div_col <- c("#8E063B", "#BB7784", "#D6BCC0", "#E2E2E2", "#BEC1D4", "#7D87B9",
                "#023FA5") # colorspace::diverge_hcl(7, rev = TRUE)
   p <- p +
@@ -134,24 +137,24 @@ dens_point <- function (p, flag, IC, width) {
   if (is_symbol(get_expr(flag))) {
     p <- p +
       ggplot2::scale_color_gradientn(
-      "",
-      breaks = range(IC$dens),
-      labels =  c("divergent", "confluent"),
-      colors = div_col,
-      na.value = "transparent",
-      guide = guide_colourbar(ticks = FALSE, barwidth = width)
-    )
+        "",
+        breaks = range(IC$dens),
+        labels =  c("divergent", "confluent"),
+        colors = div_col,
+        na.value = "transparent",
+        guide = guide_colourbar(ticks = FALSE, barwidth = width)
+      )
   } else {
     p <- p +
       scale_color_distiller(
-      "",
-      breaks = range(IC$dens),
-      labels =  c("low density", "high density"),
-      palette = "YlOrRd",
-      direction = 1,
-      na.value = "transparent",
-      guide = guide_colourbar(ticks = FALSE, barwidth = width)
-      )
+        "",
+        breaks = range(IC$dens),
+        labels =  c("low density", "high density"),
+        palette = "YlOrRd",
+        direction = 1,
+        na.value = "transparent",
+        guide = guide_colourbar(ticks = FALSE, barwidth = width)
+        )
   }
   # alpha
   p <- p +

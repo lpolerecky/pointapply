@@ -1,6 +1,6 @@
 #' Get path to matlab file
 #'
-#' This function comes from the package `readr`, and has been modified to access
+#' This function is modified from the package `readr` to access
 #' the bundled datasets in directory `inst/extdata` of `pointapply`. This
 #' function make them easy to access. This function is modified from
 #' \code{\link[readr:readr_example]{readr_example}} of the package

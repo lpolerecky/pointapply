@@ -156,7 +156,7 @@ image_cnts <- function(IC_3d, plane, title, species, file_name){
     flatten_matrix(var = "N.rw") %>%
     mutate(
       grid.nm = row_number(),
-      t.nm = 1e-3 * dim(df_3d)[which(plane == names(dimnames(df_3d)))],
+      t.nm = 1e-3 * dim(IC_3d)[which(plane == names(dimnames(IC_3d)))],
       species.nm = species,
       file.nm = file_name,
       sample.nm = title,

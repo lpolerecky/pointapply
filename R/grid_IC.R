@@ -4,23 +4,29 @@
 #' precision isotope ratios. \code{gg_sketch} draws the layout of the
 #' grid_cells.
 #'
-#' @param ls Named list containing dataframes for planes of ion counts for
+#' @param ls Named list containing data frames for planes of ion counts for
 #' high precision isotope ratios.
-#' @param ls_im Named list containing dataframes for planes of ion counts for
+#' @param ls_im Named list containing data frames for planes of ion counts for
 #' ion raster map.
 #' @param ttl Character string or expression for plot title.
 #' @param ratio A character string constituting the ion ratio, where the two
 #' ions are separated by a dash ("12C14N-40Ca16O").
 #' @param grid_print Logical whether to print the grid numbers
 #' (default = FALSE).
-#' @param viri Character string selecting the viriditas color scheme
+#' @param viri Character string selecting the viriditas colour scheme
 #' (default = "A").
 #' @param res Resolution of ion map in pixels (default = 256).
 #' @param grid_cell Grid-cell size in pixels (default = 64).
 #' @param scaler Numeric converting the pixels to metric dimension of
 #' measurement (default is the conversion used in this study).
-#' @param Xt Variable for ion count rates (default = Xt.pr).
-#' @param grid Variable for grid_cell number (default = grid.nm).
+#' @param label Character string indicating how to name tibble columns
+#' (default = "latex").
+#' @param .X Variable for ion count rates (default = Xt.pr).
+#' @param .N Variable for ion counts (default = N.pr).
+#' @param .species Variable for species names (default = species.nm).
+#' @param .t Variable for time increment (default = t.nm).
+#' @param .ion1 Character string for rare isotope (default = "13C").
+#' @param .ion2 Character string for common isotope (default = "12C").
 #'
 #' @return \code{\link[ggplot2:ggplot]{ggplot}}.
 #'
@@ -74,7 +80,6 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
         size = 1,
         inherit.aes = FALSE
         ) +
-      # ggplot2::coord_fixed(clip = "off") +
       depth_arrows(res, grid_cell) +
       geom_text(
         data = IC,
@@ -87,7 +92,7 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
         inherit.aes = FALSE
         ) +
       scale_color_distiller(
-        expression("Inter-isotope var. Pr("*delta^13*"C (\u2030) > |t|)"),
+        expression("Inter-isotope var."~italic(p)),
         palette = "OrRd",
         breaks = sapply(c(0.1, 0.01, 0.001) / 2, qt, 16, lower.tail = FALSE),
         labels = c(0.1, 0.01, 0.001),
@@ -98,7 +103,7 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
         title = ttl,
         subtitle =
           substitute(
-            "Intra-isotope var. Pr("*delta^13*"C (\u2030) > |F|):"~a,
+            "Intra-isotope var."~italic(p)*":"~a,
             list(a = sig_coder())
             )
          ) +
@@ -158,8 +163,11 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
     rlang::set_names(nm = dim_names) %>%
     purrr::map(flatten_matrix, var = "grid.nm") %>%
     purrr::map(
-      ~summarise(group_by(.x, grid.nm), across(.fns = mean),
-                 .groups = "drop")
+      ~summarise(
+        group_by(.x, grid.nm),
+        across(.fns = mean),
+        .groups = "drop"
+        )
       ) %>%
     purrr::map(tibble::add_column, sample.nm = "sketch")
 
@@ -186,20 +194,8 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
       expand = c(0, 0)
       ) +
     ggtitle("Grid layout") +
-    ggplot2::theme_classic() +
-    ggplot2::theme(
-      legend.position = "top",
-      rect = ggplot2::element_rect(
-        fill = "transparent",
-        color = "transparent"
-      ),
-      panel.background =  ggplot2::element_rect(
-        fill = "transparent",
-        color = "transparent"
-      ),
-      axis.line = ggplot2::element_blank()
-    ) +
-    themes_IC(base = ggplot2::theme_bw())
+    ggplot2::theme(axis.line = ggplot2::element_blank()) +
+    themes_IC(base = ggplot2::theme_void())
 }
 
 #-------------------------------------------------------------------------------
@@ -259,7 +255,10 @@ depth_arrows <- function(res, grid_cell) {
       xend = max_arrow,
       y = direction,
       yend = direction,
-      arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "npc"), type = "closed")
+      arrow = ggplot2::arrow(
+        length = ggplot2::unit(0.01, "npc"),
+        type = "closed"
+        )
       ),
     ggplot2::annotate(
       "segment",
@@ -267,10 +266,24 @@ depth_arrows <- function(res, grid_cell) {
       xend = direction,
       y = min_arrow,
       yend = max_arrow,
-      arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "npc"), type = "closed")
+      arrow = ggplot2::arrow(
+        length = ggplot2::unit(0.01, "npc"),
+        type = "closed"
+        )
       ),
-    ggplot2::annotate("text", x = res + grid_cell, y = text_level, label = "depth"),
-    ggplot2::annotate("text", x = text_level, y = res + grid_cell, label = "depth", angle = 90)
+    ggplot2::annotate(
+      "text",
+      x = res + grid_cell,
+      y = text_level,
+      label = "depth"
+      ),
+    ggplot2::annotate(
+      "text",
+      x = text_level,
+      y = res + grid_cell,
+      label = "depth",
+      angle = 90
+      )
     )
 }
 
@@ -391,8 +404,7 @@ tex_labeller <- function(vars, stat, label){
       org = names_vars$origin,
       stat = names_vars$name
     ),
-    stat_labeller,
+    point::stat_labeller,
     label = label
   )
 }
-
