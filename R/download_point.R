@@ -29,18 +29,16 @@
 #' @export
 download_point <- function (type = "all") {
 
-  path_ext <- fs::path_package("pointapply", "extdata")
-  path_int <- fs::path_package("pointapply", "data")
+  path <- fs::path_package("pointapply", "data")
 
   # get the data
-  if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
-    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4580159",
-                                        path = path_ext)
+  if (length(list.files(path, pattern = ".zip$")) == 0) {
+    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4580159", path = path)
     }
 
   if (type == "all" | type == "raw") {
     # extract matlab
-    ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
+    ls_mat <- list.files(path, pattern = "GLENDON.zip$", full.names = TRUE)
     purrr::walk(
       ls_mat,
       ~unzip(.x, exdir = tools::file_path_sans_ext(.x), junkpaths = TRUE)
@@ -49,10 +47,10 @@ download_point <- function (type = "all") {
 
   if (type == "all" | type == "processed") {
     # purge data
-    purrr::walk(list.files(path_int, full.names = TRUE), file.remove)
+    purrr::walk(list.files(path, full.names = TRUE), file.remove)
     # extract data (.rda format)
-    ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
-    unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
+    ls_dat <- list.files(path, pattern = "data.zip", full.names = TRUE)
+    unzip(ls_dat, exdir = path, junkpaths = TRUE)
     }
 }
 #' @rdname download_point
