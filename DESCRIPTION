@@ -27,7 +27,8 @@ Imports:
     point,
     fs,
     MASS,
-    RColorBrewer
+    RColorBrewer,
+    zen4R
 Suggests: 
     roxygen2,
     grid,
@@ -41,7 +42,6 @@ Suggests:
     tibble,
     cubelyr,
     R.matlab,
-    zen4R,
     tidyselect
 VignetteBuilder: knitr
 Depends: 
