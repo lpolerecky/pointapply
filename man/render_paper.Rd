@@ -9,7 +9,7 @@ render_paper(
   output_dir = fs::path_wd(),
   type_ms = "preprint",
   copy_figures = TRUE,
-  on_build = TRUE
+  on_build = FALSE
 )
 }
 \arguments{
