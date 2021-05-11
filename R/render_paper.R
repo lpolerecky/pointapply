@@ -33,30 +33,25 @@ render_paper <- function(
   if (on_build) {
     path <- fs::path_wd("inst/paper")
     IC <- fs::path_wd("inst/extdata/data")
-    vig <- fs::path_wd("vignettes/figures")
     pkg <- fs::path_wd("packages", ext ="bib")
     R <- fs::path_wd("rversion", ext ="bib")
+    fs::file_copy(
+      pkg,
+      fs::path(path, type_ms, "packages", ext = "bib"),
+      overwrite = TRUE
+    ) # bib
+    fs::file_copy(
+      R,
+      fs::path(path,  type_ms, "rversion", ext = "bib"),
+      overwrite = TRUE
+    ) # bib
     } else {
       path <- fs::path_package("pointapply", "paper")
       IC <- fs::path_package("pointapply", "data")
-      vig <- fs::path_package("pointapply", "vignettes/figures")
-      pkg <- fs::path_package("packages", ext = "bib")
-      R <- fs::path_package("rversion", ext ="bib")
       }
 
   # make links
-  fs::link_create(vig, fs::path(path,  type_ms, "figures")) # figures
   fs::link_create(IC, fs::path(path,  type_ms, "data")) # data
-  fs::file_copy(
-    pkg,
-    fs::path(path, type_ms, "packages", ext = "bib"),
-    overwrite = TRUE
-    ) # bib
-  fs::file_copy(
-    R,
-    fs::path(path,  type_ms, "rversion", ext = "bib"),
-    overwrite = TRUE
-    ) # bib
   fs::link_create(
     fs::path(path, "templates"),
     fs::path(path,  type_ms, "templates")
@@ -80,5 +75,6 @@ render_paper <- function(
     )
 
   # copy figures
-  fs::dir_copy(vig, fs::path(output_dir, "figures"), overwrite = TRUE)
+  fs::dir_copy(fs::path(path, type_ms), fs::path(output_dir, "figures"),
+               overwrite = TRUE)
 }
