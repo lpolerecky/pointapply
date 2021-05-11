@@ -2,7 +2,7 @@ Package: pointapply
 Type: Package
 Title: Package to apply point functionality to real and synthetic data
 Year: 2021
-Version: 0.1.0.9000
+Version: 0.1.0.9001
 Authors@R: 
     person(given = "Martin", 
            family = "Schobben", 

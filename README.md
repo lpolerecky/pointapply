@@ -1,15 +1,14 @@
 
 # pointapply
 
-<!-- badges: start -->
-<!-- badges: end -->
+[![DOI](https://zenodo.org/badge/340077309.svg)](https://zenodo.org/badge/latestdoi/340077309)
 
 The R package *pointapply* contains the code and data to reconstruct the
 publication: Martin Schobben, Michiel Kienhuis, and Lubos Polerecky.
 2021. *New methods to detect isotopic heterogeneity with Secondary Ion
 Mass Spectrometry*, preprint on [Eartharxiv](https://eartharxiv.org/).
 
-This paper assess the performance of the application of the `diag_R()`
+This paper assesses the performance of the application of the `diag_R()`
 function of the sister package *point* (Schobben 2021) in detecting
 isotope heterogeneity in natural substrates.
 
