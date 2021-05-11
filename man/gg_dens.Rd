@@ -8,14 +8,14 @@ gg_dens(
   IC,
   x,
   y,
-  xlab,
-  ylab,
-  ttl,
-  downsample,
-  gr,
+  xlab = ggplot2::waiver(),
+  ylab = ggplot2::waiver(),
+  ttl = "",
+  gr = NULL,
+  downsample = 1,
   x_lim = NULL,
   y_lim = NULL,
-  unit = "um",
+  unit = "dim",
   sds = 22,
   geom = "point",
   facet_sc = "fixed",
@@ -35,10 +35,10 @@ gg_dens(
 
 \item{ttl}{Character string or expression for plot title.}
 
+\item{gr}{A grouping variable.}
+
 \item{downsample}{A numeric supplying the fraction for down-sampling of the
 original data frame.}
-
-\item{gr}{A grouping variable.}
 
 \item{x_lim}{Numeric range for x axis (default = NULL).}
 
@@ -56,6 +56,8 @@ Options are  \code{"point"} for normal scatter plots, and \code{"dens2d"} for
 density contour lines.}
 
 \item{facet_sc}{The \code{scales} parameter of `ggplot2::facet_grid`}
+
+\item{flag}{A variable representing a flag for outliers.}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.

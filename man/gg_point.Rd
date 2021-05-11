@@ -12,7 +12,7 @@ gg_point(
   thr,
   ion1_R,
   ion2_R,
-  colors = c("#FFEDA0", "#FEB24C"),
+  colors = c("#8E063B", "#023FA5"),
   .X = Xt.pr,
   .N = N.pr,
   .species = species.nm,
@@ -36,17 +36,21 @@ the map.}
 
 \item{ion2_R}{A character string constituting the common isotope ("12C").}
 
-\item{colors}{Color palette to identify matrix and inclusion (default =
-\code{ c("#FFEDA0", "#FEB24C")}).}
+\item{colors}{Colour palette to identify matrix and inclusion (default =
+\code{ c("#8E063B", "#023FA5")}).}
 
-\item{Xt}{Variable for ion count rates (default = Xt.pr).}
+\item{.X}{Variable for ion count rates (default = Xt.pr).}
 
-\item{N}{Variable for ion counts (default = N.rw).}
+\item{.N}{Variable for ion counts (default = N.pr).}
+
+\item{.species}{Variable for species names (default = species.nm).}
+
+\item{.t}{Variable for time increment (default = t.nm).}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 }
 \description{
-\code{gg_effect} This plot function is used to produce the scatterplots of
-Figure 9 and Supplementary Figure 8.
+\code{gg_effect} This plot function is used to produce the scatter plots of
+Figure 8 and Supplementary Figure 9.
 }

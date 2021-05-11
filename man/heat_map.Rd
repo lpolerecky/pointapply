@@ -2,7 +2,6 @@
 % Please edit documentation in R/heatmap.R
 \name{heat_map}
 \alias{heat_map}
-\alias{heat_sum}
 \title{Heatmaps and summary plots for model performance.}
 \usage{
 heat_map(
@@ -19,23 +18,6 @@ heat_map(
   x_sec = NULL,
   trans_base = -2,
   trans_n = 10
-)
-
-heat_sum(
-  simu,
-  x,
-  y,
-  stat,
-  grp1,
-  grp2,
-  conversion,
-  ttl,
-  x_lab,
-  y_lab,
-  x_sec,
-  y_sec,
-  trans_base = -20,
-  trans_n = 6
 )
 }
 \arguments{

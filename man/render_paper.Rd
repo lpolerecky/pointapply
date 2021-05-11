@@ -6,7 +6,8 @@
 \usage{
 render_paper(
   title = "Schobbenetal_SIMS_method",
-  output_dir = "/home/amandus/Documents/work/manuscripts/Schobbenetal_SIMS_method",
+  output_dir = fs::path_wd(),
+  type_ms = "preprint",
   copy_figures = TRUE,
   on_build = TRUE
 )
@@ -16,6 +17,9 @@ render_paper(
 
 \item{output_dir}{Character string for directory containing the rendered
 document.}
+
+\item{type_ms}{Character string for type manuscript, either \code{"preprint"}
+or \code{"paper"}.}
 
 \item{copy_figures}{Logical wether to copy figures to directory
 (default = TRUE).}

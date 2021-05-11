@@ -15,6 +15,7 @@ gg_effect(
   res = 256,
   grid_cell = 64,
   scaler = 40/256,
+  label = "latex",
   .X = Xt.pr,
   .N = N.pr,
   .species = species.nm,
@@ -26,10 +27,10 @@ gg_effect(
 gg_sketch(res = 256, grid_cell = 64, scaler = 40/256)
 }
 \arguments{
-\item{ls}{Named list containing dataframes for planes of ion counts for
+\item{ls}{Named list containing data frames for planes of ion counts for
 high precision isotope ratios.}
 
-\item{ls_im}{Named list containing dataframes for planes of ion counts for
+\item{ls_im}{Named list containing data frames for planes of ion counts for
 ion raster map.}
 
 \item{ttl}{Character string or expression for plot title.}
@@ -40,7 +41,7 @@ ions are separated by a dash ("12C14N-40Ca16O").}
 \item{grid_print}{Logical whether to print the grid numbers
 (default = FALSE).}
 
-\item{viri}{Character string selecting the viriditas color scheme
+\item{viri}{Character string selecting the viriditas colour scheme
 (default = "A").}
 
 \item{res}{Resolution of ion map in pixels (default = 256).}
@@ -50,9 +51,20 @@ ions are separated by a dash ("12C14N-40Ca16O").}
 \item{scaler}{Numeric converting the pixels to metric dimension of
 measurement (default is the conversion used in this study).}
 
-\item{Xt}{Variable for ion count rates (default = Xt.pr).}
+\item{label}{Character string indicating how to name tibble columns
+(default = "latex").}
 
-\item{grid}{Variable for grid_cell number (default = grid.nm).}
+\item{.X}{Variable for ion count rates (default = Xt.pr).}
+
+\item{.N}{Variable for ion counts (default = N.pr).}
+
+\item{.species}{Variable for species names (default = species.nm).}
+
+\item{.t}{Variable for time increment (default = t.nm).}
+
+\item{.ion1}{Character string for rare isotope (default = "13C").}
+
+\item{.ion2}{Character string for common isotope (default = "12C").}
 }
 \value{
 \code{\link[ggplot2:ggplot]{ggplot}}.
