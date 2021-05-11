@@ -1,7 +1,7 @@
 ---
 title: "Validation of regression assumptions"
 output: rmarkdown::html_vignette
-bibliography: biblio.bib
+bibliography: packages.bib
 biblio-style: apalike
 vignette: >
   %\VignetteIndexEntry{Validation of regression assumptions}
@@ -25,12 +25,12 @@ The R package `pointapply` contains the code and data to reconstruct the publica
 
 The validity of inter- and intra- isotope models is verified for the nanoSIMS-generated data by an assessment of the implicit assumptions of the linear regression model (Eq. (4) of the paper, and see below); normality, homogeneity and independence of residuals (see also `vignette("IC-diagnostics", package = "point")`). 
 
-$$\text{The ideal linear R model:} \quad \hat{X}_i^b = \hat{R}X_i^a +  \hat{e}_i \text{.}$$
+$$\text{The ideal linear model:} \quad \hat{X}_i^b = \hat{R}X_i^a +  \hat{e}_i \text{.}$$
 
 
 In addition, the regression assumptions are used to aid the selection of the appropriate grid-cell size, as the underlying data structure of ion counts depends on this factor encompassed in the individual measurements of a conventional SIMS isotope analysis. In effect, the smaller the grid-cell (i.e. measurement time) the more the reduced counts will deviate from a normal (Gaussian distribution). This effect will affect at first counts of the rare isotope (i.e. ^13^C). 
 
-The function to perform regression diagnostics `diag_R()` is a core feature of the accompanying package *point* [@point].
+The function to perform regression diagnostics `diag_R()` is a core feature of the accompanying package `point` [@point].
 
 
 ```{r setup, eval=TRUE}
@@ -40,13 +40,13 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- TRUE
+on_build <- FALSE
 ```  
 
 
 # Download data
 
-The validation of regression assumptions of Supplementary Section requires ion count data processed with the *point* R package. Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("read-matlab")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. 
+The validation of regression assumptions of Supplementary Section requires ion count data processed with the *point* R package. Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. 
 
 
 ```{r data}
@@ -66,7 +66,8 @@ grid_cell <- sapply(2:7, function(x) 2 ^ x)
 # names of the analytes in the paper
 name <- c("MEX", "MON")
 # load
-name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE, on_build)
+name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE, 
+                   on_build)
 # data frame aggregated over depth
 tb <- purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
 ```
@@ -88,7 +89,7 @@ tb_QQ <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm,
 
 ## Residuals with a mean of zero 
 
-For the next chunk of code, only the argument `.hyp` is changed to `ttest`. This invokes another hypothesis test, which checks whether the mean of the pooled $\hat{e}_i^*$ is significantly different from zero by performing a one-sample two-sided *Student’s t* hypothesis test. 
+For the next chunk of code, only the argument `.hyp` is changed to `"ttest"`. This invokes another hypothesis test, which checks whether the mean of the pooled $\hat{e}_i^*$ is significantly different from zero by performing a one-sample two-sided *Student’s t* hypothesis test. 
 
 
 ```{r mu}
@@ -125,7 +126,7 @@ tb_IR <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm,
 # Visualization
 ## Classification plots
 
-Barplots (`ggplot` with `geom_bar()`) are chosen to visualise (Fig. and Supplementary Fig. ), and summarise, the outcomes of the different hypothesis tests for the different grid-cell sizes. Besides a bin selection based on grid-cell size, a secondary x-axis is added to further emphasize the importance of count statistics (Poisson statistics) on the underlying data structure, and thus a crucial aspects in the outcome of various hypothesis tests. For this the mean count of the rare isotope (^13^C) is calculated ove both samples added together and for each grid-cell size separately. 
+Barplots (`ggplot` with `geom_bar()`[@ggplot2; @ggplot22016]) are chosen to visualise (Supplementary Fig. 6), and summarise, the outcomes of the different hypothesis tests for the different grid-cell sizes. Besides a bin selection based on grid-cell size, a secondary x-axis is added to further emphasize the importance of count statistics (Poisson statistics) on the underlying data structure, and thus a crucial aspects in the outcome of various hypothesis tests. For this the mean count of the rare isotope (^13^C) is calculated ove both samples added together and for each grid-cell size separately. 
 
 
 ```{r}
@@ -201,9 +202,10 @@ dev.off()
 ```
 
 
-# Scatter plots
+# Scatterplots
 
-The results of the regression diagnostics are furthermore evaluated by visualising the normality of the pooled $\hat{e}_i^*$ as a *normal Quantile--Quantile plot* (Supplementary Fig. ) and homogeneity of variance as a *scale-location* plot (Supplementary Fig. ). Because of the high number of ion counts in a standard SIMS measurement, the 2D-density of the data (i.e. how many data point fall in a specific regions on the x-y coordinates of the plot) is highlighted by mapping of color and alpha to the individual points for a better visualization of patterns. This is done by calculating the 2D density of each observation with the function `MASS::kde2d()`, and this is included in the function `twodens()` which produces a `ggplot` with `geom_point()`.
+The results of the regression diagnostics are furthermore evaluated by visualising the normality of the pooled $\hat{e}_i^*$ as a *normal Quantile--Quantile plot* (Supplementary Fig. 4) and homogeneity of variance as a *scale-location* plot (Supplementary Fig. 5). Because of the high number of ion counts in a standard SIMS measurement, the 2D-density of the data (i.e. how many data point fall in a specific regions on the x-y coordinates of the plot) is highlighted by mapping of color and alpha to the individual points for a better visualization of patterns. This is achieved with the function `gg_dens()` which produces a `ggplot` [@ggplot2; @ggplot22016] with `geom_point()` and calculates the 2D density of each observation with the function `MASS::kde2d()`[@MASS; @MASS2002], and which is included in the function `point::twodens()`.
+
 
 ## Normal Quantile--Quantile plot
 

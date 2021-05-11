@@ -1,7 +1,7 @@
 ---
 title: "SIMS analytical artefacts"
 output: rmarkdown::html_vignette
-bibliography: biblio.bib
+bibliography: ["packages.bib", "SIMS_method.bib"]
 biblio-style: apalike
 vignette: >
   %\VignetteIndexEntry{SIMS analytical artefacts}
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-This vignette deals with the evaluation of the impact of systematic and random biases on high-precision isotope data generated with the nanoSIMS 50L, and as discussed in the paper (Supplementary Section 2.1 *Precision of isotope analysis* and Supplementary Section 2.3 *Quasi Simulations Arrival*). The here discussed analytical artefacts all have been argued to compromise SIMS isotope analyses and do not relate to the isotope homogeneity of the analyte (i.e., the target of this study).
+This vignette deals with the evaluation of the impact of systematic and random biases on high-precision isotope data generated with the nanoSIMS 50L, and as discussed in the Supplementary Information of the paper (Supplementary Section 2.1 *Precision of isotope analysis* and Supplementary Section 2.3 *Quasi Simulations Arrival*). The here discussed analytical artefacts all have been argued to compromise SIMS isotope analyses and do not relate to the isotope homogeneity of the analyte (i.e., the target of this study).
 
 
 ```{r setup, eval = TRUE}
@@ -30,7 +30,7 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE}
-on_build <- TRUE
+on_build <- FALSE
 ```  
 
 
@@ -61,7 +61,7 @@ load_point("simu", "CD_eval_intra", NULL, return_name = FALSE, on_build)
 # Systematic biases
 ## Quasi Simulations Arrival (QSA)
 
-The combination of measuring under high ionisation efficiencies and the usage of electron multipliers (EM) for ion detection can lead to an artefact understood as the more-or-less (quasi) simultaneous arrival (QSA) of an incident ion at the detection device. Differentiation of the two secondary ions is thus not possible, and the ions are therefore counted as $1$ detection event by the machine. In the case of isotope systems this could theoretically lead to under-sampling of the common isotope [@Slodzian2004]. An exact correction of under-sampling induced by QSA can be a cumbersome undertaking, as such the R package `point` has a diagnostic tool that helps evaluate whether the ion count data is likely to have been compromised by this analytical artefact. The function `QSA_test()` fits a least-square linear model to the common isotope count rates (e.g. ^12^C) as a predictor, and the targeted isotope ratio (e.g. ^13^C/^12^C) as the independent variable. If under-sampling would be present in the ion count data, then this would cause a significant positive linear trend of higher isotope ratios with higher count rates of the common isotope.
+The combination of measuring under high ionisation efficiencies and the usage of electron multipliers (EM) for ion detection can lead to an artefact understood as the more-or-less (quasi) simultaneous arrival (QSA) of an incident ion at the detection device. Differentiation of the two secondary ions is thus not possible, and the ions are therefore counted as $1$ detection event by the machine. In the case of isotope systems this could theoretically lead to under-sampling of the common isotope [@Slodzian2004]. An exact correction of under-sampling induced by QSA can be a cumbersome undertaking, as such the R package `point` [@point] has a diagnostic tool that helps evaluate whether the ion count data is likely to have been compromised by this analytical artefact. The function `QSA_test()` fits a least-square linear model to the common isotope count rates (e.g. ^12^C) as a predictor, and the targeted isotope ratio (e.g. ^13^C/^12^C) as the independent variable. If under-sampling would be present in the ion count data, then this would cause a significant positive linear trend of higher isotope ratios with higher count rates of the common isotope.
 
 
 ```{r QSA}
@@ -123,7 +123,7 @@ save_point("point_QSA", ggplot2::last_plot(), width = 12, height = 8,
 
 The random nature of secondary ions emitted from an analytical substrate (e.g. rock sample) during sputtering can be described by Poisson statistics, which can be used to predict the precision of pulsed ion counts (e.g. measurements with a *Cameca NanoSIMS 50L*) under ideal circumstances. More specifically, the variation can be deduced from the total counts of secondary ions. Usefully, we can compare these predictive values with the descriptive statistics; essentially estimates of the true population location (e.g. mean) and spread (variance).
 
-First we will calculate some standard predictive and descriptive statistics for the internal precision of SIMS single iona, with the `point` function `stat_Xt()`. See the documentation of this package `vignette("IC-precision", package = "point")` for an extensive overview of the complete functionality of these functions as well as the mathematics behind the statistics.
+First we will calculate some standard predictive and descriptive statistics for the internal precision of SIMS single iona, with the `point` function `stat_X()`. See the documentation of this package `vignette("IC-precision", package = "point")` for an extensive overview of the complete functionality of these functions as well as the mathematics behind the statistics.
 
 
 ```{r statXt}
@@ -159,7 +159,7 @@ The reduced $\chi^2$ can then be used to assess the machine performance and anal
 
 where values close to $1$ suggest good agreement between the actual measurement and the predicted value [@Kilburn2015a]. Values lower than $1$ suggest that the analysis was better than predicted, and values higher than $1$ indicate that the analysis was worse than predicted by Poisson statistics.
 
-Intra-isotope variation is measured by the test (based on F-statistic) as outlined in the paper. Varying degrees of variance in the ionization efficiency of the analyte cause a systematic trend that is mirrored in both isotopes. This ionization efficiency trend has been parameterized as the difference between the relative standard deviation of the common isotope $\epsilon_{X^{a}}$ and the theoretical standard deviation $\hat{\epsilon}_{N^{a}}$, based on Poisson statistics. This ionization efficiency trend has an impact on the accuracy of the intra-isotope test (see paper), and therefore has been included in the simulated data. For this comparative approach an ionization trend of below < 6% has been omitted, because of limited detection at the lower ranges of ionization efficiency. The remainder has been divided into three groups; low (6--21%), medium (22--37%) and high (38--53%) ionization efficiency with the `ggplot::cut_width()` function.
+Intra-isotope variation is measured by the test (based on F-statistic) as outlined in the paper. Varying degrees of variance in the ionization efficiency of the analyte cause a systematic trend that is mirrored in both isotopes. This ionization efficiency trend has been parameterized as the difference between the relative standard deviation of the common isotope $\epsilon_{X^{a}}$ and the theoretical standard deviation $\hat{\epsilon}_{N^{a}}$, based on Poisson statistics (so-called "excess" ionization, see paper). This ionization efficiency trend has an impact on the accuracy of the intra-isotope test (see paper), and therefore has been included in the simulated data. For this comparative approach an excess ionization of below < 6% has been omitted, because of limited detection at the lower ranges of ionization efficiency. The remainder has been divided into three groups; low (5--15%), medium (15--25%) and high (25--35%) excess ionization with the `ggplot::cut_width()` function [@ggplot2; @ggplot22016].
 
 
 ```{r cut}
@@ -178,7 +178,7 @@ simu_CD_eval_intra <- slice_sample(simu_CD_eval_intra, prop = 0.01)
 ```
   
   
-A simple ggplot (`ggplot() + geom_point`) has been used to compare the F statistic for intra-isotope variability with the $\chi^2$ for an assessment of the precision.
+A simple ggplot (`ggplot() + geom_point()`) [@ggplot2; @ggplot22016] has been used to compare the $F$ statistic for intra-isotope variability with the reduced $\chi^2$ for an assessment of the precision.
 
   
 ```{r FvsChi}

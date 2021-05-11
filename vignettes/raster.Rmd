@@ -1,7 +1,7 @@
 ---
 title: "Raster images"
 output: rmarkdown::html_vignette
-bibliography: biblio.bib
+bibliography: packages.bib
 biblio-style: apalike
 vignette: >
   %\VignetteIndexEntry{Raster images}
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-This vignette deals with the visualization of spatial ion maps and high-precision isotope data generated with the Cameca nanoSIMS 50L, and as discussed in the paper (Figs 7 and 8, and Supplementary Fig. 7). 
+This vignette deals with the visualization of spatial ion maps and high-precision isotope data generated with the Cameca nanoSIMS 50L, as discussed in the paper (Figs 6 and 7, and Supplementary Fig. 7). 
 
 
 ```{r setup, eval = TRUE}
@@ -30,13 +30,13 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- TRUE
+on_build <- FALSE
 ```  
 
 
 # Download data
 
-Ion count data processed with the *point* R package [@point] is required to produce the raster plots (Figs 7 and 8, and Supplementary Fig. 7). Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4580159) with the function `download_point()`. 
+Ion count data processed with the `*`point`*` R package [@point] is required to produce the raster plots (Figs 7 and 8, and Supplementary Fig. 7). Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4580159) with the function `download_point()`. 
 
 
 ```{r data}
@@ -48,7 +48,7 @@ Ion count data processed with the *point* R package [@point] is required to prod
 
 # Load data
 
-For this example aggregated and processed ion count data is loaded with grid-cell sizes of 64 pixels by 64 pixels, which as determined based on regression diagnostics yields the most accurate isotope ratio *Validation of regression assumptions* (`vignette("assumptions")`). In addition, ion ratio maps, which provide auxiliary information on the spatial distributions of e.g. organic inclusions, and two full (pixel by pixel) grid-cell datasets for the MEX analyte are loaded.
+For this example aggregated and processed ion count data is loaded with grid-cell sizes of 64 pixels by 64 pixels, which as determined based on regression diagnostics yields the most accurate isotope ratio *Validation of regression assumptions* (`vignette("regression")`). In addition, ion ratio maps, which provide auxiliary information on the spatial distributions of e.g. organic inclusions, and two full (pixel-by-pixel) grid-cell datasets for the MEX analyte are loaded.
 
 
 ```{r label, options}
@@ -66,14 +66,14 @@ load_point("map_full_grid", "MEX", 64, return_name = FALSE, on_build)
 # Raster images
 ## Simple ion ratio map
 
-The function `gg_cnts()` is designed for plotting of ion count ratios, i.e. the background ion map of Figures 7 and 8 and Supplementary Figure 7. This function simply produces a raster of ion count ratios according to spatial dimensions; height, width and depth, by using `ggplot() +  geom_raster()`, and mapping a color to the numeric value of the ion ratio. The viridis color scale is used as it provides a perceptually uniform scale in both colour and black-and-white (`scale_fill_viridis_c()`).
+The function `gg_cnts()` is designed for plotting of ion count ratios, i.e. the background ion map of Figures 7 and 8 and Supplementary Figure 7. This function simply produces a raster of ion count ratios according to spatial dimensions; height, width and depth, by using `ggplot() +  geom_raster()`[@ggplot2; @ggplot22016], and mapping a colour to the numeric value of the ion ratio. The viridis colour scale is used as it provides a perceptually uniform scale in both colour and black-and-white (`scale_fill_viridis_c()`).
 
 
 ```{r raster}
 gg_cnts(map_raster_image_MEX$depth, "12C14N", "12C", ttl = "MEX", viri = "D")
 # save
-save_point("simple_raster_Mex_12C-14N-12C", last_plot(), width = 10, height = 8, 
-           unit = "cm", on_build = TRUE)
+save_point("simple_raster_Mex_12C-14N-12C", ggplot2::last_plot(), width = 10, 
+           height = 8, unit = "cm", on_build)
 ```
 
 
@@ -84,7 +84,7 @@ knitr::include_graphics("figures/simple_raster_Mex_12C-14N-12C.png")
 
 ## Combination plot
 
-The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the data-grid with a 100$\,\mu$m^2 (64 pixels by 64 pixels) size, as this aggregation resulted in normally distributed ion counts; see *Validation of regression assumptions* (`vignette("assumptions")`), and, as described in the paper. The core `point` functions `diag_R()` and `eval_diag()` are subsequently applied to the gridded datasets to assess the intra- and inter- ^13^C/^12^C variability comprised in, respectively, the individual grid-cells and the whole target area of the analyte.
+The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the data-grid with a 100$\,\mu$m^2 (64 pixels by 64 pixels) size, as this aggregation resulted in normally distributed ion counts; see *Validation of regression assumptions* (`vignette("assumptions")`), and, as described in the paper. The core `point`[@point] functions `diag_R()` and `eval_diag()` are subsequently applied to the gridded datasets to assess the intra- and inter- ^13^C/^12^C variability comprised in, respectively, the individual grid-cells and the whole target area of the analyte.
 
 
 ```{r diag1}
@@ -97,11 +97,11 @@ ls_diag <- purrr::map(
 ```
 
 
-The results can be visualized by application of the function `gg_effect()`, which combines the previous `gg_cnts()` function with tiles (`geom_tiles()`) and text (`geom_text()`) mapping the outcomes of regression diagnostic on ^13^C/^12^C. This produces the Figures 7 and 8, and Supplementary Figure 7 of the paper. 
+The results can be visualized by application of the function `gg_effect()`, which combines the previous `gg_cnts()` function with tiles (`geom_tiles()`) and text (`geom_text()`)[@ggplot2; @ggplot22016] mapping the outcomes of regression diagnostic on ^13^C/^12^C. This produces the Figures 7 and 8, and Supplementary Figure 7 of the paper. 
 
 ### Figure 7 (MON)
 
-In the first example (Fig. 7), high-precision grid-cells for ^13^C/^12^C is combined with a high spatial resolution map for `r point::R_labeller("12C", "40Ca16O")`. Although no pattern can be discerned in the ion ratio map, the high-precision ^13^C/^12^C reveal a distinct gradient traversing the targeted analyte, which is reflected in both the intra- and inter-isotope variability (as designated by significance stars and color of the text, respectively).
+In the first example (Fig. 7), high-precision grid-cells for ^13^C/^12^C is combined with a high spatial resolution map for `r point::R_labeller("12C", "40Ca16O")`. Although no pattern can be discerned in the ion ratio map, the high-precision ^13^C/^12^C reveal a distinct gradient traversing the targeted analyte, which is reflected in both the intra- and inter-isotope variability (as designated by significance stars and colour of the text, respectively).
 
 
 ```{r grid1}
@@ -109,8 +109,8 @@ In the first example (Fig. 7), high-precision grid-cells for ^13^C/^12^C is comb
 diag_64_MON <- gg_effect(ls_diag, map_raster_image_MON, "MON", "12C-40Ca16O", 
                          viri = "B")
 # save plot
-save_point("raster_MON_12C-40Ca16O", ggplot2::last_plot(), width = 16, height = 14, 
-           unit = "cm", on_build)
+save_point("raster_MON_12C-40Ca16O", ggplot2::last_plot(), width = 16, 
+           height = 14, unit = "cm", on_build)
 # save data
 write_point("diag_64_MON", on_build)
 ```
@@ -134,6 +134,7 @@ ls_diag <- purrr::map(
                  .nest = grid.nm, .output = "complete")
   ) 
 ```
+
 
 Thereafter, the ion ratio map (`r point::R_labeller("12C", "40Ca16O")`) is combined with high ^13^C/^12^C tiles for the 100$\,\mu$m^2 grid-cells. For this analyte, however, there appear to be distinct cluster of elevated `r point::R_labeller("12C", "40Ca16O")` (e.g. red rectangle), which could indicate the presence of organic inclusions in the sedimentary carbonate. 
 
@@ -199,9 +200,9 @@ knitr::include_graphics("figures/raster_MEX_12C14N-12C.png")
 The recognition of clusters of elevated `r point::R_labeller("12C14N", "12C")` and `r point::R_labeller("12C", "40Ca16O")` in the MEX analyte spurred additional in-depth analysis on the potential effect of these anomalies regions on the ^13^C/^12^C values. For this purpose, the auxiliary information of the ion raster images are used to filter those anomalous areas (organic and nitrogen enriched areas) from the background, and analyse those regions in term of ^13^C/^12^C composition. The `gg_point()` is designed to perform this function, where the arguments `image` and `ion_1_thr` and `ion_1_thr` refer to ion ratio map and the respective ions, and the argument `thr` is used to set a threshold value for filtering. The arguments `ion_1_R` and `ion_1_R` connect the former to high-precision isotope analysis (e.g. ^13^C/^12^C) which are included in the full (pixel by pixel dataset) provided with the argument `IC`.
 
 
-### Figure 9
+### Figure 8
 
-This function has been applied to `r point::R_labeller("12C", "40Ca16O")` of Figure 8 (highlighted by a red rectangle). This shows that the ^13^C and ^12^C count rates could be of potential high influence on the isotope ratio, given that the organic inclusion is sufficiently large relative to the matrix (or the analytical resolution of the method is sufficiently large).
+This function has been applied to `r point::R_labeller("12C", "40Ca16O")` of Figure 7 (highlighted by a red rectangle). This shows that the ^13^C and ^12^C count rates could be of potential high influence on the isotope ratio, given that the organic inclusion is sufficiently large relative to the matrix (or the analytical resolution of the method is sufficiently large).
 
 
 ```{r inclusion1}
@@ -212,7 +213,7 @@ gg_point(
   ion1_R = "13C", ion2_R = "12C" # isotope ratio
   )
 # save
-save_point("point_MEX_ROI9", ggplot2::last_plot(), width = 9, height = 10, 
+save_point("point_MEX_ROI9", ggplot2::last_plot(), width = 6.75, height = 9, 
            unit = "cm", on_build)
 ```
 
@@ -236,7 +237,7 @@ gg_point(
   ion1_R = "13C",  ion2_R = "12C"
   ) 
 # save
-save_point("point_MEX_ROI2", ggplot2::last_plot(), width = 9, height = 10, 
+save_point("point_MEX_ROI2", ggplot2::last_plot(), width = 6.75, height = 9, 
            unit = "cm", on_build)
 ```
 
