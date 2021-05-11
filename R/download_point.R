@@ -20,6 +20,8 @@
 #' @param return_name Logical whether to return file names.
 #' @param on_build Logical whether download is loaded during build
 #' (default = FALSE).
+#' @param type_ms Character string for type manuscript, either \code{"preprint"}
+#' or \code{"paper"}.
 #'
 #' @return Raw matlab files are stored in the directories
 #' `extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
@@ -54,7 +56,7 @@ download_point <- function (type = "all") {
 
   # get the data
   if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
-    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4580159",
+    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4748667",
                                         path = path_ext)
     }
 
@@ -93,7 +95,7 @@ write_point <- function (obj, on_build = FALSE) {
 #'
 #' @export
 save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
-                        unit, on_build = FALSE) {
+                        unit, on_build = FALSE, type_ms = "preprint") {
 
   if (on_build) {
     path <- usethis::proj_path()
@@ -109,6 +111,15 @@ save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
     unit = unit
     )
   rlang::exec("ggsave", !!! args)
+
+  if (on_build) {
+    # copy whole dir to paper
+    fs::dir_copy(
+      fs::path(path, "vignettes/figures"),
+      fs::path(path, "inst/paper", type_ms, "figures"),
+      overwrite = TRUE
+      )
+      }
 }
 #' @rdname download_point
 #'

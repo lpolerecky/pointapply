@@ -17,7 +17,8 @@ save_point(
   width,
   height,
   unit,
-  on_build = FALSE
+  on_build = FALSE,
+  type_ms = "preprint"
 )
 
 load_point(type, name, grid_cell, return_name = FALSE, on_build)
@@ -41,6 +42,9 @@ loaded.}
 
 \item{unit}{Character string indicating dimension units for graphic based
 on ggplot.}
+
+\item{type_ms}{Character string for type manuscript, either \code{"preprint"}
+or \code{"paper"}.}
 
 \item{grid_cell}{Numeric value of grid_cell size in pixels.}
 
