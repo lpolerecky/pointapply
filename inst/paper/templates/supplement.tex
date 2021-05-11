@@ -1,0 +1,22 @@
+% https://stackoverflow.com/questions/50223141/rmarkdown-bookdown-separate-figure-numbering-for-supplemental-section
+\newcommand{\beginsupplement}{
+% reset section counter and create new label
+  \setcounter{section}{0}
+% append
+% \renewcommand{\thesection}{S \arabic{section}}
+% reset figure counter and  create new label
+  \setcounter{figure}{0}
+% prepend
+  \renewcommand{\figurename}{Supplementary Figure}
+% append
+% \renewcommand{\thefigure}{S \arabic{figure}}
+% reset table counter and  create new label
+  \setcounter{table}{0}
+% prepend
+  \renewcommand{\tablename}{Supplementary Table}
+% append
+% \renewcommand{\thetable}{S \arabic{table}}
+% reset equation counter and  create new label
+  \setcounter{equation}{0}
+  \renewcommand{\theequation}{S \arabic{equation}}
+}
