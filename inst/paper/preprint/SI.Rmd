@@ -22,7 +22,7 @@ repo <- tibble::tibble(
   DOI = c(
     "\\href{https://doi.org/10.5281/zenodo.4633104}{10.5281/zenodo.4633104}",
     "\\href{https://doi.org/10.5281/zenodo.4748376}{10.5281/zenodo.4748376}",
-    "\\href{https://doi.org/10.5281/zenodo.4580159}{10.5281/zenodo.4580159}"
+    "\\href{https://doi.org/10.5281/zenodo.4748667}{10.5281/zenodo.4748667}"
     )
 )
 # print
