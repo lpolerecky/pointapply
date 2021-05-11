@@ -23,7 +23,7 @@ render_paper <- function(
   output_dir = fs::path_wd(),
   type_ms = "preprint",
   copy_figures = TRUE,
-  on_build = TRUE
+  on_build = FALSE
   ){
 
   # download data when needed
