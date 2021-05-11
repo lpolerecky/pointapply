@@ -99,11 +99,11 @@ load_point("diag", c("MEX", "MON"), 64, return_name = FALSE, on_build)
 
 ```{r filesizes}
 # filesizes
-fsize_intra <- file.info(here::here("data", "simu_sens_IC_intra.rda"))$size / 10^6
+fsize_intra <- file.info("data/simu_sens_IC_intra.rda")$size / 10^6
 ls_files <- lapply(1:10, function(x) paste0("simu_sens_IC_inter_", x, ".rda"))
 fsize_inter <- purrr::map_dbl(
   ls_files, 
-  ~file.info(here::here("data", .x))$size / 10^6) %>% 
+  ~file.info(paste0("data", .x))$size / 10^6) %>% 
   sum()
 ```
 

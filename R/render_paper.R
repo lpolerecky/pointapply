@@ -75,6 +75,9 @@ render_paper <- function(
     )
 
   # copy figures
-  fs::dir_copy(fs::path(path, type_ms), fs::path(output_dir, "figures"),
-               overwrite = TRUE)
+  fs::dir_copy(
+    fs::path(path, type_ms, "figures"),
+    fs::path(output_dir, "figures"),
+    overwrite = TRUE
+    )
 }
