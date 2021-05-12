@@ -309,13 +309,17 @@ write_point("simu_CD_eval_intra", on_build)
 
 ### Cameca
 
-The $\sigma_R$-rejection method requires the `.method` to be set to `"Cameca"`. In addition, to faithfully mimic the behaviour of the Cameca software the grouping structure needs to be adjusted slightly, where this software uses an intermediate (but artificial) subdivision of a single analysis; the so-called "block" (variable: `bl.nm`), which consists generally of ~50 measurements. The application of `diag_R()` produces now mean values for the single blocks, which are irrelevant for the subsequent study, as such the `tibble` [@tibble] is filtered for distinct analysis only by using `dplyr::distinct()` [@dplyr].
+The $\sigma_R$-rejection method requires the `.method` to be set to `"Cameca"`. In addition, to faithfully mimic the behaviour of the Cameca software the grouping structure needs to be adjusted slightly, where this software uses an intermediate (but artificial) subdivision of a single analysis; the so-called "block" (variable: `bl.nm`), which consists generally of ~50 measurements. To accommodate this, the `diag_R()` and `eval_diag()` functions are successively applied with a respective grouping structure for "blocks" and then "single analysis". Note, that the `.output` of `diag_R()` is set to `"diagnostic"` to only produce outlier detection results. The application of `eval_diag()` produces now mean values for the single blocks, which are irrelevant for the subsequent study, as such the `tibble` [@tibble] is filtered for distinct analysis only by using `dplyr::distinct()` [@dplyr].
 
 
 ```{r CM}
 # diagnostics
-CM_eval <- point::diag_R(simu_sens_IC_intra , "13C", "12C", !!!grps, bl.nm, 
-                        .method = "Cameca")
+tb_dia <- point::diag_R(simu_sens_IC_intra , "13C", "12C", !!!grps, bl.nm, 
+                        .method = "Cameca", .output = "diagnostic", .N = N.sm, 
+                        .Xt = Xt.sm)
+# evaluation of performance (intra-isotope test)
+CM_eval <- point::eval_diag(tb_dia, "13C", "12C", !!!grps, .N = N.sm, 
+                            .Xt = Xt.sm)
 # extract distinct groups omitting block-wise means
 simu_CM_eval_intra <- dplyr::distinct(CM_eval, !!!grps, .keep_all = TRUE)
 # export
