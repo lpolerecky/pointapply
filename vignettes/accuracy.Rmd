@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-This vignette deals with the evaluation of the impact of systematic and random biases on high-precision isotope data generated with the nanoSIMS 50L, and as discussed in the Supplementary Information of the paper (Supplementary Section 2.1 *Precision of isotope analysis* and Supplementary Section 2.3 *Quasi Simulations Arrival*). The here discussed analytical artefacts all have been argued to compromise SIMS isotope analyses and do not relate to the isotope homogeneity of the analyte (i.e., the target of this study).
+This vignette deals with the evaluation of the impact of systematic and random biases on high-precision isotope data generated with the nanoSIMS 50L, and as discussed in the Supplementary Information of the paper (Supplementary Section 2.1 *Precision of isotope analysis* and Supplementary Section 2.3 *Quasi simultaneous Arrival*). The here discussed analytical artefacts all have been argued to compromise SIMS isotope analyses and do not relate to the isotope homogeneity of the analyte (i.e., the target of this study).
 
 
 ```{r setup, eval = TRUE}
@@ -59,7 +59,7 @@ load_point("simu", "CD_eval_intra", NULL, return_name = FALSE, on_build)
 
 
 # Systematic biases
-## Quasi Simulations Arrival (QSA)
+## Quasi simultaneous Arrival (QSA)
 
 The combination of measuring under high ionisation efficiencies and the usage of electron multipliers (EM) for ion detection can lead to an artefact understood as the more-or-less (quasi) simultaneous arrival (QSA) of an incident ion at the detection device. Differentiation of the two secondary ions is thus not possible, and the ions are therefore counted as $1$ detection event by the machine. In the case of isotope systems this could theoretically lead to under-sampling of the common isotope [@Slodzian2004]. An exact correction of under-sampling induced by QSA can be a cumbersome undertaking, as such the R package `point` [@point] has a diagnostic tool that helps evaluate whether the ion count data is likely to have been compromised by this analytical artefact. The function `QSA_test()` fits a least-square linear model to the common isotope count rates (e.g. ^12^C) as a predictor, and the targeted isotope ratio (e.g. ^13^C/^12^C) as the independent variable. If under-sampling would be present in the ion count data, then this would cause a significant positive linear trend of higher isotope ratios with higher count rates of the common isotope.
 
