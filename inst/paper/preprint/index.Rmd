@@ -73,28 +73,10 @@ permille <- function(x, sign = FALSE, word = knitr::pandoc_to("docx")){
 ```
 
 
-```{r kable}
-# ensure correct kable output
-options("kableExtra.html.bsTable" = TRUE) 
-```
-
-
-```{r data}
-# raw data 64 pixels
-load_point("map_sum_grid", c("MEX", "MON"), 64, return_name = FALSE, on_build)
-map_sum_grid_64_all <- dplyr::bind_rows(
-  dplyr::bind_rows(map_sum_grid_64_MEX), 
-  dplyr::bind_rows(map_sum_grid_64_MON)
-  )
-# general statistics single ions for grid-cell 64 
-load_point("stat_X", "all", 64, return_name = FALSE, on_build)
-# general statistics isotope ratios for grid-cell 64 
-load_point("stat_R", "all", 64, return_name = FALSE, on_build)
-# QSA data
-load_point("test_QSA", "all", 64, return_name = FALSE, on_build)
-# inter-isotope variability test results
-load_point("diag", c("MEX", "MON"), 64, return_name = FALSE, on_build)
-```
+<!-- ```{r kable} -->
+<!-- # ensure correct kable output -->
+<!-- options("kableExtra.html.bsTable" = TRUE)  -->
+<!-- ``` -->
 
 
 ```{r filesizes}

@@ -78,7 +78,7 @@ download_point <- function (type = "all") {
 write_point <- function (obj, on_build = FALSE) {
 
   if (on_build) {
-    path <- fs::path_wd("inst/extdata/data", obj, ext = "rda")
+    path <- usethis::proj_path("inst/extdata/data", obj, ext = "rda")
     } else {
       path <- fs::path_package("pointapply", "data",  obj, ext = "rda")
       }
@@ -95,7 +95,7 @@ save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
                         unit, on_build = FALSE, type_ms = "preprint") {
 
   if (on_build) {
-    path <- fs::path_wd()
+    path <- usethis::proj_path()
       } else {
       path <- fs::path_package("pointapply")
       }
@@ -136,7 +136,7 @@ load_point <- function(type, name, grid_cell, return_name = FALSE, on_build){
     dplyr::pull(name)
 
   if (on_build) {
-    fs::path_wd("inst/extdata/data", name, ext = "rda") %>%
+    usethis::proj_path("inst/extdata/data", name, ext = "rda") %>%
       purrr::walk(load, .GlobalEnv)
     } else {
       data(list = name, envir = .GlobalEnv)

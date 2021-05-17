@@ -65,7 +65,7 @@ The combination of measuring under high ionisation efficiencies and the usage of
 
 
 ```{r QSA}
-# bind dataframes
+# bind data frames
 tb <- dplyr::bind_rows(map_sum_grid_64_MEX$depth, map_sum_grid_64_MON$depth)
 # QSA test
 test_QSA_64_all <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm, 

@@ -26,9 +26,6 @@ render_paper <- function(
   on_build = FALSE
   ){
 
-  # download data when needed
-  if (!on_build) download_point()
-
   # paths
   if (on_build) {
     path <- fs::path_wd("inst/paper")

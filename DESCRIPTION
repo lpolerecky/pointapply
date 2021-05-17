@@ -32,7 +32,8 @@ Imports:
     bookdown (>= 0.22),
     knitr (>= 1.32),
     rmarkdown (>= 2.7),
-    kableExtra (>= 1.3.4)
+    kableExtra (>= 1.3.4),
+    rticles (>= 0.19)
 Suggests: 
     roxygen2,
     grid,
@@ -40,7 +41,8 @@ Suggests:
     tibble,
     cubelyr,
     R.matlab,
-    tidyselect
+    tidyselect,
+    usethis
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
