@@ -51,8 +51,6 @@ size of the isotope anomaly.}
 
 \item{trans_n}{Initial sample size for the scale transformation for
 fractional size of the isotope anomaly.}
-
-\item{y_sec}{Character string or expression for the secondary y-axis label.}
 }
 \value{
 \code{\link[ggplot2:ggplot]{ggplot}}.

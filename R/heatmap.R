@@ -19,7 +19,6 @@
 #' @param x_lab Character string or expression for the x-axis label.
 #' @param y_lab Character string or expression for the y-axis label.
 #' @param x_sec Character string or expression for the secondary x-axis label.
-#' @param y_sec Character string or expression for the secondary y-axis label.
 #' @param trans_base Isotope value for the scale transformation for fractional
 #' size of the isotope anomaly.
 #' @param trans_n Initial sample size for the scale transformation for
