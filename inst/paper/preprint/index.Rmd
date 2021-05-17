@@ -79,17 +79,6 @@ permille <- function(x, sign = FALSE, word = knitr::pandoc_to("docx")){
 <!-- ``` -->
 
 
-```{r filesizes}
-# filesizes
-fsize_intra <- file.info("data/simu_sens_IC_intra.rda")$size / 10^6
-ls_files <- lapply(1:10, function(x) paste0("simu_sens_IC_inter_", x, ".rda"))
-fsize_inter <- purrr::map_dbl(
-  ls_files, 
-  ~file.info(paste0("data", .x))$size / 10^6) %>% 
-  sum()
-```
-
-
 ```{r sumfun}
 # filter select cast function
 var_mean <- function(data, plane, grid_cell, var) {
@@ -99,11 +88,16 @@ var_mean <- function(data, plane, grid_cell, var) {
   }
 ```
   
-  
-```{r child}
-# child duplicate option
-options(knitr.duplicate.label = "allow")
+
+<!-- ```{r child} -->
+<!-- # child duplicate option -->
+<!-- options(knitr.duplicate.label = "allow") -->
+<!-- ``` -->
+
+```{r pipe}
+
+`%>%` <- magrittr::`%>%`
+
 ```
-  
-  
+
 \newpage

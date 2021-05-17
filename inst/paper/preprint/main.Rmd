@@ -254,8 +254,8 @@ knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
 
 ```{r MONtab}
 # conventional calculation of variance
-stat_R_ext_64_all <- point::stat_R(map_sum_grid_64_all, "13C", "12C",  
-                                   sample.nm, dim_name.nm, grid.nm, 
+stat_R_ext_64_all <- point::stat_R(pointapply::map_sum_grid_64_all, "13C", 
+                                   "12C", sample.nm, dim_name.nm, grid.nm, 
                                    .nest = grid.nm, .stat = c("M", "RS"),
                                    .label = "latex")
 # table of stats MON
