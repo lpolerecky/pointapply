@@ -139,7 +139,7 @@ load_point <- function(type, name, grid_cell, return_name = FALSE, on_build){
     fs::path_wd("inst/extdata/data", name, ext = "rda") %>%
       purrr::walk(load, .GlobalEnv)
     } else {
-      data(list = name, envir = environment())
+      data(list = name, envir = .GlobalEnv)
       }
   if (return_name) return(name)
 }
