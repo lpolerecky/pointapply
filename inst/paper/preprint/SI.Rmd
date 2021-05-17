@@ -147,8 +147,9 @@ The $\chi^2$ test statistic for ^13^C/^12^C analysis from the `r SI(10, c("micro
 # footnote
 ft <- paste0("See Supplementary Fig. ", "(ref:foot3)", " for layout and numbering of grid-cells.")
 # table of precision stats
-point::stat_R(map_sum_grid_64_all, "13C", "12C", sample.nm, dim_name.nm, 
-              grid.nm, .stat=c("M", "RSeM", "chi2"), .label = "latex") %>% 
+point::stat_R(pointapply::map_sum_grid_64_all, "13C", "12C", sample.nm, 
+              dim_name.nm,grid.nm, .stat=c("M", "RSeM", "chi2"), 
+              .label = "latex") %>% 
   dplyr::rename(`analyte` = "sample.nm", `dimension` = "dim_name.nm", 
          `grid-cell*` = "grid.nm") %>% 
   dplyr::select(-ratio.nm) %>% 
