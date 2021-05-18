@@ -36,12 +36,12 @@ render_paper <- function(
       pkg,
       fs::path(path, type_ms, "packages", ext = "bib"),
       overwrite = TRUE
-    ) # bib
+      ) # bib
     fs::file_copy(
       R,
       fs::path(path,  type_ms, "rversion", ext = "bib"),
       overwrite = TRUE
-    ) # bib
+      ) # bib
     } else {
       path <- fs::path_package("pointapply", "paper")
       IC <- fs::path_package("pointapply", "data")
@@ -82,6 +82,9 @@ render_paper <- function(
 #' @export
 edit_paper <- function(type_ms = "preprint"){
   path <- fs::path_package("pointapply", "paper", type_ms)
-  chr_files <- purrr::map_chr( c("index", "main", "SI"), ~fs::path(path, .x, ext = "Rmd"))
+  chr_files <- purrr::map_chr(
+    c("index", "main", "SI"),
+    ~fs::path(path, .x, ext = "Rmd")
+    )
   fs::file_show(chr_files)
 }

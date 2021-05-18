@@ -2,6 +2,7 @@
 % Please edit documentation in R/render_paper.R
 \name{render_paper}
 \alias{render_paper}
+\alias{edit_paper}
 \title{Render the paper}
 \usage{
 render_paper(
@@ -11,6 +12,8 @@ render_paper(
   copy_figures = TRUE,
   on_build = FALSE
 )
+
+edit_paper(type_ms = "preprint")
 }
 \arguments{
 \item{title}{Character string for title of rendered document.}
