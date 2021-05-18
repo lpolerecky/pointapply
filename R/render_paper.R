@@ -28,10 +28,10 @@ render_paper <- function(
 
   # paths
   if (on_build) {
-    path <- fs::path_wd("inst/paper")
-    IC <- fs::path_wd("inst/extdata/data")
-    pkg <- fs::path_wd("packages", ext ="bib")
-    R <- fs::path_wd("rversion", ext ="bib")
+    path <- usethis::proj_path("inst/paper")
+    IC <- usethis::proj_path("inst/extdata/data")
+    pkg <- usethis::proj_path("packages", ext ="bib")
+    R <- usethis::proj_path("rversion", ext ="bib")
     fs::file_copy(
       pkg,
       fs::path(path, type_ms, "packages", ext = "bib"),
@@ -48,7 +48,6 @@ render_paper <- function(
       }
 
   # make links
-  fs::link_create(IC, fs::path(path,  type_ms, "data")) # data
   fs::link_create(
     fs::path(path, "templates"),
     fs::path(path,  type_ms, "templates")
@@ -77,4 +76,12 @@ render_paper <- function(
     fs::path(output_dir, "figures"),
     overwrite = TRUE
     )
+}
+#' @rdname render_paper
+#'
+#' @export
+edit_paper <- function(type_ms = "preprint"){
+  path <- fs::path_package("pointapply", "paper", type_ms)
+  chr_files <- purrr::map_chr( c("index", "main", "SI"), ~fs::path(path, .x, ext = "Rmd"))
+  fs::file_show(chr_files)
 }

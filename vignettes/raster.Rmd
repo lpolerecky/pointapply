@@ -30,7 +30,7 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- TRUE
+on_build <- FALSE
 ```  
 
 

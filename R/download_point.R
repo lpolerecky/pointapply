@@ -48,8 +48,8 @@ download_point <- function (type = "all") {
 
   if (all(lgl_int, lgl_ext)) return(invisible())
 
-  # purge other data
-  purrr::walk(list.files(path_int, full.names = TRUE), file.remove)
+  # # purge other data
+  # purrr::walk(list.files(path_int, full.names = TRUE), file.remove)
 
   # get the data
   if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
@@ -62,14 +62,14 @@ download_point <- function (type = "all") {
     ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
     purrr::walk(
       ls_mat,
-      ~unzip(.x, exdir = tools::file_path_sans_ext(.x), junkpaths = TRUE)
+      ~utils::unzip(.x, exdir = fs::path_ext_remove(.x), junkpaths = TRUE)
       )
     }
 
   if (type == "all" | type == "processed") {
     # extract data (.rda format)
     ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
-    unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
+    utils::unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
     }
 }
 #' @rdname download_point
