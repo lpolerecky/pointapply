@@ -27,7 +27,7 @@ knitr::include_graphics("figures/ionization_concept.png")
 ```
 
 
-We can also formalise the "ideal" linear model for SIMS isotope count rates (Fig. \@ref(fig:ionization)), as the correlated auxiliary information among isotope species enables so-called ratio estimation of matched pairs of variables, where the ratio estimate can be used to predict the count rates of $X_b$ through a linear combination with the observed count rate of $X_a$. 
+We can also formalise the "ideal" linear model for SIMS isotope count rates (Fig. \@ref(fig:ionization)), as the correlated auxiliary information among isotope species enables so-called ratio estimation of matched pairs of variables, where the ratio estimate can be used to predict the count rates of $X^b$ through a linear combination with the observed count rate of $X^a$. 
 
 \begin{equation}
 E \left(X_i^b \mid X_i^a \right) = RX_i^a \qquad \text{if} \qquad R > 0 (\#eq:linR)
@@ -36,7 +36,7 @@ E \left(X_i^b \mid X_i^a \right) = RX_i^a \qquad \text{if} \qquad R > 0 (\#eq:li
 In this formulation, $R$ is quantified as the ratio of means of the population.
 
 \begin{equation}
-R = \frac{\mu_{b}}{\mu_{a}} (\#eq:linpopR)
+R = \frac{\mu^{b}}{\mu^{a}} (\#eq:linpopR)
 \end{equation}
 
 The ratio estimator $\hat{R}$ is used to approximate $R$. This value is the same as ratio of means of the observed count rates ($\bar{R}$), and this is typically the final value reported for a SIMS isotope analysis. For large samples, the uncertainty associated with $\hat{R}$ becomes small and approximates a normal distribution. This is also typically the case for SIMS $\bar{R}$, where a precision of better than `r permille(1)` is custom under the right machine specifications.  
@@ -48,7 +48,7 @@ The ratio estimator $\hat{R}$ is used to approximate $R$. This value is the same
 This leads to derivation of an "ideal" linear model for “homogeneous” isotope count data. 
 
 \begin{equation}
-\hat{X}_i^b = \hat{R}X_i^a +  \hat{e}_i \qquad \text{where} \quad  e_i \sim N \left(0,\sigma^2 \right) \quad \text{if} \quad  X_i^a, X_i^b \gg 0 (\#eq:linmodR)
+\hat{X}_i^b = \hat{R}X_i^a + e_i \qquad \text{where} \quad e_i \sim N \left(0,\sigma^2 \right) \quad \text{if} \quad  X_i^a, X_i^b \gg 0 (\#eq:linmodR)
 \end{equation}
 
 The error term ('residuals'; $e_i$) of this linear function are assumed to be normally distributed with an expected mean of zero. These conditions will be satisfied if the count rates are sufficiently high and the Poisson distribution for the counts approximates a normal distribution [see Supplementary Section \@ref(sec:precision) and @Fitzsimons2000a; @Kilburn2015a]. Although the residuals ($e_i$) of the  linear model, and their variance $\sigma^2$, are unobserved, they can be approximated, as follows:
@@ -67,7 +67,7 @@ knitr::include_graphics("figures/hetero_concept.png")
 ```
 
 
-It is important to recognise that the isotopic anomaly in Figure \@ref(fig:hetero) can be expressed as an isotopic offset and the mass fraction ($f$) of the isotopic anomalous component. Both definitions are two sides of the same coin and can be expressed with a mass balance.
+It is important to recognise that the isotopic anomaly in Figure \@ref(fig:hetero) can be expressed as an isotopic offset and the fraction of $n$ measurements ($f$) of the isotopic anomalous component. Both definitions are two sides of the same coin and can be expressed with a mass balance.
 
 \begin{equation}
   R = R_{A}(1-f) + R_{B}f 
@@ -101,13 +101,13 @@ On the other hand, studentized residuals are a measure of a data points outlying
 A measure routinely applied to quantify influence of data points on the regression model is Cook's Distance (or Cook's D) [e.g., @Fox2018], which accommodates for both the leverage and the outlyingness of data points, as defined in Equations \@ref(eq:lev) and \@ref(eq:studres).
 
 \begin{equation}
-  D_i = \frac{e_{i}^{*}\phantom{}^2}{p + 1} \times \frac{h_i}{1- h_i} (\#eq:CD)
+  D_i = \frac{\hat{e}_{i}^{*}{}^2}{k + 1} \times \frac{h_i}{1- h_i} (\#eq:CD)
 \end{equation}
 
-Here, the $p$ stands for the number of coefficients in the regression model. To quantify whether $D_i$ is substantially larger then the rest of the sample's $D$ a critical value is usually defined as follows. 
+Here, the $k$ stands for the number of coefficients in the regression model. To quantify whether $D_i$ is substantially larger then the rest of the sample's $D$ a critical value is usually defined as follows. 
 
 \begin{equation}
-  D_c = \frac{4}{n-p-1} (\#eq:CDcut)
+  D_c = \frac{4}{n-k-1} (\#eq:CDcut)
 \end{equation}
 
 This approach allows the sub-setting of the ion counts that might have disproportional influence on $\hat{R}$. Since random variation in the emitted secondary ions will always cause some "spurious" outlying data points, a measure of the significance of the data points marked as "influential" is still required. Note, that this is also the case for the univariate $\sigma_R$-rejection method. 
@@ -124,10 +124,10 @@ A joint model coefficient hypothesis test is used to make inferences about the e
 Two new parameters ($\hat\beta_1$ and $\hat\beta_2$) are introduced in Equation \@ref(eq:fullmodR) in order to subject $\lambda_i^C$ as an additive, and a multiplicative component, to the continuous variable ($X_i^a$). This nominal factorial is encoded as a $C-1$ indicator variable ($\lambda_i^{C}$) taking a value of $0$ or $1$ based on the residual diagnostics test (e.g., Cook's D), and thus representing a value suspect to be an outlier and/or influential data point. The outliers detected by residual analysis are re-centered around the fitted values of the restricted model (Eq. \ref{eq:linmodR}) before application of the regression model to ensure a unimodal distribution of residuals of the unrestricted model. Hence the likelihood $L$ of the parameter(s) ($\theta$) fitting the data ($L(\theta_{0}|X^a)$) in the case of the restricted model can be tested against the unrestricted model ($L(\theta_{1}|X^a)$). A Fisher Test compares $L$ under model reduction, where the approach uses the residual sum of squares ($RSS = \sum_{i=1}^n \hat{e}_i^2$) of the restricted and unrestricted model, respectively.
 
 \begin{equation}
-F_{(q-p),(n-q)} = \frac{ (RSS_{\theta_{0}}-RSS_{\theta_{1}}) / (q-p) }{RSS_{\theta_{1}} / (n-q)} (\#eq:Fisher)
+F_{(q-k),(n-q)} = \frac{ (RSS_{\theta_{0}}-RSS_{\theta_{1}}) / (q-k) }{RSS_{\theta_{1}} / (n-q)} (\#eq:Fisher)
 \end{equation}
 
-In this formulation the obtained test statistic follows a $F$ distribution with the degrees of freedom derived from the numbers of parameters in the unrestricted model ($q$), restricted model ($p$), and the number of observations ($n$). This $F$ value can be tested against a critical value ($F > F_{(2),(n-3)}^\alpha$) to obtain the probability that a value falls within a pre-defined confidence level ($\alpha$). The model reduction leads to the null hypothesis; $H_{0}: \hat{R} = \bar{R}$, and the alternative hypothesis; $H_{a}: \hat{R} \neq \bar{R}$. The rejection of this hypothesis can therefore be interpreted as that the residual analyses improved the approximation of $\hat{R}$, and, by extension, that $\bar{R}$ likely arises from a homogeneous population. 
+In this formulation the obtained test statistic follows a $F$ distribution with the degrees of freedom derived from the numbers of parameters in the unrestricted model ($q=3$; Eq. \@ref(eq:fullmodR)), restricted model ($k=1$; Eq. \@ref(eq:linmodR)), and the number of observations ($n$). This $F$ value can be tested against a critical value ($F > F_{(2),(n-3)}^\alpha$) to obtain the probability that a value falls within a pre-defined confidence level ($\alpha$). The model reduction leads to the null hypothesis; $H_{0}: \hat{R} = \bar{R}$, and the alternative hypothesis; $H_{a}: \hat{R} \neq \bar{R}$. The rejection of this hypothesis can therefore be interpreted as that the residual analyses improved the approximation of $\hat{R}$, and, by extension, that $\bar{R}$ likely arises from a homogeneous population. 
 
 
 ## Inter-isotope variability
@@ -136,15 +136,15 @@ Inter-isotope variability is defined as the difference in $\bar{R}$ among an $m$
 
 \begin{equation}
   \begin{split}
-  & \text{level 1:} \quad \hat{X}_{ij}^b = \hat{R}_{j}X_{ij}^a +  e_{ij} \qquad \text{where} \quad  e_{ij} \sim N(0,\sigma^2)   \\
-  & \text{level 2:} \quad \hat{R}_{j} = \hat{\bar{R}} + u_{j} \qquad \text{where} \quad u_{j} \sim N(0, t^2) (\#eq:mlm)
+  & \text{level 1:} \quad \hat{X}_{ij}^b = \hat{R}_{j}X_{ij}^a +  \hat{e}_{ij} \qquad \text{where} \quad  \hat{e}_{ij} \sim N(0,\hat{\sigma}^2)   \\
+  & \text{level 2:} \quad \hat{R}_{j} = \hat{\bar{R}} + \hat{u}_{j} \qquad \text{where} \quad \hat{u}_{j} \sim N(0, \hat{t}^2) (\#eq:mlm)
   \end{split}
 \end{equation}
 
-In Equation \@ref(eq:mlm) subscript $j$ encodes then for the analyses (cq. nest). The parameter $\hat{\bar{R}}$ of the second level is now a general coefficient, that approximates the grand mean of an $m$-series of analyses, whereas $u_{j}$ introduces a new error component, which is specific for each nest (cq. analyses) and follows a normal distribution with variance $t^2$ and a mean of $0$. This new error component encodes for the nest-specific deviations, or random effects, superimposed on the $\bar{\bar{R}}$, here approximated by $\hat{\bar{R}}$. The purpose of the $m$-series of analyses is to approximate the variation in the true population through sampling at multiple instances (i.e. along a transect of sputter pits on the substrate). For these types of questions; i.e., is the substrate isotopically homogeneous or heterogeneous, a mix of fixed and random effects (known as a mixed effect linear models) is of particular high value. The variance of $R$ (level 1 of Eq. \@ref(eq:mlm)) among the $m$-series of analysis, together with the second level fixed component $\hat{\bar{R}}$, can be re-cast as a relative standard deviation of the coefficient;
+In Equation \@ref(eq:mlm) subscript $j$ encodes then for the analyses (cq. nest). The parameter $\hat{\bar{R}}$ of the second level is now a general coefficient, that approximates the grand mean of an $m$-series of analyses, whereas $\hat{u}_{j}$ introduces a new error component, which is specific for each nest (cq. analyses) and follows a normal distribution with variance $\hat{t}^2$ and a mean of $0$. This new error component encodes for the nest-specific deviations, or random effects, superimposed on the $\bar{\bar{R}}$, here approximated by $\hat{\bar{R}}$. The purpose of the $m$-series of analyses is to approximate the variation in the true population through sampling at multiple instances (i.e. along a transect of sputter pits on the substrate). For these types of questions; i.e., is the substrate isotopically homogeneous or heterogeneous, a mix of fixed and random effects (known as a mixed effect linear models) is of particular high value. The variance of $R$ (level 1 of Eq. \@ref(eq:mlm)) among the $m$-series of analysis, together with the second level fixed component $\hat{\bar{R}}$, can be re-cast as a relative standard deviation of the coefficient:
 
 \begin{equation}
-  \hat{\epsilon}_{\bar{R}} = \left(\frac{\sum_{j = 1}^{n} (\frac{\hat{R}_{j}}{\hat{\bar{R}}} - 1)^{2}}{n-1} \right) \times 10^3  \text{.} (\#eq:varmlm)
+  \hat{\epsilon}_{\bar{R}} = \frac{\sum_{j = 1}^{n}  \left(\frac{\hat{R}_{j}}{\hat{\bar{R}}} - 1 \right)^{2}}{n-1}  \times 10^3  \text{.} (\#eq:varmlm)
 \end{equation}
 
 This formulation can thus serve as an alternative measure of dispersion in a sample when studying the isotope composition of a substrate. In addition, the fit of the mixed effects model can be compared to the restricted model (the ideal linear model of Eq. \@ref(eq:linmodR). For this comparison, Restricted Maximum Likelihood (REML) optimization is used to estimate parameters for both the restricted fixed effect (Eq. \@ref(eq:linmodR)) and the unrestricted mixed effect models. By contrast to the ratio method estimation (Section \@ref(sec:theory)), this method is a computational iterative process of selecting parameters that maximize the likelihood of obtaining the sample data with a particular parameter ($L\left( \theta_{0} \mid X^{a} \right)$), known as a log-likelihood function [see @Zuur2008 for the functions and their theoretical underpinning]. The REML solver is particularly useful when the random component is the focus of interest [@Kreft1998; @Finch2014], as it does not rely on estimates of model parameters for maximization of the log-likelihood function, and is therefore unbiased [@Zuur2008]. The ratio of the obtained log-likelihood (i.e., maximized likelihood functions) for the restricted model and the unrestricted model, or likelihood-ratio test (LR), can be applied to deduce the significance of including a random component in Equation \@ref(eq:linmodR) [@Molenberghs2007; @Zuur2008].
