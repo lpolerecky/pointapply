@@ -146,6 +146,17 @@ purrr::map2_dfr(
 p <- ggplot2::last_plot() + 
   themes_IC(base = ggplot2::theme_bw()) + 
   ggtitle("Isotopic heterogeneity")
+
+# overview
+p <- gridExtra::grid.arrange(
+  gridExtra::arrangeGrob(QQ_class, CV_class, ncol = 2), 
+  gridExtra::arrangeGrob(mu_class, IR_class, ncol = 2)
+  ) 
+png(filename = "figures/bar_over_class.png", width = 14, height = 14, 
+    units = "cm", res = 256)
+grid::grid.draw(p)
+dev.off()
+
 # save and print
 save_point("hetero_concept", p, width = 15, height = 10, 
            unit = "cm", on_build)

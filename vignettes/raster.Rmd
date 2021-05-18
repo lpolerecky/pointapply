@@ -30,7 +30,7 @@ library(pointapply) # load package
 
 
 ```{r bld, echo=FALSE, eval=TRUE}
-on_build <- FALSE
+on_build <- T
 ```  
 
 
@@ -243,7 +243,7 @@ save_point("point_MEX_ROI2", ggplot2::last_plot(), width = 6.75, height = 9,
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("In-depth analysis of the potential influence of anomolous ", point::R_labeller("12C14N", "12C"), " values on the ",  point::R_labeller("13C", "12C")," (MEX)."), out.width="50%"}
- knitr::include_graphics("figures/point_MEX_ROI2.png")
+knitr::include_graphics("figures/point_MEX_ROI2.png")
 ```
 
 

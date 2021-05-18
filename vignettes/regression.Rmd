@@ -51,7 +51,7 @@ The validation of regression assumptions of Supplementary Section requires ion c
 
 ```{r data}
 # use download_point() to obtain processed data (only has to be done once)
-# download_point(type = "processed")
+download_point(type = "processed")
 ```
 
 

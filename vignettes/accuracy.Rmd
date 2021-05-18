@@ -41,7 +41,7 @@ The assessment of these analytical artefacts  is largely based on the *point* R 
 
 ```{r data}
 # use download_point() to obtain processed data (only has to be done once)
-# download_point(type = "processed")
+download_point(type = "processed")
 ```
 
 
@@ -52,7 +52,8 @@ For this example processed "real" data is loaded with a grid-cell size of 64 pix
 
 ```{r }
 # load "real" data
-load_point("map_sum_grid", c("MEX", "MON"), grid_cell = 64, return_name = FALSE, on_build)
+load_point("map_sum_grid", c("MEX", "MON"), grid_cell = 64, return_name = FALSE, 
+           on_build)
 # load simulated data
 load_point("simu", "CD_eval_intra", NULL, return_name = FALSE, on_build)
 ```
