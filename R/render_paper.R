@@ -30,8 +30,8 @@ render_paper <- function(
   if (on_build) {
     path <- usethis::proj_path("inst/paper")
     IC <- usethis::proj_path("inst/extdata/data")
-    pkg <- usethis::proj_path("packages", ext ="bib")
-    R <- usethis::proj_path("rversion", ext ="bib")
+    pkg <- usethis::proj_path("packages", ext = "bib")
+    R <- usethis::proj_path("rversion", ext = "bib")
     fs::file_copy(
       pkg,
       fs::path(path, type_ms, "packages", ext = "bib"),
@@ -42,10 +42,10 @@ render_paper <- function(
       fs::path(path,  type_ms, "rversion", ext = "bib"),
       overwrite = TRUE
       ) # bib
-    } else {
-      path <- fs::path_package("pointapply", "paper")
-      IC <- fs::path_package("pointapply", "data")
-      }
+  } else {
+    path <- fs::path_package("pointapply", "paper")
+    IC <- fs::path_package("pointapply", "data")
+  }
 
   # make links
   fs::link_create(
@@ -80,11 +80,12 @@ render_paper <- function(
 #' @rdname render_paper
 #'
 #' @export
-edit_paper <- function(type_ms = "preprint"){
-  path <- fs::path_package("pointapply", "paper", type_ms)
-  chr_files <- purrr::map_chr(
-    c("index", "main", "SI"),
-    ~fs::path(path, .x, ext = "Rmd")
-    )
-  fs::file_show(chr_files)
+edit_paper <- function(type_ms = "preprint", on_build = FALSE){
+  if (isTRUE(on_build)) {
+    path <- usethis::proj_path("inst/paper", type_ms)
+  } else {
+    path <- fs::path_package("pointapply", "paper", type_ms)
+  }
+  fs::path(path, c("index", "main", "SI"), ext = "Rmd") %>%
+    fs::file_show()
 }
