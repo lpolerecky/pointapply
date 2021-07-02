@@ -80,11 +80,12 @@ render_paper <- function(
 #' @rdname render_paper
 #'
 #' @export
-edit_paper <- function(type_ms = "preprint"){
-  path <- fs::path_package("pointapply", "paper", type_ms)
-  chr_files <- purrr::map_chr(
-    c("index", "main", "SI"),
-    ~fs::path(path, .x, ext = "Rmd")
-    )
-  fs::file_show(chr_files)
+edit_paper <- function(type_ms = "preprint", on_build = FALSE){
+  if (isTRUE(on_build)) {
+    path <- usethis::proj_path("inst/paper", type_ms)
+  } else {
+    path <- fs::path_package("pointapply", "paper", type_ms)
+  }
+  fs::path(path, c("index", "main", "SI"), ext = "Rmd") %>%
+    fs::file_show()
 }
