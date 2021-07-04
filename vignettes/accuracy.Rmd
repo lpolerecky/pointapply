@@ -9,6 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -29,11 +30,6 @@ library(pointapply) # load package
 ```
 
 
-```{r bld, echo=FALSE}
-on_build <- FALSE
-```  
-
-
 # Download data
 
 The assessment of these analytical artefacts  is largely based on the *point* R package. Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. Simulated data (*Sensitivity by simulation* (`vignette("simulation")`) is used to gauge the effectiveness of precision metrics (such as, the error of the mean) of an SIMS isotope analysis in detecting isotopically anomalies entrained in the analyte (intra-isotope variability).
@@ -52,14 +48,14 @@ For this example processed "real" data is loaded with a grid-cell size of 64 pix
 
 ```{r }
 # load "real" data
-load_point("map_sum_grid", c("MEX", "MON"), grid_cell = 64, return_name = FALSE, 
-           on_build)
+load_point("map_sum_grid", c("MEX", "MON"), grid_cell = 64, return_name = FALSE)
 # load simulated data
-load_point("simu", "CD_eval_intra", NULL, return_name = FALSE, on_build)
+load_point("simu", "CD_eval_intra", NULL, return_name = FALSE)
 ```
 
 
 # Systematic biases
+
 ## Quasi simultaneous Arrival (QSA)
 
 The combination of measuring under high ionisation efficiencies and the usage of electron multipliers (EM) for ion detection can lead to an artefact understood as the more-or-less (quasi) simultaneous arrival (QSA) of an incident ion at the detection device. Differentiation of the two secondary ions is thus not possible, and the ions are therefore counted as $1$ detection event by the machine. In the case of isotope systems this could theoretically lead to under-sampling of the common isotope [@Slodzian2004]. An exact correction of under-sampling induced by QSA can be a cumbersome undertaking, as such the R package `point` [@point] has a diagnostic tool that helps evaluate whether the ion count data is likely to have been compromised by this analytical artefact. The function `QSA_test()` fits a least-square linear model to the common isotope count rates (e.g. ^12^C) as a predictor, and the targeted isotope ratio (e.g. ^13^C/^12^C) as the independent variable. If under-sampling would be present in the ion count data, then this would cause a significant positive linear trend of higher isotope ratios with higher count rates of the common isotope.
@@ -74,7 +70,7 @@ test_QSA_64_all <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm,
 # make mlm model line
 test_QSA_64_all <- dplyr::mutate(
   test_QSA_64_all, 
-  hat_R = alpha_grid.nm + beta_grid.nm * Xt.pr.12C
+  hat_R = alpha_Xt.pr.12C + beta_Xt.pr.12C * Xt.pr.12C
   )
 ```
 
@@ -107,11 +103,11 @@ QSA_dens <- gg_dens(
 QSA_dens + ggplot2::geom_line(ggplot2::aes(y = hat_R)) 
 
 # save data
-write_point("test_QSA_64_all", on_build)
+write_point("test_QSA_64_all")
  
 # save plot  
 save_point("point_QSA", ggplot2::last_plot(), width = 12, height = 8, 
-           unit = "cm", on_build)
+           unit = "cm")
 ```
 
 
@@ -133,7 +129,7 @@ stat_X_64_all <- purrr::map_dfr(
   purrr::flatten(list(map_sum_grid_64_MEX, map_sum_grid_64_MON)),
   ~stat_X(.x, file.nm, sample.nm, dim_name.nm, grid.nm)
   )
-write_point("stat_X_64_all", on_build)
+write_point("stat_X_64_all")
 head(stat_X_64_all)
 ```
 
@@ -147,7 +143,7 @@ stat_R_64_all <- purrr::map_dfr(
   purrr::flatten(list(map_sum_grid_64_MEX, map_sum_grid_64_MON)),
   ~stat_R(.x, "13C", "12C", file.nm, sample.nm, dim_name.nm, grid.nm)
   )
-write_point("stat_R_64_all", on_build)
+write_point("stat_R_64_all")
 head(stat_R_64_all)
 ```
 
@@ -168,12 +164,11 @@ Intra-isotope variation is measured by the test (based on F-statistic) as outlin
 simu_CD_eval_intra <- simu_CD_eval_intra %>% 
  mutate(ion_trend = RS_Xt.sm.12C - hat_RS_Xt.sm.12C) %>% 
  filter(ion_trend > 6) %>% 
- mutate(ion_trend = 
-          factor(
-            ggplot2::cut_width(ion_trend, 10), 
-            labels = c("low", "medium", "high") 
-            ) 
-        )
+  mutate(ion_trend =
+           factor(
+             ggplot2::cut_width(ion_trend, 10),
+             labels = c("low", "medium", "high")
+           ))
 # down-sample
 simu_CD_eval_intra <- slice_sample(simu_CD_eval_intra, prop = 0.01)
 ```
@@ -206,7 +201,7 @@ ggplot(simu_CD_eval_intra, aes(x = chi2_R_Xt.sm, y = F_vl, color = force.nm)) +
 
 # save 
 save_point("simu_precision", ggplot2::last_plot(), width = 14, height = 14, 
-           unit = "cm", on_build)
+           unit = "cm")
 ```
 
 

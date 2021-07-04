@@ -35,11 +35,6 @@ library(pointapply) # load package
 ```
 
 
-```{r bld, echo=FALSE, eval=TRUE}
-on_build <- FALSE
-```  
-
-
 The package `point` [@point] is especially designed to perform the intra- and inter-isotope tests highlighted in the publication.
 
 
@@ -51,12 +46,11 @@ The raw ion count data is generated with Look\@NanoSIMS [@Polerecky2012] as LANS
 ```{r data}
 # use download_point() to obtain processed data.
 # this only has to be done once after installation
-# download_point(type = "raw")
+download_point(type = "raw")
 ```
 
 
 # Extract ion count data
-
 
 ## The two "real" datasets of Schobben, Kienhuis and Polerecky 2021
 
@@ -103,7 +97,7 @@ The grid-cell size has important consequences for the data structure of the ion 
 gg_sketch() 
 # save
 save_point("grid_sketch", ggplot2::last_plot(), width = 12, height = 12, 
-           unit = "cm", on_build)
+           unit = "cm")
 ```
 
 

@@ -18,8 +18,6 @@
 #' @param type Character string for type of file to be loaded.
 #' @param grid_cell Numeric value of grid_cell size in pixels.
 #' @param return_name Logical whether to return file names.
-#' @param on_build Logical whether download is loaded during build
-#' (default = FALSE).
 #' @param type_ms Character string for type manuscript, either \code{"preprint"}
 #' or \code{"paper"}.
 #'
@@ -48,14 +46,13 @@ download_point <- function (type = "all") {
 
   if (all(lgl_int, lgl_ext)) return(invisible())
 
-  # # purge other data
-  # purrr::walk(list.files(path_int, full.names = TRUE), file.remove)
-
   # get the data
   if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
-    pointdata <- zen4R::download_zenodo("10.5281/zenodo.4748667",
-                                        path = path_ext)
-    }
+    pointdata <- zen4R::download_zenodo(
+      "10.5281/zenodo.4748667",
+      path = path_ext
+      )
+  }
 
   if (type == "all" | type == "raw") {
     # extract matlab
@@ -75,54 +72,50 @@ download_point <- function (type = "all") {
 #' @rdname download_point
 #'
 #' @export
-write_point <- function (obj, on_build = FALSE) {
-
-  if (on_build) {
-    path <- usethis::proj_path("inst/extdata/data", obj, ext = "rda")
-    } else {
-      path <- fs::path_package("pointapply", "data",  obj, ext = "rda")
-      }
+write_point <- function (obj) {
+  if (fs::file_exists(fs::path_package("pointapply", "README", ext = "Rmd"))) {
+    data_dir <- "extdata"
+  } else {
+    data_dir <- NULL
+  }
+  path <- fs::path_package("pointapply", data_dir, "data",  obj, ext = "rda")
   envir <- parent.frame()
-  args <- rlang::list2(obj, file = path, envir = envir, compress = "xz",
-                       version = 2)
-
-  rlang::exec("save", !!!args)
+  args <- rlang::list2(
+    obj,
+    file = path,
+    envir = envir,
+    compress = "xz",
+    version = 2
+    )
+  rlang::exec("save", !!! args)
 }
 #' @rdname download_point
 #'
 #' @export
 save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
-                        unit, on_build = FALSE, type_ms = "preprint") {
-
-  if (on_build) {
-    path <- usethis::proj_path()
-      } else {
-      path <- fs::path_package("pointapply")
-      }
-
+                        unit, type_ms = "preprint") {
   args <- rlang::list2(
-    filename = fs::path(path, "vignettes/figures", name, ext = "png"),
+    filename =
+      fs::path_package("pointapply", "vignettes", "figures", name, ext = "png"),
     plot = ggplot,
     width = width,
     height = height,
     unit = unit
     )
   rlang::exec("ggsave", !!! args)
-
-  if (on_build) {
+  if (fs::file_exists(fs::path_package("pointapply", "README", ext = "Rmd"))) {
     # copy whole dir to paper
     fs::dir_copy(
-      fs::path(path, "vignettes/figures"),
-      fs::path(path, "inst/paper", type_ms, "figures"),
+      fs::path_package("pointapply", "vignettes", "figures"),
+      fs::path_package("pointapply", "paper", type_ms, "figures"),
       overwrite = TRUE
-      )
-      }
+    )
+  }
 }
 #' @rdname download_point
 #'
 #' @export
-load_point <- function(type, name, grid_cell, return_name = FALSE, on_build){
-
+load_point <- function(type, name, grid_cell, return_name = FALSE){
   name <- tidyr::crossing(grid_cell, name) %>%
     dplyr::rowwise() %>%
     dplyr::transmute(
@@ -135,11 +128,11 @@ load_point <- function(type, name, grid_cell, return_name = FALSE, on_build){
       ) %>%
     dplyr::pull(name)
 
-  if (on_build) {
-    usethis::proj_path("inst/extdata/data", name, ext = "rda") %>%
+  if (fs::file_exists(fs::path_package("pointapply", "README", ext = "Rmd"))) {
+    fs::path_package("pointapply", "extdata", "data", name, ext = "rda") %>%
       purrr::walk(load, .GlobalEnv)
     } else {
       data(list = name, envir = .GlobalEnv)
-      }
+    }
   if (return_name) return(name)
 }
