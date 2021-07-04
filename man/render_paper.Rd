@@ -9,8 +9,7 @@ render_paper(
   title = "Schobbenetal_SIMS_method",
   output_dir = fs::path_wd(),
   type_ms = "preprint",
-  copy_figures = TRUE,
-  on_build = FALSE
+  copy_figures = TRUE
 )
 
 edit_paper(type_ms = "preprint")
@@ -26,9 +25,6 @@ or \code{"paper"}.}
 
 \item{copy_figures}{Logical wether to copy figures to directory
 (default = TRUE).}
-
-\item{on_build}{Logical whether download is loaded during build
-(default = FALSE).}
 }
 \value{
 Rendered documents including a tex, docx and pdf file. Depending on

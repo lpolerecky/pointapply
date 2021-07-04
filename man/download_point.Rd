@@ -9,7 +9,7 @@
 \usage{
 download_point(type = "all")
 
-write_point(obj, on_build = FALSE)
+write_point(obj)
 
 save_point(
   name,
@@ -17,19 +17,15 @@ save_point(
   width,
   height,
   unit,
-  on_build = FALSE,
   type_ms = "preprint"
 )
 
-load_point(type, name, grid_cell, return_name = FALSE, on_build)
+load_point(type, name, grid_cell, return_name = FALSE)
 }
 \arguments{
 \item{type}{Character string for type of file to be loaded.}
 
 \item{obj}{Character string of object to store.}
-
-\item{on_build}{Logical whether download is loaded during build
-(default = FALSE).}
 
 \item{name}{Character string for graphic based on ggplot or file to be
 loaded.}

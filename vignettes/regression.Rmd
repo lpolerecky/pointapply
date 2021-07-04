@@ -39,11 +39,6 @@ library(pointapply) # load package
 ```
 
 
-```{r bld, echo=FALSE, eval=TRUE}
-on_build <- FALSE
-```  
-
-
 # Download data
 
 The validation of regression assumptions of Supplementary Section requires ion count data processed with the *point* R package. Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4564170) with the function `download_point()`. 
@@ -66,8 +61,7 @@ grid_cell <- sapply(2:7, function(x) 2 ^ x)
 # names of the analytes in the paper
 name <- c("MEX", "MON")
 # load
-name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE, 
-                   on_build)
+name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE)
 # data frame aggregated over depth
 tb <- purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
 ```
@@ -126,6 +120,7 @@ tb_IR <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm,
 # Visualization
 ## Classification plots
 
+
 Barplots (`ggplot` with `geom_bar()`[@ggplot2; @ggplot22016]) are chosen to visualise (Supplementary Fig. 6), and summarise, the outcomes of the different hypothesis tests for the different grid-cell sizes. Besides a bin selection based on grid-cell size, a secondary x-axis is added to further emphasize the importance of count statistics (Poisson statistics) on the underlying data structure, and thus a crucial aspects in the outcome of various hypothesis tests. For this the mean count of the rare isotope (^13^C) is calculated ove both samples added together and for each grid-cell size separately. 
 
 
@@ -146,8 +141,7 @@ The function `hyp_class()` constructs barplots showing the frequency of $H_0$ re
 
 ```{r QQclass}
 QQ_class <- hyp_class(tb_QQ, vc_N_13C, "Normality test") # barplot
-save_point("bar_QQ_class", QQ_class, width = 7, height = 7, unit = "cm", 
-           on_build) # save
+save_point("bar_QQ_class", QQ_class, width = 7, height = 7, unit = "cm") # save
 ```
 
 
@@ -158,7 +152,7 @@ save_point("bar_QQ_class", QQ_class, width = 7, height = 7, unit = "cm",
 
 ```{r CVclass}
 CV_class <- hyp_class(tb_CV, vc_N_13C, "Breusch-Pagan test") # barplot
-save_point("bar_CV_class", CV_class, width = 7, height = 7, unit = "cm", on_build) # save
+save_point("bar_CV_class", CV_class, width = 7, height = 7, unit = "cm") # save
 ```
 
 
@@ -169,7 +163,7 @@ save_point("bar_CV_class", CV_class, width = 7, height = 7, unit = "cm", on_buil
 
 ```{r muclass}
 mu_class <- hyp_class(tb_mu, vc_N_13C, "Student's t test") # barplot  
-save_point("bar_mu_class", mu_class, width = 7, height = 7, unit = "cm", on_build) # save
+save_point("bar_mu_class", mu_class, width = 7, height = 7, unit = "cm") # save
 ```
 
 
@@ -180,7 +174,7 @@ save_point("bar_mu_class", mu_class, width = 7, height = 7, unit = "cm", on_buil
 
 ```{r IRclass}
 IR_class <- hyp_class(tb_IR, vc_N_13C, "Ljung-box test")  # barplot
-save_point("bar_IR_class", IR_class, width = 7, height = 7, unit = "cm",on_build) # save
+save_point("bar_IR_class", IR_class, width = 7, height = 7, unit = "cm") # save
 ```
 
 
@@ -227,8 +221,7 @@ QQ_dens <- gg_dens(
 # add abline
 QQ_dens <- QQ_dens + ggplot2::geom_abline(alpha = 0.7, linetype = 3) 
 # plot and save for paper
-save_point(QQ_dens, name = "point_QQ", width = 12, height = 10, unit = "cm", 
-           on_build)
+save_point(QQ_dens, name = "point_QQ", width = 12, height = 10, unit = "cm")
 ```
 
 
@@ -258,8 +251,7 @@ CV_dens <- gg_dens(
 # add ab line
 CV_dens <- CV_dens + ggplot2::geom_hline(yintercept = 0, linetype = 3)
 # plot and save for paper
-save_point(CV_dens, name = "point_CV", width = 12, height = 10, unit = "cm", 
-           on_build)
+save_point(CV_dens, name = "point_CV", width = 12, height = 10, unit = "cm")
 ```
 
 
