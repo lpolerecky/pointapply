@@ -38,9 +38,12 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
                       .ion2 = "12C"){
 
   args <- enquos(.X = .X, .N = .N, .species = .species, .t = .t)
-  args <- arg_builder(all_args(args, .ion1, .ion2, chr = FALSE), "model")
+  args <- point:::arg_builder(
+    point:::all_args(args, .ion1, .ion2, chr = FALSE),
+    "model"
+    )
 
-    im <- dim_folds(ls_im, height, width, depth, ttl, "raster", res, grid_cell)
+  im <- dim_folds(ls_im, height, width, depth, ttl, "raster", res, grid_cell)
 
   # base raster image for ion ratios
   gg_base <- gg_cnts(
@@ -134,7 +137,7 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
     model_args <- args[paste(tb_model$name, tb_model$derived, sep = "_")]
     ls_latex <- set_names(
       sapply(model_args, as_name),
-      tex_labeller(tb_model, tb_model$name, label)
+      point:::tex_labeller(tb_model, tb_model$name, label)
       )
     } else {
       ls_latex <- sapply(model_args, as_name)
@@ -240,7 +243,7 @@ dim_folds <- function(ls, dim1, dim2, dim3, ttl, geom, res, grid_cell){
   bind_rows(ls)
 }
 
-
+# placing arrows for depth
 depth_arrows <- function(res, grid_cell) {
 
   min_arrow <- res + grid_cell / 2
@@ -285,126 +288,4 @@ depth_arrows <- function(res, grid_cell) {
       angle = 90
       )
     )
-}
-
-# Build new quosures and names for calcs
-arg_builder <- function(args, stat, ion = NULL, append = NULL){
-
-  if (stat == "X") arg_names <- point::names_stat_X
-  if (stat == "R") arg_names <- point::names_stat_R
-  if (stat == "model") arg_names <- point::names_model
-
-  if (stat == "model") pre <-  NULL else pre  <- "."
-
-  # no origin of variable names
-  if (!"origin" %in% colnames(arg_names)) arg_names$origin <- NA_character_
-
-  arg_names <- mutate(
-    arg_names,
-    origin = if_else(is.na(.data$origin), .data$derived, .data$origin),
-    label =
-      if_else(
-        .data$origin == .data$derived,
-        paste0(paste(.data$name, .data$origin, sep = "_"), append),
-        paste0(paste(.data$name, .data$derived, sep = "_"), append)
-      ),
-    name =
-      if_else(
-        .data$origin == .data$derived,
-        .data$name,
-        paste(.data$name, .data$derived, sep = "_")
-      )
-  )
-
-  # quosure update
-  args <- purrr::map2(
-    arg_names$origin,
-    arg_names$name,
-    ~quo_updt(args[[paste0(pre, .x)]], pre = .y)
-  )
-  # wide format with ions
-  if (!is.null(ion)) args <- purrr::map(args, quo_updt, post = ion)
-  # set names
-  set_names(args, nm = arg_names$label)
-}
-
-# Function which updates quosures for subsequent tidy evaluation
-quo_updt <- function(my_q, pre = NULL, post = NULL, update_post = FALSE){
-
-  # Get expressions
-  old_expr <- get_expr(my_q)
-  # Get text
-  old_chr <- expr_text(old_expr)
-
-  # Update
-  if (update_post & stringr::str_detect(old_chr , "\\.") ){
-    old_chr <- stringr::str_split(old_chr, "\\.")[[1]][1]
-  }
-
-  # Separators
-  if (is.null(pre) & is.null(post)) {
-    warning("Quosure not updated")
-    return(my_q)
-  }
-  if (!is.null(pre) & is.null(post)) {
-    new_chr <- paste0(pre, "_", old_chr)
-  }
-  if (is.null(pre) & !is.null(post)) {
-    new_chr <- paste0(old_chr, ".", post)
-  }
-  if (!is.null(pre) & !is.null(post)) {
-    new_chr <- paste0(pre, "_", old_chr, ".", post)
-  }
-
-  # New expression from character (remove whitespace)
-  new_expr <- parse_expr(stringr::str_replace_all(new_chr, " ", ""))
-  # Update old quosure
-  set_expr(my_q, new_expr)
-}
-
-# Select arguments
-all_args <- function(args, ion1, ion2, except = NULL, chr = TRUE) {
-  args_Xt <- purrr::flatten(
-    purrr::map2(
-      c(ion1, ion2),
-      seq_along(c(ion1, ion2)),
-      ~arg_builder(args, "X", .x, .y)
-    )
-  )
-  args_R <- list2(
-    !!! arg_builder(args, "R"),
-    R = quo_updt(args[[".X"]], pre = "R"),
-    ratio = parse_quo("ratio.nm", env = quo_get_env(args[[".X"]]))
-  )
-  args <- append(args_Xt, args_R)
-  if (isTRUE(chr)) {
-    vc_args <- sapply(args, as_name)
-    return(vc_args[!vc_args %in% except])
-  } else {
-    return(args)
-  }
-}
-
-# latex labeller function
-tex_labeller <- function(vars, stat, label){
-  if (!"origin" %in% colnames(vars)) vars$origin <- vars$derived
-  names_vars <- filter(vars, .data$name %in% stat) %>%
-    # if variable has a stat component
-    mutate(
-      derived =
-        if_else(
-          stringr::str_detect(.data$derived, "[[:punct:]]"),
-          stringr::str_extract("M_R", "(?<=[[:punct:]])[[:alpha:]]"),
-          .data$derived
-        )
-    )
-  purrr::pmap_chr(
-    list(
-      var = names_vars$derived,
-      org = names_vars$origin,
-      stat = names_vars$name
-    ),
-    point::stat_labeller,
-    label = label
-  )
 }

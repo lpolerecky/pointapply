@@ -30,20 +30,20 @@ gg_point <- function(IC, image, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
   # user-supplied variables
   args <- enquos(.X = .X, .N = .N, .species = .species, .t = .t)
   # variables for threshold ion ratio
-  args_thr <- arg_builder(args, "X")
+  args_thr <- point:::arg_builder(args, "X")
   # variables for isotope ratio
-  args_R <- all_args(args, ion1_R, ion2_R, chr = FALSE)
+  args_R <- point:::all_args(args, ion1_R, ion2_R, chr = FALSE)
   # ions
-  args_ion <- purrr::map(ions, ~quo_updt(args[[".X"]], post = .x)) %>%
+  args_ion <- purrr::map(ions, ~point:::quo_updt(args[[".X"]], post = .x)) %>%
     rlang::set_names(nm = ions)
 
-  N.rw <- quo_updt(args[[".N"]], post = "rw", update_post = TRUE)
+  N.rw <- point:::quo_updt(args[[".N"]], post = "rw", update_post = TRUE)
 
   # ratio bounds
-  lower1 <- quo_updt(args[[".X"]], pre = "lower", post = ion1_R)
-  lower2 <- quo_updt(args[[".X"]], pre = "lower", post = ion2_R)
-  upper1 <- quo_updt(args[[".X"]], pre = "upper", post = ion1_R)
-  upper2 <- quo_updt(args[[".X"]], pre = "upper", post = ion2_R)
+  lower1 <- point:::quo_updt(args[[".X"]], pre = "lower", post = ion1_R)
+  lower2 <- point:::quo_updt(args[[".X"]], pre = "lower", post = ion2_R)
+  upper1 <- point:::quo_updt(args[[".X"]], pre = "upper", post = ion1_R)
+  upper2 <- point:::quo_updt(args[[".X"]], pre = "upper", post = ion2_R)
 
   im_ROI <-filter(
     image,

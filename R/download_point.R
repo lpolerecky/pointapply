@@ -15,6 +15,8 @@
 #' @param height Numeric value for height of graphic based on ggplot.
 #' @param unit Character string indicating dimension units for graphic based
 #' on ggplot.
+#' @param output_dir Character string for directory containing the rendered
+#' document.
 #' @param type Character string for type of file to be loaded.
 #' @param grid_cell Numeric value of grid_cell size in pixels.
 #' @param return_name Logical whether to return file names.
@@ -73,7 +75,8 @@ download_point <- function (type = "all") {
 #'
 #' @export
 write_point <- function (obj) {
-  if (fs::file_exists(fs::path_package("pointapply", "README", ext = "Rmd"))) {
+  # if loaded exists then it is in development mode
+  if (exists("loaded", "package:pointapply")) {
     data_dir <- "extdata"
   } else {
     data_dir <- NULL
@@ -93,17 +96,18 @@ write_point <- function (obj) {
 #'
 #' @export
 save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
-                        unit, type_ms = "preprint") {
+                        unit, type_ms = "preprint", output_dir = fs::path_wd()) {
+
   args <- rlang::list2(
-    filename =
-      fs::path_package("pointapply", "vignettes", "figures", name, ext = "png"),
+    filename = fs::path(output_dir, "figures", name, ext = "png"),
     plot = ggplot,
     width = width,
     height = height,
     unit = unit
     )
   rlang::exec("ggsave", !!! args)
-  if (fs::file_exists(fs::path_package("pointapply", "README", ext = "Rmd"))) {
+  # if loaded exists then it is in development mode
+  if (exists("loaded", "package:pointapply")) {
     # copy whole dir to paper
     fs::dir_copy(
       fs::path_package("pointapply", "vignettes", "figures"),
@@ -127,12 +131,16 @@ load_point <- function(type, name, grid_cell, return_name = FALSE){
           )
       ) %>%
     dplyr::pull(name)
-
-  if (fs::file_exists(fs::path_package("pointapply", "README", ext = "Rmd"))) {
-    fs::path_package("pointapply", "extdata", "data", name, ext = "rda") %>%
-      purrr::walk(load, .GlobalEnv)
+  # if loaded exists then it is in development mode
+  if (exists("loaded", "package:pointapply")) {
+    fs::path(fs::path_package("pointapply"), "extdata", "data", name, ext = "rda") %>%
+      purrr::walk(load, envir = .GlobalEnv)
     } else {
-      data(list = name, envir = .GlobalEnv)
+    data(list = name, envir = environment())
     }
   if (return_name) return(name)
 }
+
+# some pointer to check whether load_all is used
+loaded <- function(...) invisible(...)
+

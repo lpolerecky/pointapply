@@ -56,9 +56,10 @@ gg_dens <- function(IC, x, y, xlab = ggplot2::waiver(),
       )
     }
     if (unit == "dim") lab <- ggplot2::label_value
-    } else {
-      ran <- range(count(IC)$n)
-      }
+  } else {
+    ran <- range(count(IC)$n)
+  }
+
 
   # down-sample
   IC <- slice_sample(IC, n =  min(count(IC)$n) * downsample)
@@ -158,7 +159,7 @@ dens_point <- function (p, flag, IC, width) {
   }
   # alpha
   p <- p +
-    scale_alpha_identity(guide = FALSE, limits = c(1e-5, 1))
+    scale_alpha_identity(guide = "none", limits = c(1e-5, 1))
   return(p)
 }
 
