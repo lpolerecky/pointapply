@@ -40,24 +40,25 @@ pointapply::render_paper(title = "Schobbenetal_SIMS_method",
 
 The construction of the R (R Core Team 2021) package *pointapply* and
 associated documentation was aided by the packages; *devtools* (Wickham,
-Hester, and Chang 2021), *roxygen2* (Wickham, Danenberg, et al. 2020),
-and *fs* (Hester and Wickham 2020).
+Hester, and Chang 2021), *roxygen2* (Wickham et al. 2020), *testthat*
+(Wickham 2021a), *vdiffr* (Henry et al. 2021), and *fs* (Hester and
+Wickham 2020).
 
 The book: *R packages: organize, test, document, and share your code*,
 by (**Wickham2015?**) is a great guide for learning how to build
 packages.
 
 In addition, this package relies on a set of external packages from the
-tidyverse universe, including: *dplyr* (Wickham et al. 2021), *tidyr*
-(Wickham 2021), *tibble* (Müller and Wickham 2021), *stringr* (Wickham
-2019), *magrittr* (Bache and Wickham 2020), and *purrr* (Henry and
-Wickham 2020a) for data manipulation.
+tidyverse universe, including: *dplyr* (Wickham, François, et al. 2021),
+*tidyr* (Wickham 2021b), *tibble* (Müller and Wickham 2021), *stringr*
+(Wickham 2019), *magrittr* (Bache and Wickham 2020), and *purrr* (Henry
+and Wickham 2020) for data manipulation.
 
-Data plots are constructed with *ggplot2* (Wickham, Chang, et al. 2020;
+Data plots are constructed with *ggplot2* (Wickham, Chang, et al. 2021;
 Wickham 2016), *ggrepel* (Slowikowski 2021), *RColorBrewer* (Neuwirth
 2014), and *scales* (Wickham and Seidel 2020)
 
-The package *rlang* (Henry and Wickham 2020b) was used for tidy
+The package *rlang* (Henry and Wickham 2021) was used for tidy
 evaluation.
 
 Some specialised specialised packages where used, notably; *R.matlab*
@@ -164,16 +165,24 @@ Francois, Romain. 2020. *Bibtex: Bibtex Parser*.
 
 </div>
 
+<div id="ref-vdiffr" class="csl-entry">
+
+Henry, Lionel, Thomas Lin Pedersen, T Jake Luciani, Matthieu Decorde,
+and Vaudor Lise. 2021. *Vdiffr: Visual Regression Testing and Graphical
+Diffing*.
+
+</div>
+
 <div id="ref-purrr" class="csl-entry">
 
-Henry, Lionel, and Hadley Wickham. 2020a. *Purrr: Functional Programming
+Henry, Lionel, and Hadley Wickham. 2020. *Purrr: Functional Programming
 Tools*. <https://CRAN.R-project.org/package=purrr>.
 
 </div>
 
 <div id="ref-rlang" class="csl-entry">
 
-———. 2020b. *Rlang: Functions for Base Types and Core r and Tidyverse
+———. 2021. *Rlang: Functions for Base Types and Core r and Tidyverse
 Features*. <https://CRAN.R-project.org/package=rlang>.
 
 </div>
@@ -257,9 +266,16 @@ Operations*. <https://CRAN.R-project.org/package=stringr>.
 
 </div>
 
+<div id="ref-testthat" class="csl-entry">
+
+———. 2021a. *Testthat: Unit Testing for r*.
+<https://CRAN.R-project.org/package=testthat>.
+
+</div>
+
 <div id="ref-tidyr" class="csl-entry">
 
-———. 2021. *Tidyr: Tidy Messy Data*.
+———. 2021b. *Tidyr: Tidy Messy Data*.
 <https://CRAN.R-project.org/package=tidyr>.
 
 </div>
@@ -268,7 +284,7 @@ Operations*. <https://CRAN.R-project.org/package=stringr>.
 
 Wickham, Hadley, Winston Chang, Lionel Henry, Thomas Lin Pedersen,
 Kohske Takahashi, Claus Wilke, Kara Woo, Hiroaki Yutani, and Dewey
-Dunnington. 2020. *Ggplot2: Create Elegant Data Visualisations Using the
+Dunnington. 2021. *Ggplot2: Create Elegant Data Visualisations Using the
 Grammar of Graphics*. <https://CRAN.R-project.org/package=ggplot2>.
 
 </div>

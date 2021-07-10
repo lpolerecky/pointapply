@@ -25,7 +25,7 @@ pkgs <- c(
 # tidyverse
     "tidyverse",
 # package dev
-    "devtools", "roxygen2", "rlang", "fs",
+    "devtools", "roxygen2", "rlang", "fs", "testthat", "vdiffr",
 # documentation and paper
     "knitr", "rmarkdown", "bookdown", "rticles", "kableExtra", "Cairo", "bibtex",
 # reading and downloading data
@@ -88,7 +88,7 @@ pointapply::render_paper(title = "Schobbenetal_SIMS_method",
 
 ## Credits
 
-The construction of the R [@rversion] package *pointapply* and associated documentation was aided by the packages; *devtools* [@devtools], *roxygen2* [@roxygen2], and *fs* [@fs].
+The construction of the R [@rversion] package *pointapply* and associated documentation was aided by the packages; *devtools* [@devtools], *roxygen2* [@roxygen2], *testthat* [@testthat], *vdiffr* [@vdiffr], and *fs* [@fs].
 
 The book: *R packages: organize, test, document, and share your code*, by @Wickham2015 is a great guide for learning how to build packages. 
 
