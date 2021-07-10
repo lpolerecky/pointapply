@@ -34,7 +34,7 @@ library(pointapply) # load package
 Ion count data processed with the `*`point`*` R package [@point] is required to produce the raster plots (Figs 7 and 8, and Supplementary Fig. 7). Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4580159) with the function `download_point()`. 
 
 
-```{r data}
+```{r data, eval=FALSE}
 # use download_point() to obtain processed data.
 # this only has to be done once after installation
 download_point(type = "processed")
@@ -95,7 +95,8 @@ ls_diag <- purrr::map(
     file.nm, 
     grid.nm, 
     .nest = grid.nm, 
-    .output = "complete"
+    .output = "complete", 
+    .meta = TRUE
     )
   )
 ```
@@ -144,7 +145,8 @@ ls_diag <- purrr::map(
     file.nm, 
     grid.nm,
     .nest = grid.nm, 
-    .output = "complete"
+    .output = "complete", 
+    .meta = TRUE
     )
 ) 
 ```
@@ -232,7 +234,7 @@ save_point("point_MEX_ROI9", ggplot2::last_plot(), width = 6.75, height = 9,
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("In-depth analysis of the potential influence of anomolous ", point::R_labeller("12C", "40Ca16O"), " values on the ",  point::R_labeller("13C", "12C")," (MEX)."), out.width="50%"}
- knitr::include_graphics("figures/point_MEX_ROI9.png")
+knitr::include_graphics("figures/point_MEX_ROI9.png")
 ```
 
 

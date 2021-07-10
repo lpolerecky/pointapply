@@ -51,6 +51,8 @@ For this example processed "real" data is loaded with a grid-cell size of 64 pix
 load_point("map_sum_grid", c("MEX", "MON"), grid_cell = 64, return_name = FALSE)
 # load simulated data
 load_point("simu", "CD_eval_intra", NULL, return_name = FALSE)
+# load simulated sensitivity data
+load_point("simu", "sens_IC_intra", NULL, return_name = FALSE)
 ```
 
 
@@ -70,7 +72,7 @@ test_QSA_64_all <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm,
 # make mlm model line
 test_QSA_64_all <- dplyr::mutate(
   test_QSA_64_all, 
-  hat_R = alpha_Xt.pr.12C + beta_Xt.pr.12C * Xt.pr.12C
+  hat_R = alpha_grid.nm + beta_grid.nm * Xt.pr.12C
   )
 ```
 
@@ -160,17 +162,25 @@ Intra-isotope variation is measured by the test (based on F-statistic) as outlin
 
 
 ```{r cut}
+# groups
+grps <- rlang::quos(type.nm, trend.nm, force.nm, spot.nm)
+# R stats synthetic data
+tb_R <- point::stat_R(simu_sens_IC_intra, "13C", "12C", !!!grps, .X = Xt.sm, 
+                      .N = N.sm) 
+# single ions stats
+tb_X <- point::stat_X(simu_sens_IC_intra, !!!grps, .X = Xt.sm, .N = N.sm) %>% 
+  dplyr::filter(species.nm == "12C")
 # filter and cut continuous ionization efficiency
-simu_CD_eval_intra <- simu_CD_eval_intra %>% 
- mutate(ion_trend = RS_Xt.sm.12C - hat_RS_Xt.sm.12C) %>% 
- filter(ion_trend > 6) %>% 
-  mutate(ion_trend =
-           factor(
-             ggplot2::cut_width(ion_trend, 10),
-             labels = c("low", "medium", "high")
-           ))
-# down-sample
-simu_CD_eval_intra <- slice_sample(simu_CD_eval_intra, prop = 0.01)
+simu_stat_eval_intra <- list(simu_CD_eval_intra, tb_X, tb_R) %>% 
+  purrr::reduce(left_join, by = sapply(grps, rlang::as_name)) %>% 
+  dplyr::mutate(ion_trend = RS_Xt.sm - hat_RS_N.sm) %>% 
+  dplyr::filter(ion_trend > 6) %>% 
+  dplyr::mutate(ion_trend =
+                  factor(
+                    ggplot2::cut_width(ion_trend, 10),
+                    labels = c("low", "medium", "high")
+                    )
+                )
 ```
   
   
@@ -179,7 +189,7 @@ A simple ggplot (`ggplot() + geom_point()`) [@ggplot2; @ggplot22016] has been us
   
 ```{r FvsChi}
 # plot F vs Chi2
-ggplot(simu_CD_eval_intra, aes(x = chi2_R_Xt.sm, y = F_vl, color = force.nm)) +
+ggplot(simu_stat_eval_intra, aes(x = chi2_R_N.sm, y = F_R_Xt.sm, color = force.nm)) +
   geom_point() +
   facet_grid(cols = vars(type.nm), rows = vars(ion_trend)) +
   scale_color_distiller(
@@ -206,7 +216,7 @@ save_point("simu_precision", ggplot2::last_plot(), width = 14, height = 14,
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="The sensitivity of precision and accuracy-based test statistics to intra-isotope variability.", out.width="80%"}
- knitr::include_graphics("figures/simu_precision.png")
+knitr::include_graphics("figures/simu_precision.png")
 ```
 
 

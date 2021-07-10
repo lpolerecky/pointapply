@@ -130,7 +130,7 @@ plane_fun <- function(directory, grid_cell, title, file_name, species = NULL){
   name <- paste(file_name, grid_cell, title, sep = "_")
   if (grid_cell == 1) name <- paste(file_name, title, sep = "_")
   assign(name, ls_pr)
-  rlang::exec("write_point", rlang::sym(name), on_build)
+  rlang::exec("write_point", rlang::sym(name))
   }
 
 # execute
@@ -188,7 +188,7 @@ ls_GC <- purrr::map(
   ) %>% 
   rlang::set_names(nm = paste("map_full_grid_64", c(2, 9), "MEX", sep = "_"))
 assign("map_full_grid_64_MEX", ls_GC)
-write_point(map_full_grid_64_MEX, on_build)
+write_point(map_full_grid_64_MEX)
 ```
 
 

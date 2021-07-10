@@ -17,7 +17,8 @@ save_point(
   width,
   height,
   unit,
-  type_ms = "preprint"
+  type_ms = "preprint",
+  output_dir = fs::path_wd()
 )
 
 load_point(type, name, grid_cell, return_name = FALSE)
@@ -41,6 +42,9 @@ on ggplot.}
 
 \item{type_ms}{Character string for type manuscript, either \code{"preprint"}
 or \code{"paper"}.}
+
+\item{output_dir}{Character string for directory containing the rendered
+document.}
 
 \item{grid_cell}{Numeric value of grid_cell size in pixels.}
 

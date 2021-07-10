@@ -212,8 +212,8 @@ QQ_dens <- gg_dens(
   "Theoretical quantiles", 
   "Sample quantiles", 
   "Normal QQ plot",
-  1, 
   grid_size.nm,
+  1, 
   c(-4, 4), 
   c(-4, 4)
   )  
@@ -244,8 +244,8 @@ CV_dens <- gg_dens(
     ), 
   expression("studentized residuals (" * italic(e)^"*" * ")"), 
   "Scale-location plot",
+  grid_size.nm,
   1, 
-  gr = grid_size.nm,
   facet_sc = "free_x"
   )
 # add ab line
