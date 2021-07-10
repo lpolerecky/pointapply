@@ -34,11 +34,6 @@ library(pointapply) # load package
 ```
 
 
-```{r bld, echo=FALSE, eval=TRUE}
-on_build <- FALSE
-```  
-
-
 The performance of the intra- and inter-isotope tests, bundled in this package, are tested with the simulated (or synthetic) data.
 
 
@@ -54,7 +49,9 @@ stable_ion <- point::simu_R(0, "ideal", "13C", "12C", "VPDB", 1) %>%
 # fluctuating ionization efficiency
 fluc_ion <- point::simu_R(10, "ideal", "13C", "12C", "VPDB", 1)  %>% 
   dplyr::mutate(type.nm = "fluctuating ionization")
-
+# combine
+ion_eff <- dplyr::bind_rows(stable_ion, fluc_ion)
+# single ion stats
 tb_X <- stat_X(
   ion_eff, 
   type.nm, 
@@ -63,6 +60,7 @@ tb_X <- stat_X(
   .stat = c("M", "S", "hat_S")
   )
 
+# stat ranges
 mean_y <- filter(tb_X, species.nm == "13C")$M_Xt.sm %>% mean
 x_fluc <- filter(fluc_ion, species.nm == "12C")$Xt.sm %>% range() %>% diff()
 x_stable <- filter(stable_ion, species.nm == "12C")$Xt.sm %>% range() %>% diff() 
@@ -72,8 +70,7 @@ y_range <- c(
   mean_y + (x_fluc / x_stable * y_stable / 2)
 )
 
-ion_eff <- dplyr::bind_rows(stable_ion, fluc_ion)
-
+# plot
 gg_dens(
   point::cov_R(ion_eff, c("12C", "13C"), type.nm), 
   x = Xt.sm.12C, 
@@ -120,7 +117,7 @@ gg_dens(
 
 # save and print
 save_point("ionization_concept", last_plot(), width = 15, height = 10, 
-           unit = "cm", on_build)
+           unit = "cm")
 ```
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Conceptual sketches for ionization efficiency.", out.width="70%"}
@@ -159,7 +156,7 @@ dev.off()
 
 # save and print
 save_point("hetero_concept", p, width = 15, height = 10, 
-           unit = "cm", on_build)
+           unit = "cm")
 ```
 
 
@@ -253,7 +250,8 @@ ggplot(tb_cp, aes(x = Xt2, y = Xt1, group = name, color = "simulated Ri")) +
   themes_IC(base = ggplot2::theme_bw())
 
 # save and print
-save_point("simu_intra_concept", ggplot2::last_plot(), width = 14, height = 7, unit = "cm", on_build)
+save_point("simu_intra_concept", ggplot2::last_plot(), width = 14, height = 7, 
+           unit = "cm")
 ```
 
 
@@ -280,7 +278,7 @@ The function `write_point()` is included in this package and saves the generated
 
 
 ```{r saveintra, options}
-write_point("simu_sens_IC_intra", on_build)
+write_point("simu_sens_IC_intra")
 ```
 
 
@@ -314,7 +312,7 @@ The Cook's D method is the default method of `diag_R()`, and is therefore simple
 # diagnostics
 simu_CD_eval_intra <- point::diag_R(simu_sens_IC_intra, "13C", "12C", !!!grps)
 # export
-write_point("simu_CD_eval_intra", on_build)
+write_point("simu_CD_eval_intra")
 ```
 
 
@@ -334,7 +332,7 @@ CM_eval <- point::eval_diag(tb_dia, "13C", "12C", !!!grps, .N = N.sm,
 # extract distinct groups omitting block-wise means
 simu_CM_eval_intra <- dplyr::distinct(CM_eval, !!!grps, .keep_all = TRUE)
 # export
-write_point("simu_CM_eval_intra", on_build)
+write_point("simu_CM_eval_intra")
 ```
 
 
@@ -404,7 +402,7 @@ inter_run <- function(vct, n, file_name, reps) {
   name <- paste(file_name, n, sep = "_")
   assign(name, simu)
   name %T>% 
-    rlang::exec("write_point", ., on_build) %>% 
+    rlang::exec("write_point", .) %>% 
     rlang::sym() %>% 
     eval()
 }
@@ -438,7 +436,7 @@ Also, the execution over the has been packed in a wrapper function that can be a
 
 ```{r loadinter, echo=FALSE}
 # load data
-# load_point("simu", paste0("sens_IC_inter_", 1:10), NULL, return_name = FALSE, on_build)
+# load_point("simu", paste0("sens_IC_inter_", 1:10), NULL, return_name = FALSE)
 ```
 
 
@@ -448,7 +446,7 @@ inter_wrap <- function(simu, n, grps, file_name){
   tb_dia <- diag_R(simu, "13C", "12C", !!!grps)
   name <- paste(file_name, n, sep = "_")
   assign(name, tb_dia)
-  exec("write_point", name, on_build)
+  exec("write_point", name)
 }
 
 # execute
