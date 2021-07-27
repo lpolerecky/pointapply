@@ -44,11 +44,6 @@ always_allow_html: true
 ```
 
 
-```{r bld, echo=FALSE}
-on_build <- FALSE
-```  
-
-
 ```{r units}
 # latex unit SIUnitx package
 SI <- function(x, unit, not = "fl", word = knitr::pandoc_to("docx")) {
@@ -73,12 +68,6 @@ permille <- function(x, sign = FALSE, word = knitr::pandoc_to("docx")){
 ```
 
 
-<!-- ```{r kable} -->
-<!-- # ensure correct kable output -->
-<!-- options("kableExtra.html.bsTable" = TRUE)  -->
-<!-- ``` -->
-
-
 ```{r sumfun}
 # filter select cast function
 var_mean <- function(data, plane, grid_cell, var) {
@@ -87,17 +76,10 @@ var_mean <- function(data, plane, grid_cell, var) {
     mean() 
   }
 ```
+
   
-
-<!-- ```{r child} -->
-<!-- # child duplicate option -->
-<!-- options(knitr.duplicate.label = "allow") -->
-<!-- ``` -->
-
 ```{r pipe}
-
 `%>%` <- magrittr::`%>%`
-
 ```
 
 \newpage
