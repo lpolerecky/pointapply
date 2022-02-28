@@ -13,7 +13,7 @@
 #' @param output Character string for type of output; \code{"complete"} or
 #' \code{"sum"}.
 #' @param grid_sel Integer selecting an grid-cell for in-depth analysis.
-#' @param scaler Numeric converting the pixels to metric dimension of
+#' @param scalar Numeric converting the pixels to metric dimension of
 #' measurement (default is the conversion used in this study).
 #'
 #' @return A \code{tibble::\link[tibble:tibble]{tibble}} containing the ion counts
@@ -23,7 +23,7 @@
 #'
 #' @export
 read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
-                        output = "sum", grid_sel = NULL, scaler = 40 / 256){
+                        output = "sum", grid_sel = NULL, scalar = 40 / 256){
 
   plane <- enquo(plane)
   # search pattern
@@ -45,7 +45,7 @@ read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
     )
   chop_files <- stringr::str_split(directory,"/")[[1]]
   file_names <- purrr::map(
-    1:dplyr::n_distinct(ls_files),
+    1 : dplyr::n_distinct(ls_files),
     ~ chop_files[dplyr::n_distinct(chop_files)]
     )
 
@@ -54,7 +54,7 @@ read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
                file_name = file_names, dim_size = dim_sizes)
   purrr::pmap_dfr(args, cube_to_ion_tibble, plane = plane, title = title,
                   grid_cell = grid_cell, output = output,
-                  grid_sel = grid_sel, scaler = scaler,
+                  grid_sel = grid_sel, scalar = scalar,
                   dim_names = dim_names)
 }
 
@@ -64,7 +64,7 @@ read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
 
 # convert the matlab data cub to a long format dataframe
 cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
-                               title, grid_cell, output, grid_sel, scaler,
+                               title, grid_cell, output, grid_sel, scalar,
                                dim_names) {
 
   if (grid_cell != 1) {
@@ -89,7 +89,7 @@ cube_to_ion_tibble <- function(matfile, species, file_name, dim_size, plane,
         species = species,
         file_name = file_name,
         grid = grid_cell,
-        scaler = scaler,
+        scalar = scalar,
         dim_names = dim_names
         )
       return(res)
@@ -167,7 +167,7 @@ image_cnts <- function(IC_3d, plane, title, species, file_name){
 
 # summarise count statistics over plane for each grid-specifically
 accumulate_cnts <- function(IC_2d, sum_plane, title, species, file_name, grid,
-                            scaler, dim_names){
+                            scalar, dim_names){
 
   sum_plane <- enquo(sum_plane)
   dim_vars <- parse_exprs(dim_names) %>% set_names()
@@ -179,7 +179,7 @@ accumulate_cnts <- function(IC_2d, sum_plane, title, species, file_name, grid,
   IC_2d <-group_by(IC_2d, !!! gr_var, grid.nm) %>%
     summarise(
       dim_name.nm = as_name(sum_plane),
-      grid_size.nm = (grid * scaler) ^ 2,
+      grid_size.nm = (grid * scalar) ^ 2,
       across(c(!!! stat_var), mean, .names = "mean_{.col}.mt"),
       N.rw = as.numeric(sum(N.rw)),
       t.nm = n() * 1e-3,

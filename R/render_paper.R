@@ -23,7 +23,6 @@ render_paper <- function(
   copy_figures = TRUE
   ){
 
-
   # paths
   paper <- fs::path("paper", type_ms)
   # dirs
@@ -34,7 +33,7 @@ render_paper <- function(
   # make links
   fs::link_create(
     fs::path_package("pointapply", "paper", "templates"),
-    fs::path_package("pointapply", "paper", type_ms, "templates")
+    fs::path(fs::path_package("pointapply", "paper", type_ms), "templates")
     ) # templates
 
   # make bookdown_yml
@@ -64,7 +63,6 @@ render_paper <- function(
 #' @rdname render_paper
 #'
 #' @export
-
 edit_paper <- function(type_ms = "preprint") {
   path <- fs::path_package("pointapply", "paper", type_ms)
   fs::path(path, c("index", "main", "SI"), ext = "Rmd") %>%

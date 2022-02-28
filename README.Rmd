@@ -77,10 +77,11 @@ pointapply::download_point()
 
 # Render the paper
 
-Use the function `pointapply::render_paper()` and specify the directory to save the paper.
+Use the function `pointapply::render_paper()` and specify the directory to save the paper. Make sure to have latex installed on your system. Check e.g., https://yihui.org/tinytex/ for a light weight tex version.
 
 
 ``` r
+# install.packages('tinytex')
 # Knit
 pointapply::render_paper(title = "Schobbenetal_SIMS_method", 
                          output_dir = "mydir")

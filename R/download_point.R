@@ -46,7 +46,7 @@ download_point <- function (type = "all") {
   # check if rda files are present in data
   lgl_int <- length(list.files(path_int, pattern = ".rda$")) > 0
 
-  if (all(lgl_int, lgl_ext)) return(invisible())
+  if (all(c(lgl_int, lgl_ext))) return(invisible())
 
   # get the data
   if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
@@ -143,4 +143,3 @@ load_point <- function(type, name, grid_cell, return_name = FALSE){
 
 # some pointer to check whether load_all is used
 loaded <- function(...) invisible(...)
-
