@@ -19,7 +19,7 @@ test_that("flattening ot the cube works", {
   ls_files <- list.files(dirmat, pattern = search_pattern, full.names = TRUE)
 
   # read count cube files
-  all_files <- purrr::map(ls_files, ~purrr::pluck(R.matlab::readMat(.x), "cnt"))
+  all_files <- purrr::map(ls_files, ~readmat::read_mat(.x))
   # dimensions
   dim_names <- c("height", "width", "depth")
 
@@ -47,4 +47,9 @@ test_that("flattening ot the cube works", {
   xc <- do.call(cube_to_ion_tibble, args)
   expect_snapshot(head(xc, 35)) # head
   expect_snapshot(tail(xc, 35)) # tail
+})
+
+test_that("an expanded grid can be made the Kronecker product", {
+  xc <- grid_gen(c(256, 256, 400), quo(depth), 64, c("height", "width", "depth"))
+  expect_snapshot(xc)
 })

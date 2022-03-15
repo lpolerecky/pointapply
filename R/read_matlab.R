@@ -32,7 +32,7 @@ read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
   ls_files <- list.files(directory, pattern = search_pattern, full.names = TRUE)
 
   # read count cube files
-  all_files <- purrr::map(ls_files, ~purrr::pluck(R.matlab::readMat(.x), "cnt"))
+  all_files <- purrr::map(ls_files, ~readmat::read_mat(.x)) # purrr::pluck(R.matlab::readMat(.x), "cnt"))
   # dimensions
   dim_names <- c("height", "width", "depth")
 
@@ -197,48 +197,61 @@ accumulate_cnts <- function(IC_2d, sum_plane, title, species, file_name, grid,
   point::fold(IC_2d, ".mt")
 }
 
+# sub-sample cube over grid of the same dimensions
+kronecker_subsample <- function(original) {
+
+  # vectorized sub-sampling where the kronecker produced grid number detonates
+  # the sub-sample
+  rng <- range(xc) # range over which to sub-sample
+  # original[xc ==]
+
+}
+
 # if plane is depth ROI dims should be 2^x
-grid_gen <- function(dims, plane, grid_cell, dim_names, expand = TRUE) {
+kronecker_subsample_grid <- function(dims, plane, grid_cell, expand = TRUE) {
 
   plane <- rlang::as_name(plane)
 
   # ROI size
   if (plane == "depth") {
     grid <- matrix(1, grid_cell, grid_cell)
-    } else {
-      grid <- matrix(1, grid_cell, dims[3])
-      }
-  # raster matrix
-  rs <- rs_matrix(dims = dims, grid_cell = grid_cell, plane = plane)
+  } else {
+    grid <- matrix(1, grid_cell, dims[3])
+  }
+  # raster grid
+  sub <- subsample_grid(dims = dims, grid_cell = grid_cell, plane = plane)
 
   if(isTRUE(expand)){
-    rs <- kronecker(rs,  grid)
-    rs <- dim_labeller(rs, plane = plane, dims = dim_names)
-    return(rs)
-  }
+    mt <- kronecker(sub,  grid)
+    # expand into the 3th dimension by addition
+    cast <- outer(mt, max(xc) * 0:399, FUN = "+") # cast
+    mold <- outer(xc, max(xc) * 0:399, FUN = "+") # mold
 
-  rs <- dim_labeller(rs, plane = plane, dims = dim_names)
-  return(rs)
+    purrr::modify(mold, ~as.integer(sum(original[cast == .x])))
+    # return expanded
+    #dim_labeller(rs, plane = plane, dims = dim_names)
+  } else {
+    # return (as an example of the layout)
+    #dim_labeller(rs, plane = plane, dims = dim_names)
+  }
 }
 
 # create matrix based on original dims
-rs_matrix <- function(dims, grid_cell, plane = "depth") {
-
+subsample_grid <- function(dims, grid_cell, plane = "depth") {
+  # dependent on the dimensions of aggregation, different dimension matrices
+  # are being produced
   if (plane == "depth") {
-    rs <- matrix(
+    matrix(
       1:((dims[1] * dims[2]) / (grid_cell * grid_cell)),
-      dims[1] / grid_cell
+      nrow = dims[1] / grid_cell
     )
-    return(rs)
-    }
-  if (plane == "height") {
-    rs <- matrix(1:(dims[1] / grid_cell))
-    return(rs)
-    }
-  if (plane == "width") {
-    rs <- matrix(1:(dims[2] / grid_cell))
-    return(rs)
-    }
+  } else if (plane == "height") {
+    matrix(1:(dims[1] / grid_cell))
+  } else if (plane == "width") {
+    matrix(1:(dims[2] / grid_cell))
+  } else {
+    stop("Dimension uknown.", call. = FALSE)
+  }
 }
 
 # label array dims
