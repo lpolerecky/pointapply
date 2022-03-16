@@ -12,7 +12,7 @@ read_matlab(
   grid_cell = 64,
   output = "sum",
   grid_sel = NULL,
-  scaler = 40/256
+  scalar = 40/256
 )
 }
 \arguments{
@@ -32,7 +32,7 @@ base two allowed (default = 64)}
 
 \item{grid_sel}{Integer selecting an grid-cell for in-depth analysis.}
 
-\item{scaler}{Numeric converting the pixels to metric dimension of
+\item{scalar}{Numeric converting the pixels to metric dimension of
 measurement (default is the conversion used in this study).}
 }
 \value{
