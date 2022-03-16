@@ -224,10 +224,11 @@ kronecker_subsample_grid <- function(dims, plane, grid_cell, expand = TRUE) {
   if(isTRUE(expand)){
     mt <- kronecker(sub,  grid)
     # expand into the 3th dimension by addition
-    cast <- outer(mt, max(xc) * 0:399, FUN = "+") # cast
+    grid <- outer(mt, max(xc) * 0:399, FUN = "+") # grid
     mold <- outer(xc, max(xc) * 0:399, FUN = "+") # mold
+    cast <- unique(grid)
 
-    purrr::modify(mold, ~as.integer(sum(original[cast == .x])))
+    # purrr::modify(mold, ~as.integer(sum(original[cast == .x])))
     # return expanded
     #dim_labeller(rs, plane = plane, dims = dim_names)
   } else {
