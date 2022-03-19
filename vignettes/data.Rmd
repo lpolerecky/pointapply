@@ -102,7 +102,7 @@ save_point("grid_sketch", ggplot2::last_plot(), width = 12, height = 12,
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap = "Sketch of the grid layout with grid-cell size of 64 pixels by 64 pixels.", out.width="90%"}
- knitr::include_graphics("figures/grid_sketch.png")
+knitr::include_graphics("figures/grid_sketch.png")
 ```
 
 

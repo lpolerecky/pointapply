@@ -32,7 +32,7 @@ read_matlab <- function(directory, plane, title, species = NULL, grid_cell = 64,
   ls_files <- list.files(directory, pattern = search_pattern, full.names = TRUE)
 
   # read count cube files
-  all_files <- purrr::map(ls_files, ~purrr::pluck(R.matlab::readMat(.x), "cnt"))
+  all_files <- purrr::map(ls_files, ~readmat::read_mat(.x))
   # dimensions
   dim_names <- c("height", "width", "depth")
 
