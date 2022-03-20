@@ -1,6 +1,17 @@
 test_that("reading the matlab ion count cubes works", {
-  IC <- read_matlab(get_matlab("2020-08-20-GLENDON"), height, "MEX",
-                    c("12C", "13C"), grid_cell = 64)
+  # search pattern
+  search_pattern <- paste0(paste0(c("12C", "13C"), "_cnt.mat$"), collapse = "|")
+  # list files
+  ls_files <- list.files(
+    get_matlab("2020-08-20-GLENDON"),
+    pattern = search_pattern,
+    full.names = TRUE
+  )
+  # read ion count mat files
+  all_files <- purrr::map(ls_files, ~readmat::read_mat(.x))
+
+  IC <- grid_aggregate(all_files, "depth")
+
   expect_snapshot(head(IC, 35)) # head
   expect_snapshot(tail(IC, 35)) # tail
   expect_equal(nrow(IC), 2048) # number of rows
