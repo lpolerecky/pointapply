@@ -69,16 +69,16 @@ The matlab-generated files contain multidimensional hyper-arrays (or 'data cubes
 
 ```{r mats}
 MEX_files <- list.files(get_matlab("2020-08-20-GLENDON"), full.names = TRUE)
-MON_files <- list.files(get_matlab("2020-08-28-GLENDON"), full.names = TRUE)
+# MON_files <- list.files(get_matlab("2020-08-28-GLENDON"), full.names = TRUE)
 MEX <- purrr::map(MEX_files, ~readmat::read_mat(.x))
-# ls2 <- purrr::map(ls2, ~readmat::read_mat(.x))
+# MON <- purrr::map(ls2, ~readmat::read_mat(.x))
 ```
 
 The `grid_aggregate ` function is designed to aggregate over a specified dimension (e.g. `"height"` see example below) and a set of species (e.g. `c("12C", "13C")` see example below). The grid-cell size for aggregation can be set by the `grid_cell` argument, which should be an integer exponent with base two (64 pixels by 64 pixels in this example).
 
 
 ```{r read}
-grid_aggregate(ls1, "height", 64, "12C", save = TRUE)
+grid_aggregate(MEX, "height", 64, "12C")
 ```
 
 The `tibble` contains the following variables:
@@ -119,13 +119,18 @@ The following code was use to produce data aggregation for ^12^C and ^13^C over 
 
 ```{r all}
 # 4, 8, 16, 32, 64, and 128 px grid-cell size  for aggregating data
-vc_px <- sapply(2:7, function(x) 2 ^ x)
+vc_px <- sapply(6:7, function(x) 2 ^ x)
 
-# aggregate and save (in parallel with mclapply)
-mclapply(starts, fx, mc.cores = numCores)
+# tuning the perfect grid dimensions
+tune_grid <- function(x, name, title) {
+    grid_aggregate(MEX, c("height", "width", "depth"), x, "12C", title, name, 
+                   corrected = TRUE, save = TRUE)
+}
 
-grid_aggregate(ls1, "depth", 64, "12C", "MEX", "map_sum_grid", 
-               corrected = TRUE, save = TRUE)
+# Aggregate and save (in parallel with `mclapply`). By using multiple cores this
+# exercise can be sped up significantly.
+parallel::mclapply(vc_px, tune_grid, title = "MEX", name = "map_sum_grid", 
+                   mc.cores = 6)
 ```
 
 
@@ -136,8 +141,8 @@ By keeping grid-cell size to 1 pixel we can also produce ion maps for each of th
 
 ```{r raster}
 # raster images
-plane_fun(get_matlab("2020-08-20-GLENDON"), 1, "MEX", "map_raster_image")
-plane_fun(get_matlab("2020-08-28-GLENDON"), 1, "MON", "map_raster_image")
+grid_aggregate(MEX, c("height", "width", "depth"), 1, "12C", "MEX", 
+               "map_raster_image", corrected = TRUE, save = TRUE)
 ```
 
 

@@ -48,7 +48,7 @@ For this example aggregated and processed ion count data is loaded with grid-cel
 
 ```{r load}
 # names of the analytes in the paper
-name <- c("MEX", "MON")
+name <- c("MEX")
 # load grid aggregated counts
 load_point("map_sum_grid", name, 64, return_name = FALSE)
 # load ion maps

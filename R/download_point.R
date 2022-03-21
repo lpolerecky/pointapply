@@ -78,11 +78,15 @@ write_point <- function (obj, name) {
   } else {
     data_dir <- NULL
   }
+  # path for saving file
   path <- fs::path_package("pointapply", data_dir, "data")
   fpath <- fs::path(path, name, ext =  "rda")
-  envir <- parent.frame()
 
-  save(obj, file = fpath, compress = "xz", version = 2)
+  # assign name to dataframe
+  assign(name, obj)
+  rlang::inject(
+    save(!!rlang::sym(name), file = fpath, compress = "xz", version = 2)
+  )
 }
 #' @rdname download_point
 #'
