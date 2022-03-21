@@ -11,7 +11,4 @@
 #' @docType package
 #' @name pointapply
 NULL
-## usethis namespace: start
-#' @useDynLib pointapply, .registration = TRUE
-## usethis namespace: end
-NULL
+

@@ -26,7 +26,7 @@ grid_aggregate <- function(IC, plane, title = character(1), species = NULL,
 
   # dimensions
   dim_names <- c("height", "width", "depth")
-  all_dims <- purrr::map(all_files, ~set_names(dim(.x), nm = dim_names))
+  all_dims <- purrr::map(IC, ~set_names(dim(.x), nm = dim_names))
 
   # species names
   if (is.null(species)) {
@@ -157,7 +157,7 @@ subsample_grid <- function(dims, grid_cell, plane = "depth") {
 }
 
 # in case of sub-sampling, new grid positions are calculated
-grid_positions <- function(dim, plane, grid_cell) {
+grid_positions <- function(dims, plane, grid_cell) {
 
   # dimensions remaining after flattening
   dimr <- dims[names(dims) != plane]

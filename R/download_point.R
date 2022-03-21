@@ -59,10 +59,8 @@ download_point <- function (type = "all") {
   if (type == "all" | type == "raw") {
     # extract matlab
     ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
-    purrr::walk(
-      ls_mat,
-      ~utils::unzip(.x, exdir = fs::path_ext_remove(.x), junkpaths = TRUE)
-      )
+
+
     }
 
   if (type == "all" | type == "processed") {
