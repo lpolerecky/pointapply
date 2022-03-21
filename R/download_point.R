@@ -53,42 +53,36 @@ download_point <- function (type = "all") {
     pointdata <- zen4R::download_zenodo(
       "10.5281/zenodo.4748667",
       path = path_ext
-      )
+    )
   }
 
   if (type == "all" | type == "raw") {
     # extract matlab
     ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
-
-
-    }
+  }
 
   if (type == "all" | type == "processed") {
     # extract data (.rda format)
     ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
     utils::unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
-    }
+  }
 }
 #' @rdname download_point
 #'
 #' @export
-write_point <- function (obj) {
+write_point <- function (obj, name) {
+
   # if loaded exists then it is in development mode
   if (exists("loaded", "package:pointapply")) {
     data_dir <- "extdata"
   } else {
     data_dir <- NULL
   }
-  path <- fs::path_package("pointapply", data_dir, "data",  obj, ext = "rda")
+  path <- fs::path_package("pointapply", data_dir, "data")
+  fpath <- fs::path(path, name, ext =  "rda")
   envir <- parent.frame()
-  args <- rlang::list2(
-    obj,
-    file = path,
-    envir = envir,
-    compress = "xz",
-    version = 2
-    )
-  rlang::exec("save", !!! args)
+
+  save(obj, file = fpath, compress = "xz", version = 2)
 }
 #' @rdname download_point
 #'
@@ -102,7 +96,7 @@ save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
     width = width,
     height = height,
     unit = unit
-    )
+  )
   rlang::exec("ggsave", !!! args)
   # if loaded exists then it is in development mode
   if (exists("loaded", "package:pointapply")) {

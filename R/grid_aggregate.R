@@ -3,7 +3,8 @@
 #' \code{grid_aggregate} Aggregate ion count data cubes on a 2D grid.
 #'
 #' @param IC Ion Count data cube
-#' @param plane Variable for the dimension over which to be aggregated
+#' @param plane Variable for the dimension over which to be aggregated (vectors
+#'  are allowed).
 #' @param title Character string for sample name.
 #' @param species Character string or vector with chemical species.
 #' @param grid_cell Integer indicating size of cells in pixels, only exponent of
@@ -15,44 +16,73 @@
 #'  measurement (default is the conversion used in this study).
 #'
 #' @return A \code{tibble::\link[tibble:tibble]{tibble}} containing the ion counts
-#' aggregated over the plane of choice, if \code{output = "sum"}. If
-#' \code{output = "complete"} only works in combination with \code{grid_sel} and
-#' produces a pixel-by-pixel dataset for that grid-cell.
+#'  aggregated over the plane of choice, if \code{output = "sum"}. If
+#'  \code{output = "complete"} only works in combination with \code{grid_sel} and
+#'  produces a pixel-by-pixel dataset for that grid-cell.
 #'
 #' @export
-grid_aggregate <- function(IC, plane, title = character(1), species = NULL,
-                           grid_cell = 64, name = character(1), output = "sum",
-                           grid_sel = NULL, scalar = 40 / 256) {
+grid_aggregate <- function(IC, plane, grid_cell = 64, species = NULL,
+                           title = character(1), name = character(1),
+                           output = "sum", corrected = FALSE,
+                           scalar = 40 / 256, save = FALSE) {
+
+  # get original mat file names
+  nms <- vapply(IC, attr, character(1), "file")
+  nms <- gsub("_cnt", "", nms)
+  IC <- set_names(IC, nms)
+
+  # reduce list to include only selected species
+  if (!is.null(species)) {
+    IC[nms %in% species]
+  }
 
   # dimensions
   dim_names <- c("height", "width", "depth")
   all_dims <- purrr::map(IC, ~set_names(dim(.x), nm = dim_names))
 
   # species names
-  if (is.null(species)) {
-    all_species <- stringr::str_extract_all(
-      ls_files,
-      "((?<=/)[[:alnum:]]*)(?=_cnt)"
-    )
-  }
+  if (is.null(species)) all_species <- nms else all_species <- species
 
   # execute aggregation
   args <- list(IC = IC, dims = all_dims, species = all_species)
-  purrr::pmap_dfr(args, flatten_cube, plane, grid_cell) |>
+  out <- purrr::pmap_dfr(args, flatten_cube, plane, grid_cell) |>
     dplyr::mutate(
       sample.nm = title,
       file.nm = name,
       grid_size.nm = (grid_cell * scalar) ^ 2, # grid surface
       .before = "grid.nm"
     )
+
+  # make corrections, check point package for documentation of `cor_IC`
+  if (isTRUE(corrected)) {
+  out <- point::cor_IC(out, .bl_t = 0, .det = "EM")
+  }
+
+  # print or save
+  if (isTRUE(save)) {
+    object_name <- paste(name, grid_cell, title, sep = "_")
+    write_point(out, object_name)
+    message(
+      glue::glue("Aggregated file has been saved with name {object_name}.")
+    )
+  } else {
+    out
+  }
 }
 
 #-------------------------------------------------------------------------------
 # additional supporting functions
 #-------------------------------------------------------------------------------
+# vectorized for plane
+flatten_cube <- function(IC, dims, plane, species, grid_cell, scaler) {
+  purrr::map_dfr(
+    plane,
+    ~flatten_cube_(IC = IC, dims = dims, plane = .x, species, grid_cell, scaler)
+  )
+}
 
 # cast the ion count data cube into a flat long formatted dataframe
-flatten_cube <- function(IC, dims, plane, species, grid_cell, scaler) {
+flatten_cube_ <- function(IC, dims, plane, species, grid_cell, scaler) {
 
   # sub-sample
   x <- subsample(IC, dims, plane, grid_cell)
@@ -74,7 +104,7 @@ flatten_cube <- function(IC, dims, plane, species, grid_cell, scaler) {
     grd <- rep(1:gc, dims[[plane]]) # grid numbering
     dm <- (as.integer(names(x)) - 1L) %/% gc + 1L # dimension numbering
   } else {
-    grd <- rep(1:gc, 1)
+    grd <- 1:prod(dimr) # grid numbering (equals pixel numbering)
     dm <- 1
   }
 
@@ -107,7 +137,7 @@ subsample <- function(IC, dims, plane, grid_cell) {
     dim(mt) <- NULL
     mt
   # vectorized sub-sampling where the Kronecker produced grid number denotes
-  # the sub-sample
+  # the sub-sample grid
   } else {
     # grid for aggregation
     grid <- kronecker_subsample_grid(dims, plane, grid_cell)
@@ -164,11 +194,17 @@ grid_positions <- function(dims, plane, grid_cell) {
 
   # make grid
   x <- purrr::imap(dimr, ~grid_positions_(.x, .y, grid_cell))
-  gr <- tidyr::expand_grid(x[[1]], x[[2]])
-  names(gr) <- paste0("mean_", names(dimr))
+  gr <- tidyr::expand_grid(x[[2]], x[[1]])
+  names(gr) <- paste0("mean_", names(dimr), ".mt") |> rev()
 
   # repeat
-  gr[rep(seq_len(nrow(gr)), times = dims[[plane]]), ]
+  if (grid_cell > 1) {
+    gr[rep(seq_len(nrow(gr)), times = dims[[plane]]), ]
+  } else {
+    gr <- tidyr::expand_grid(1 : dimr[[2]], 1 : dimr[[1]])
+    names(gr) <- paste0("mean_", names(dimr), ".mt") |> rev()
+    gr
+  }
 }
 
 grid_positions_ <- function(dim, dim_name, grid_cell) {
