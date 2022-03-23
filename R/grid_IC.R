@@ -33,17 +33,21 @@
 #' @export
 gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
                       res = 256, grid_cell = 64, scaler = 40 / 256,
-                      label = "latex", .X = Xt.pr, .N = N.pr,
-                      .species = species.nm, .t = t.nm, .ion1 = "13C",
+                      label = "latex", .X = NULL, .N = NULL,
+                      .species = NULL, .t = NULL, .ion1 = "13C",
                       .ion2 = "12C"){
 
-  args <- enquos(.X = .X, .N = .N, .species = .species, .t = .t)
+  # quoting the call (user-supplied expressions) and complete if NULL
+  args <- point:::inject_args(
+    .IC,
+    enquos(.X = .X, .N = .N, .species = .species, .t = .t),
+    type = c("processed", "group")
+  )
+  # new args
   args <- point:::arg_builder(
     point:::all_args(args, .ion1, .ion2, chr = FALSE),
     "model"
-    )
-
-  im <- dim_folds(ls_im, height, width, depth, ttl, "raster", res, grid_cell)
+  )
 
   # base raster image for ion ratios
   gg_base <- gg_cnts(
@@ -144,12 +148,14 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
       }
 
   if (grid_print) {
-    {print(gg_final(IC) + grid_loc)}
-    return(distinct(select(IC, .data$dim_name.nm, !!! ls_latex)))
-    } else {
-      suppressWarnings(print(gg_final(IC)))
-      return(distinct(select(IC, .data$dim_name.nm, !!! ls_latex)))
-      }
+    {
+      print(gg_final(IC) + grid_loc)
+    }
+    return(distinct(select(IC, .data$dim_name.nm,!!!ls_latex)))
+  } else {
+    suppressWarnings(print(gg_final(IC)))
+    return(distinct(select(IC, .data$dim_name.nm,!!!ls_latex)))
+  }
 }
 #' @rdname gg_effect
 #'
@@ -204,43 +210,31 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
 #-------------------------------------------------------------------------------
 # supportive functions
 #-------------------------------------------------------------------------------
-# Calculate distance for side plots (width and height aggregation plane)
-dim_folds <- function(ls, dim1, dim2, dim3, ttl, geom, res, grid_cell){
+# Calculate distance for side plots (width and height aggregation plane). This
+# function collapses the third dimension (`dim3`) to a 2D object.
+# res = resolution and geom = geometry for ggplot object
+dim_folds <- function(IC, dim1, dim2, dim3, geom, res, grid_cell){
 
   dim1 <- enquo(dim1)
   dim2 <- enquo(dim2)
   dim3 <- enquo(dim3)
 
-  ls <- purrr::map(ls, ~filter(.x, .data$sample.nm == ttl))
+  # the mutation differs depending on the chosen geom
+  calcs <- rlang::exprs(
+    tile = as.integer(res) + as.integer(grid_cell),
+    raster = !! dim3 + as.integer(res) +  as.integer(grid_cell / 2)
+    )
 
-  if (geom == "tile") {
-    ls <- purrr::map_at(
-      ls,
-      "height",
-      ~{mutate(.x, !! dim1 := res + grid_cell) %>%
-          select(-!! dim3)}
-    ) %>%
-      purrr::map_at(
-        "width",
-        ~{mutate(.x, !! dim2 := res + grid_cell) %>%
-            select(-!! dim3)}
-      )
-  }
+  # transform 3rd dimension into 2D grid and finally remove the 3rd dimension
+  dplyr::mutate(
+    IC,
+    !! dim1 :=
+      dplyr::if_else(.data$dim_name.nm == "height", !! calcs[[geom]], !! dim1),
+    !! dim2 :=
+      dplyr::if_else(.data$dim_name.nm == "width", !! calcs[[geom]], !! dim2)
+  ) |>
+    dplyr::select(-!! dim3)
 
-  if (geom == "raster") {
-    ls <- purrr::map_at(
-      ls,
-      "height",
-      ~{mutate(.x, !! dim1 := !! dim3 + res + grid_cell / 2) %>%
-          select(-!! dim3)}
-      ) %>%
-      purrr::map_at(
-        "width",
-        ~{mutate(.x, !! dim2 := !! dim3 + res + grid_cell / 2) %>%
-            select(-!! dim3)}
-        )
-  }
-  bind_rows(ls)
 }
 
 # placing arrows for depth

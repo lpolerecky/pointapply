@@ -84,21 +84,18 @@ The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the da
 
 ```{r diag1}
 # diagnostics
-ls_diag <- purrr::map(
-  map_sum_grid_64_MON,
-  ~point::diag_R(
-    .x, 
-    "13C", 
-    "12C", 
-    dim_name.nm, 
-    sample.nm, 
-    file.nm, 
-    grid.nm, 
-    .nest = grid.nm, 
-    .output = "complete", 
-    .meta = TRUE
-    )
-  )
+point::diag_R(
+  map_sum_grid_64_MEX, 
+  "13C", 
+  "12C", 
+  dim_name.nm, 
+  sample.nm, 
+  file.nm, 
+  grid.nm, 
+  .nest = grid.nm, 
+  .output = "complete", 
+  .meta = TRUE
+)
 ```
 
 

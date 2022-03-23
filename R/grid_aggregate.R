@@ -21,27 +21,31 @@
 #'  produces a pixel-by-pixel dataset for that grid-cell.
 #'
 #' @export
-grid_aggregate <- function(IC, plane, grid_cell = 64, species = NULL,
+grid_aggregate <- function(IC, plane, grid_cell = NULL, species = NULL,
                            title = character(1), name = character(1),
-                           output = "sum", corrected = FALSE,
-                           scalar = 40 / 256, save = FALSE) {
+                           corrected = FALSE, scalar = 40 / 256,
+                           save = FALSE) {
 
   # get original mat file names
   nms <- vapply(IC, attr, character(1), "file")
   nms <- gsub("_cnt", "", nms)
   IC <- set_names(IC, nms)
 
-  # reduce list to include only selected species
-  if (!is.null(species)) {
-    IC[nms %in% species]
-  }
-
   # dimensions
   dim_names <- c("height", "width", "depth")
   all_dims <- purrr::map(IC, ~set_names(dim(.x), nm = dim_names))
 
+  # reduce list to include only selected species
+  if (!is.null(species)) {
+    IC <- IC[nms %in% species]
+    all_dims <- all_dims[nms %in% species]
+  }
+
   # species names
   if (is.null(species)) all_species <- nms else all_species <- species
+
+  # grid surface
+  gridd <- ifelse(is.null(grid_cell), scalar ^ 2, grid_cell * scalar  ^ 2)
 
   # execute aggregation
   args <- list(IC = IC, dims = all_dims, species = all_species)
@@ -49,7 +53,7 @@ grid_aggregate <- function(IC, plane, grid_cell = 64, species = NULL,
     dplyr::mutate(
       sample.nm = title,
       file.nm = name,
-      grid_size.nm = (grid_cell * scalar) ^ 2, # grid surface
+      grid_size.nm = gridd,
       .before = "grid.nm"
     )
 
@@ -60,7 +64,8 @@ grid_aggregate <- function(IC, plane, grid_cell = 64, species = NULL,
 
   # print or save
   if (isTRUE(save)) {
-    object_name <- paste(name, grid_cell, title, sep = "_")
+    if (!is.null(grid_cell)) grid_cell <- paste0(grid_cell, "_")
+    object_name <- paste0(paste0(name, "_"), grid_cell, title)
     write_point(out, object_name)
     message(
       glue::glue("Aggregated file has been saved with name {object_name}.")
@@ -69,12 +74,30 @@ grid_aggregate <- function(IC, plane, grid_cell = 64, species = NULL,
     out
   }
 }
+#' @rdname grid_aggregate
+#'
+#' @export
+tune_grid <- function(grid_expression, tune, mc.cores = 1) {
+
+  # catch call and check arguments
+  gcall <- rlang::call_match(substitute(grid_expression), grid_aggregate)
+  # remove grid_cell arg if needed and extract caller args
+  args <- rlang::call_modify(gcall, grid_cell = rlang::zap()) |>
+    rlang::call_args()
+
+  # Aggregate and save (in parallel with `mclapply`). By using multiple cores this
+  # exercise can be sped up significantly.
+  rlang::inject(
+    parallel::mclapply(tune, tune_grid, !!!args, mc.cores = mc.cores)
+  )
+}
 
 #-------------------------------------------------------------------------------
 # additional supporting functions
 #-------------------------------------------------------------------------------
 # vectorized for plane
 flatten_cube <- function(IC, dims, plane, species, grid_cell, scaler) {
+  # map over different planes
   purrr::map_dfr(
     plane,
     ~flatten_cube_(IC = IC, dims = dims, plane = .x, species, grid_cell, scaler)
@@ -96,16 +119,15 @@ flatten_cube_ <- function(IC, dims, plane, species, grid_cell, scaler) {
   } else {
     gc <- as.integer(dims[[plane]] / grid_cell)
   }
-  # pixels encompassed in single measurement
-  px <- prod(dimr) / gc
 
   # grid numbering and naming
-  if(grid_cell > 1) {
+  if(!is.null(grid_cell)) {
     grd <- rep(1:gc, dims[[plane]]) # grid numbering
     dm <- (as.integer(names(x)) - 1L) %/% gc + 1L # dimension numbering
+    px <- prod(dimr) / gc # pixels encompassed in single measurement
   } else {
     grd <- 1:prod(dimr) # grid numbering (equals pixel numbering)
-    dm <- 1
+    px <- dm <- 1
   }
 
   # cast in tibble
@@ -128,7 +150,7 @@ subsample <- function(IC, dims, plane, grid_cell) {
 
   # matrix based sub-sampling where the margins denote the dimension over which
   # the cube is flattened
-  if (grid_cell == 1) {
+  if (is.null(grid_cell)) {
     # dimensions for aggregation
     dim_vc <- list(height = c(2, 3), width = c(1, 3), depth = c(1, 2))
     # sub-sample
@@ -198,16 +220,17 @@ grid_positions <- function(dims, plane, grid_cell) {
   names(gr) <- paste0("mean_", names(dimr), ".mt") |> rev()
 
   # repeat
-  if (grid_cell > 1) {
+  if (!is.null(grid_cell)) {
     gr[rep(seq_len(nrow(gr)), times = dims[[plane]]), ]
   } else {
     gr <- tidyr::expand_grid(1 : dimr[[2]], 1 : dimr[[1]])
-    names(gr) <- paste0("mean_", names(dimr), ".mt") |> rev()
+    names(gr) <- paste0(names(dimr), ".mt") |> rev()
     gr
   }
 }
 
 grid_positions_ <- function(dim, dim_name, grid_cell) {
+  if (is.null(grid_cell)) return(1:dim)
   if (dim_name != "depth") {
     seq(0, dim - grid_cell, grid_cell) + grid_cell / 2
   } else {
