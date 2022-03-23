@@ -1,6 +1,6 @@
 test_that("reading the matlab ion count cubes works", {
   # search pattern
-  search_pattern <- paste0(paste0(c("12C"), "_cnt.mat$"), collapse = "|")
+  search_pattern <- paste0(paste0(c("12C", "13C"), "_cnt.mat$"), collapse = "|")
   # list files
   ls_files <- list.files(
     get_matlab("2020-08-20-GLENDON"),

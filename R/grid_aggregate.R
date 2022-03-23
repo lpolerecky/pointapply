@@ -163,6 +163,12 @@ subsample <- function(IC, dims, plane, grid_cell) {
   } else {
     # grid for aggregation
     grid <- kronecker_subsample_grid(dims, plane, grid_cell)
+    # transpose cube if not sampling over depth
+    # transpose array height
+    if (plane == "height") IC <- aperm(IC, c(2, 3, 1))
+    # transpose array width
+    if (plane == "width") IC <- aperm(IC, c(1, 3, 2))
+
     # sub-sample
     tapply(IC, grid, sumcounts)
   }
