@@ -146,7 +146,7 @@ flatten_cube_ <- function(IC, dims, plane, species, grid_cell, scaler) {
 subsample <- function(IC, dims, plane, grid_cell) {
 
   # sum of integers
-  sumcounts <- function(x) sum(as.integer(x))
+  sumcounts <- function(x) sum(x)
 
   # matrix based sub-sampling where the margins denote the dimension over which
   # the cube is flattened
