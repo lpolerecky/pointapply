@@ -115,15 +115,15 @@ flatten_cube_ <- function(IC, dims, plane, species, grid_cell, scaler) {
 
   # calculate max grid cell per plane
   if (plane == "depth") {
-    gc <- as.integer(prod(dimr / grid_cell))
+    gc <- prod(dimr / grid_cell)
   } else {
-    gc <- as.integer(dims[[plane]] / grid_cell)
+    gc <- dims[[plane]] / grid_cell
   }
 
   # grid numbering and naming
   if(!is.null(grid_cell)) {
     grd <- rep(1:gc, dims[[plane]]) # grid numbering
-    dm <- (as.integer(names(x)) - 1L) %/% gc + 1L # dimension numbering
+    dm <- (as.numeric(names(x)) - 1) %/% gc + 1 # dimension numbering
     px <- prod(dimr) / gc # pixels encompassed in single measurement
   } else {
     grd <- 1:prod(dimr) # grid numbering (equals pixel numbering)
