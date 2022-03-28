@@ -74,12 +74,11 @@ write_point <- function (obj, name) {
 
   # if loaded exists then it is in development mode
   if (exists("loaded", "package:pointapply")) {
-    data_dir <- "extdata"
+    path <- fs::path_package("pointapply", "extdata", "data")
   } else {
-    data_dir <- NULL
+    path <- fs::path_package("pointapply", "data")
   }
   # path for saving file
-  path <- fs::path_package("pointapply", data_dir, "data")
   fpath <- fs::path(path, name, ext =  "rda")
 
   # assign name to dataframe
@@ -115,7 +114,8 @@ save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
 #' @rdname download_point
 #'
 #' @export
-load_point <- function(type, name, grid_cell, return_name = FALSE){
+load_point <- function(type, name, grid_cell = NULL, return_name = FALSE) {
+  # combine type of analysis, name of file and grid_cell size
   name <- tidyr::crossing(grid_cell, name) %>%
     dplyr::rowwise() %>%
     dplyr::transmute(
@@ -128,13 +128,37 @@ load_point <- function(type, name, grid_cell, return_name = FALSE){
       ) %>%
     dplyr::pull(name)
   # if loaded exists then it is in development mode
+  error_msg <- paste0(". Check the supplied type, name and/or",
+  " grid_cell, or see the pointapply vignette 'data' for more",
+  " information on how to generate the data.")
   if (exists("loaded", "package:pointapply")) {
-    fs::path(fs::path_package("pointapply"), "extdata", "data", name, ext = "rda") %>%
-      purrr::walk(load, envir = .GlobalEnv)
-    } else {
-    data(list = name, envir = environment())
-    }
-  if (return_name) return(name)
+    # make sure that file exists
+    tryCatch(
+      {
+        pkg <- fs::path_package("pointapply", "extdata", "data")
+        fs::path(pkg, name, ext = "rda") |>
+          purrr::walk(load, envir = .GlobalEnv)
+      },
+      error = function(c) {
+        c$message <- paste0(c$message, error_msg)
+        stop(c)
+      }
+    )
+
+  } else {
+    # make sure that file exists
+    tryCatch(
+      {
+        data(list = name, envir = .GlobalEnv)
+      },
+      warning = function(c) {
+        c$message <- paste0(c$message, error_msg)
+        warning(c)
+      }
+    )
+  }
+  # return name if required
+  if (isTRUE(return_name)) return(name)
 }
 
 # some pointer to check whether load_all is used

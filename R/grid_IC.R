@@ -31,7 +31,7 @@
 #' @return \code{\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
-gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
+gg_effect <- function(IC, image, title, ratio, grid_print = FALSE, viri = "A",
                       res = 256, grid_cell = 64, scaler = 40 / 256,
                       label = "latex", .X = NULL, .N = NULL,
                       .species = NULL, .t = NULL, .ion1 = "13C",
@@ -39,7 +39,7 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
 
   # quoting the call (user-supplied expressions) and complete if NULL
   args <- point:::inject_args(
-    .IC,
+    IC,
     enquos(.X = .X, .N = .N, .species = .species, .t = .t),
     type = c("processed", "group")
   )
@@ -51,31 +51,55 @@ gg_effect <- function(ls, ls_im, ttl, ratio, grid_print = FALSE, viri = "A",
 
   # base raster image for ion ratios
   gg_base <- gg_cnts(
-    im,
+    image,
     stringr::str_split(ratio, "-", simplify = TRUE)[,1],
     stringr::str_split(ratio, "-", simplify = TRUE)[,2],
     viri = viri,
-    height = res,
-    width = res,
+    res = res,
     grid_cell = grid_cell,
     scaler = scaler,
     compilation = TRUE
     )
 
-  # unfold metadata
-  ls <- purrr::map(ls, point::unfold)
-  # data frame for high precision R
-  IC <- dim_folds(ls, mean_height.mt, mean_width.mt, mean_depth.mt, ttl, "tile",
-                  res, grid_cell)
+  # calculate diagnostics for isotope ratio
+  IC <- point::diag_R(
+    IC,
+    .ion1,
+    .ion2,
+    dim_name.nm,
+    sample.nm,
+    file.nm,
+    grid.nm,
+    .nest = grid.nm,
+    .output = "complete",
+    .meta = TRUE
+  )
 
-  IC <- mutate(
+  # try unfolding attributes (point function) to see whether coordinate system
+  # is available
+  withCallingHandlers(
+    warning = function(cnd) {
+      IC$width.mt
+      IC$height.mt
+      IC$depth.mt
+    },
+    {
+      # make metadata available
+      IC <- point::unfold(IC)
+      # reduce dimensions to 2D grid
+      IC <- dim_folds(IC, height.mt, width.mt, depth.mt, "raster", res,
+                      grid_cell)
+    }
+  )
+
+  IC <- dplyr::mutate(
     IC,
     del = (!! args[["M_R"]] /  !! args[["hat_M_M_R"]]  - 1) * 1000,
     t_score = abs(.data$del / !! args[["hat_RS_M_R"]]),
     sig_code = sig_coder(!! args[["p_R"]], make_lab = FALSE),
     del_lab = paste(sprintf("%.1f", .data$del), .data$sig_code)
-    ) %>%
-    rename(x = .data$mean_width.mt, y = .data$mean_height.mt)
+    )  |>
+    rename(x = .data$width.mt, y = .data$height.mt)
 
   gg_final <- function(IC) {
     gg_base +

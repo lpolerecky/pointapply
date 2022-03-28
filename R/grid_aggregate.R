@@ -223,7 +223,7 @@ grid_positions <- function(dims, plane, grid_cell) {
   # make grid
   x <- purrr::imap(dimr, ~grid_positions_(.x, .y, grid_cell))
   gr <- tidyr::expand_grid(x[[2]], x[[1]])
-  names(gr) <- paste0("mean_", names(dimr), ".mt") |> rev()
+  names(gr) <- paste0(names(dimr), ".mt") |> rev()
 
   # repeat
   if (!is.null(grid_cell)) {
