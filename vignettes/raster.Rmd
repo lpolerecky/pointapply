@@ -47,14 +47,8 @@ For this example aggregated and processed ion count data is loaded with grid-cel
 
 
 ```{r load}
-# names of the analytes in the paper
-name <- c("MEX")
-# load grid aggregated counts
-load_point("map_sum_grid", name, 64, return_name = FALSE)
-# load ion maps
-load_point("map_raster_image", name, return_name = FALSE)
-# full grid-cell datasets for in-depth analysis
-load_point("map_full_grid", "MEX", 64, return_name = FALSE)
+# load e.g. grid aggregated counts
+load_point("map_sum_grid", "MEX", 64, return_name = FALSE)
 ```
 
 
@@ -65,10 +59,7 @@ The function `gg_cnts()` is designed for plotting of ion count ratios, i.e. the 
 
 
 ```{r raster}
-gg_cnts(map_raster_image_MEX, "12C14N", "12C", viri = "D")
-# save
-save_point("simple_raster_Mex_12C-14N-12C", ggplot2::last_plot(), width = 10, 
-           height = 8, unit = "cm")
+gg_cnts("MEX", "12C14N", "12C", viri = "D")
 ```
 
 
@@ -83,8 +74,9 @@ The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the da
 
 
 ```{r diag1}
+library(point)
 # diagnostics
-point::diag_R(
+diag_R(
   map_sum_grid_64_MEX, 
   "13C", 
   "12C", 

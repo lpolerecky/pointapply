@@ -19,3 +19,6 @@ inst/paper/preprint/*.log
 inst/paper/preprint/templates
 
 inst/doc
+
+# derived files
+/**/*.svg

@@ -1,0 +1,27 @@
+test_that("raster ion image plotting is consistent", {
+
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
+
+  vdiffr::expect_doppelganger(
+    "raster image MEX",
+    gg_cnts("MEX", "12C14N", "12C", viri = "D")
+  )
+  vdiffr::expect_doppelganger(
+    "raster image MEX with all sides included",
+    gg_cnts("MEX", "12C14N", "12C", viri = "D", compilation = TRUE)
+  )
+})
+
+test_that("height and depth dimensions can be aggregated", {
+
+  load_point("map_raster_image", "MEX")
+
+  expect_snapshot(
+    dim_aggregate_(map_raster_image_MEX, 64, "height")
+  )
+  expect_snapshot(
+    dim_aggregate(map_raster_image_MEX, 64)
+  )
+})

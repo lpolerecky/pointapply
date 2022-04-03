@@ -136,7 +136,7 @@ flatten_cube_ <- function(IC, dims, plane, species, grid_cell, scaler) {
     dim.nm = dm, # planes of measurement
     dim_name.nm = plane, # names of the planes of measurement
     species.nm = species, # ion species name
-    N.rw = x, # raw ion counts
+    N.rw = unname(x), # raw ion counts (remove grid names)
     t.nm = 1e-3 * px * .data$dim.nm, # time (1 pixel per millisecond)
     !!! grid_positions(dims, plane, grid_cell) # new dimension after reduction
   )
@@ -145,16 +145,13 @@ flatten_cube_ <- function(IC, dims, plane, species, grid_cell, scaler) {
 # sub-sample cube over grid of the same dimensions
 subsample <- function(IC, dims, plane, grid_cell) {
 
-  # sum of integers
-  sumcounts <- function(x) sum(x)
-
   # matrix based sub-sampling where the margins denote the dimension over which
   # the cube is flattened
   if (is.null(grid_cell)) {
     # dimensions for aggregation
     dim_vc <- list(height = c(2, 3), width = c(1, 3), depth = c(1, 2))
     # sub-sample
-    mt <- apply(IC, dim_vc[[plane]], sumcounts)
+    mt <- apply(IC, dim_vc[[plane]], sum)
     # remove dims and cast vector
     dim(mt) <- NULL
     mt
@@ -170,7 +167,7 @@ subsample <- function(IC, dims, plane, grid_cell) {
     if (plane == "width") IC <- aperm(IC, c(1, 3, 2))
 
     # sub-sample
-    tapply(IC, grid, sumcounts)
+    c(tapply(IC, grid, sum))
   }
 }
 

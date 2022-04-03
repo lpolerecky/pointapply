@@ -10,7 +10,7 @@ test_that("reading the matlab ion count cubes works", {
   # read ion count mat files
   all_files <- purrr::map(ls_files, ~readmat::read_mat(.x))
 
-  IC <- grid_aggregate(all_files, "depth")
+  IC <- grid_aggregate(all_files, "height", grid_cell = 64)
 
   expect_snapshot(head(IC, 35)) # head
   expect_snapshot(tail(IC, 35)) # tail

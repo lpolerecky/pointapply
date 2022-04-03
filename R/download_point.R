@@ -137,7 +137,7 @@ load_point <- function(type, name, grid_cell = NULL, return_name = FALSE) {
       {
         pkg <- fs::path_package("pointapply", "extdata", "data")
         fs::path(pkg, name, ext = "rda") |>
-          purrr::walk(load, envir = .GlobalEnv)
+          purrr::walk(load, envir = rlang::caller_env())
       },
       error = function(c) {
         c$message <- paste0(c$message, error_msg)
@@ -149,7 +149,7 @@ load_point <- function(type, name, grid_cell = NULL, return_name = FALSE) {
     # make sure that file exists
     tryCatch(
       {
-        data(list = name, envir = .GlobalEnv)
+        data(list = name, envir = rlang::caller_env())
       },
       warning = function(c) {
         c$message <- paste0(c$message, error_msg)

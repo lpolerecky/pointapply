@@ -143,7 +143,6 @@ grid_aggregate(
   c("height", "width", "depth"), 
   title = "MEX", 
   name = "map_raster_image", 
-  corrected = TRUE, 
   save = TRUE
 )
 ```

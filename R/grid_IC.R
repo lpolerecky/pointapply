@@ -4,11 +4,7 @@
 #' precision isotope ratios. \code{gg_sketch} draws the layout of the
 #' grid_cells.
 #'
-#' @param ls Named list containing data frames for planes of ion counts for
-#' high precision isotope ratios.
-#' @param ls_im Named list containing data frames for planes of ion counts for
-#' ion raster map.
-#' @param ttl Character string or expression for plot title.
+#' @param titel Character string for the analyte ("MEX" or "MON") to be used.
 #' @param ratio A character string constituting the ion ratio, where the two
 #' ions are separated by a dash ("12C14N-40Ca16O").
 #' @param grid_print Logical whether to print the grid numbers
@@ -31,11 +27,21 @@
 #' @return \code{\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
-gg_effect <- function(IC, image, title, ratio, grid_print = FALSE, viri = "A",
+gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
                       res = 256, grid_cell = 64, scaler = 40 / 256,
                       label = "latex", .X = NULL, .N = NULL,
                       .species = NULL, .t = NULL, .ion1 = "13C",
-                      .ion2 = "12C"){
+                      .ion2 = "12C") {
+
+  # grid data
+  IC <-  load_point("map_sum_grid", title, grid_cell, return_name = TRUE)  |>
+    rlang::sym()
+
+  # diagnostics
+  IC <- rlang::inject(
+    point::diag_R(!!IC, .ion1, .ion2, dim_name.nm, sample.nm, file.nm, grid.nm,
+                  .nest = grid.nm, .output = "complete", .meta = TRUE)
+    )
 
   # quoting the call (user-supplied expressions) and complete if NULL
   args <- point:::inject_args(
@@ -61,19 +67,6 @@ gg_effect <- function(IC, image, title, ratio, grid_print = FALSE, viri = "A",
     compilation = TRUE
     )
 
-  # calculate diagnostics for isotope ratio
-  IC <- point::diag_R(
-    IC,
-    .ion1,
-    .ion2,
-    dim_name.nm,
-    sample.nm,
-    file.nm,
-    grid.nm,
-    .nest = grid.nm,
-    .output = "complete",
-    .meta = TRUE
-  )
 
   # try unfolding attributes (point function) to see whether coordinate system
   # is available
@@ -237,27 +230,23 @@ gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
 # Calculate distance for side plots (width and height aggregation plane). This
 # function collapses the third dimension (`dim3`) to a 2D object.
 # res = resolution and geom = geometry for ggplot object
-dim_folds <- function(IC, dim1, dim2, dim3, geom, res, grid_cell){
-
-  dim1 <- enquo(dim1)
-  dim2 <- enquo(dim2)
-  dim3 <- enquo(dim3)
+dim_folds <- function(IC, geom, res, grid_cell){
 
   # the mutation differs depending on the chosen geom
   calcs <- rlang::exprs(
     tile = as.integer(res) + as.integer(grid_cell),
-    raster = !! dim3 + as.integer(res) +  as.integer(grid_cell / 2)
-    )
+    raster = depth.mt + as.integer(res) +  as.integer(grid_cell / 2)
+  )
 
   # transform 3rd dimension into 2D grid and finally remove the 3rd dimension
   dplyr::mutate(
     IC,
-    !! dim1 :=
-      dplyr::if_else(.data$dim_name.nm == "height", !! calcs[[geom]], !! dim1),
-    !! dim2 :=
-      dplyr::if_else(.data$dim_name.nm == "width", !! calcs[[geom]], !! dim2)
+    height.mt =
+      dplyr::if_else(.data$dim_name.nm == "height", !! calcs[[geom]], height.mt),
+    width.mt =
+      dplyr::if_else(.data$dim_name.nm == "width", !! calcs[[geom]], width.mt)
   ) |>
-    dplyr::select(-!! dim3)
+    dplyr::select(-depth.mt)
 
 }
 
