@@ -23,7 +23,7 @@
 #' @export
 grid_aggregate <- function(IC, plane, grid_cell = NULL, species = NULL,
                            title = character(1), name = character(1),
-                           corrected = FALSE, scalar = 40 / 256,
+                           corrected = TRUE, scalar = 40 / 256,
                            save = FALSE) {
 
   # get original mat file names
@@ -58,8 +58,11 @@ grid_aggregate <- function(IC, plane, grid_cell = NULL, species = NULL,
     )
 
   # make corrections, check point package for documentation of `cor_IC`
+  # only distinct metadata sets are taken as they are the same for different
+  # elements
   if (isTRUE(corrected)) {
-  out <- point::cor_IC(out, .bl_t = 0, .det = "EM")
+    out <- point::cor_IC(out, .bl_t = 0, .det = "EM") # |>
+      # dplyr::distinct(dplyr::across(-species.nm))
   }
 
   # print or save
@@ -96,16 +99,16 @@ tune_grid <- function(grid_expression, tune, mc.cores = 1) {
 # additional supporting functions
 #-------------------------------------------------------------------------------
 # vectorized for plane
-flatten_cube <- function(IC, dims, plane, species, grid_cell, scaler) {
+flatten_cube <- function(IC, dims, plane, species, grid_cell) {
   # map over different planes
   purrr::map_dfr(
     plane,
-    ~flatten_cube_(IC = IC, dims = dims, plane = .x, species, grid_cell, scaler)
+    ~flatten_cube_(IC = IC, dims = dims, plane = .x, species, grid_cell)
   )
 }
 
 # cast the ion count data cube into a flat long formatted dataframe
-flatten_cube_ <- function(IC, dims, plane, species, grid_cell, scaler) {
+flatten_cube_ <- function(IC, dims, plane, species, grid_cell) {
 
   # sub-sample
   x <- subsample(IC, dims, plane, grid_cell)

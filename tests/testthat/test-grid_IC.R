@@ -3,16 +3,55 @@
 #-------------------------------------------------------------------------------
 
 test_that("multiplication works", {
-  skip_if_not(exists("loaded", "package:pointapply"), "Skip test if not in development mode.")
 
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
 
   # execute
-  diag_64_MEX <- gg_effect("MEX", "12C-40Ca16O", viri = "B")
+  xc <- gg_effect("MEX", "12C-40Ca16O", viri = "B")
   # snapshot data
-  expect_snapshot(diag_64_MON)
+  expect_snapshot(xc)
   # snapshot plot
   vdiffr::expect_doppelganger(
     "ggplot2 with gridded R and ion raster image",
     ggplot2::last_plot()
     )
+})
+
+test_that("3D configuration can be converted to 2D configuration", {
+
+  load_point("map_raster_image", "MEX")
+  load_point("map_sum_grid", "MEX", 64)
+
+  im <- point::unfold(map_raster_image_MEX)
+  expect_snapshot(
+    dim_folds(im, "raster", 256, 64)
+  )
+
+  IC <- point::unfold(map_sum_grid_64_MEX)
+  expect_equal(
+    dim_folds(IC, "grid", 256, 64) |>
+      dplyr::filter(dim_name.nm == "depth") |>
+      dplyr::pull(width.mt) |>
+      sum(),
+      1638400
+  )
+
+  expect_snapshot(
+    dim_folds(IC, "grid", 256, 64)
+  )
+})
+
+test_that("diagnostics preserve metadata", {
+
+  load_point("map_sum_grid", "MEX", 64)
+  xc <- point::diag_R(map_sum_grid_64_MEX, "13C", "12C", dim_name.nm,
+                      sample.nm, file.nm, grid.nm, .nest = grid.nm,
+                      .output = "complete", .meta = TRUE)
+
+  expect_snapshot(
+    point::unfold(xc, merge = FALSE)
+  )
 })

@@ -4,19 +4,19 @@
 #' precision isotope ratios. \code{gg_sketch} draws the layout of the
 #' grid_cells.
 #'
-#' @param titel Character string for the analyte ("MEX" or "MON") to be used.
+#' @param title Character string for the analyte ("MEX" or "MON") to be used.
 #' @param ratio A character string constituting the ion ratio, where the two
-#' ions are separated by a dash ("12C14N-40Ca16O").
+#'  ions are separated by a dash ("12C14N-40Ca16O").
 #' @param grid_print Logical whether to print the grid numbers
-#' (default = FALSE).
+#'  (default = FALSE).
 #' @param viri Character string selecting the viriditas colour scheme
-#' (default = "A").
+#'  (default = "A").
 #' @param res Resolution of ion map in pixels (default = 256).
 #' @param grid_cell Grid-cell size in pixels (default = 64).
 #' @param scaler Numeric converting the pixels to metric dimension of
-#' measurement (default is the conversion used in this study).
+#'  measurement (default is the conversion used in this study).
 #' @param label Character string indicating how to name tibble columns
-#' (default = "latex").
+#'  (default = "latex").
 #' @param .X Variable for ion count rates (default = Xt.pr).
 #' @param .N Variable for ion counts (default = N.pr).
 #' @param .species Variable for species names (default = species.nm).
@@ -37,141 +37,147 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
   IC <-  load_point("map_sum_grid", title, grid_cell, return_name = TRUE)  |>
     rlang::sym()
 
-  # diagnostics
-  IC <- rlang::inject(
-    point::diag_R(!!IC, .ion1, .ion2, dim_name.nm, sample.nm, file.nm, grid.nm,
-                  .nest = grid.nm, .output = "complete", .meta = TRUE)
-    )
-
   # quoting the call (user-supplied expressions) and complete if NULL
-  args <- point:::inject_args(
-    IC,
-    enquos(.X = .X, .N = .N, .species = .species, .t = .t),
-    type = c("processed", "group")
+  args <- rlang::inject(
+    point:::inject_args(
+      !!IC,
+      enquos(.X = .X, .N = .N, .species = .species, .t = .t),
+      type = c("processed", "group")
+    )
   )
+
   # new args
   args <- point:::arg_builder(
     point:::all_args(args, .ion1, .ion2, chr = FALSE),
     "model"
   )
 
+  # diagnostics
+  IC <- rlang::inject(
+    point::diag_R(!!IC, .ion1, .ion2, dim_name.nm, sample.nm, file.nm,
+                  grid.nm, .nest = grid.nm, .output = "complete", .meta = TRUE)
+  )
+
   # base raster image for ion ratios
+  ions <- strsplit(ratio, "-")
   gg_base <- gg_cnts(
-    image,
-    stringr::str_split(ratio, "-", simplify = TRUE)[,1],
-    stringr::str_split(ratio, "-", simplify = TRUE)[,2],
+    title,
+    ions[[1]][1],
+    ions[[1]][2],
     viri = viri,
     res = res,
     grid_cell = grid_cell,
     scaler = scaler,
     compilation = TRUE
-    )
-
-
-  # try unfolding attributes (point function) to see whether coordinate system
-  # is available
-  withCallingHandlers(
-    warning = function(cnd) {
-      IC$width.mt
-      IC$height.mt
-      IC$depth.mt
-    },
-    {
-      # make metadata available
-      IC <- point::unfold(IC)
-      # reduce dimensions to 2D grid
-      IC <- dim_folds(IC, height.mt, width.mt, depth.mt, "raster", res,
-                      grid_cell)
-    }
   )
 
+  # unfold metadata
+  meta <- point::unfold(IC, merge = FALSE) |>
+    dplyr::distinct(dplyr::across(-species.nm))
+  IC <- dplyr::bind_cols(IC, dplyr::select(meta, depth.mt, width.mt, height.mt))
+
+  # reduce dimensions to 2D grid
+  IC <- dim_folds(IC, "grid", res, grid_cell)
+
+  # convert stats for plotting
   IC <- dplyr::mutate(
     IC,
+    # delta notation of R
     del = (!! args[["M_R"]] /  !! args[["hat_M_M_R"]]  - 1) * 1000,
+    # t score grid respective to whole plane
     t_score = abs(.data$del / !! args[["hat_RS_M_R"]]),
+    # significance code
     sig_code = sig_coder(!! args[["p_R"]], make_lab = FALSE),
+    # label of delta notation
     del_lab = paste(sprintf("%.1f", .data$del), .data$sig_code)
-    )  |>
-    rename(x = .data$width.mt, y = .data$height.mt)
-
-  gg_final <- function(IC) {
-    gg_base +
-      geom_tile(
-        data = IC,
-        aes(x = .data$x, y = .data$y),
-        fill = "transparent",
-        color = "black",
-        size = 1,
-        inherit.aes = FALSE
-        ) +
-      depth_arrows(res, grid_cell) +
-      geom_text(
-        data = IC,
-        aes(
-          x = .data$x,
-          y = .data$y,
-          color = .data$t_score,
-          label = .data$del_lab
-          ),
-        inherit.aes = FALSE
-        ) +
-      scale_color_distiller(
-        expression("Inter-isotope var."~italic(p)),
-        palette = "OrRd",
-        breaks = sapply(c(0.1, 0.01, 0.001) / 2, qt, 16, lower.tail = FALSE),
-        labels = c(0.1, 0.01, 0.001),
-        direction = 1,
-        ) +
-      ggplot2::guides(color = ggplot2::guide_colorbar(title.position = "top")) +
-      labs(
-        title = ttl,
-        subtitle =
-          substitute(
-            "Intra-isotope var."~italic(p)*":"~a,
-            list(a = sig_coder())
-            )
-         ) +
-      themes_IC() +
-      ggplot2::theme(axis.line = ggplot2::element_blank())
-  }
-
-  grid_loc <- list(
-    geom_text(
-      data = IC,
-      aes(
-        x = .data$x + grid_cell * 0.375,
-        y = data$y + grid_cell * 0.375,
-        label = data$grid.nm
-      ),
-      size = 3,
-      inherit.aes = FALSE
-    )
   )
 
+  # plotting
+  p <- gg_base +
+    ggplot2::geom_tile(
+      data = IC,
+      mapping = ggplot2::aes(x = .data$width.mt, y = .data$height.mt),
+      fill = "transparent",
+      color = "black",
+      size = 1,
+      inherit.aes = FALSE
+    ) +
+    # isotope values
+    ggplot2::geom_text(
+      data = IC,
+      mapping = aes(
+        x = .data$width.mt,
+        y = .data$height.mt,
+        color = .data$t_score,
+        label = .data$del_lab
+      ),
+      inherit.aes = FALSE
+    ) +
+    ggplot2::scale_color_distiller(
+      expression("Inter-analysis isotope var."~italic(p)),
+      palette = "OrRd",
+      breaks = sapply(c(0.1, 0.01, 0.001) / 2, qt, 16, lower.tail = FALSE),
+      labels = c(0.1, 0.01, 0.001),
+      direction = 1
+    ) +
+    ggplot2::guides(color = ggplot2::guide_colorbar(title.position = "top")) +
+    ggplot2::labs(
+      title = title,
+      subtitle =
+        substitute(
+          "Intra-analysis isotope var."~italic(p)*":"~a,
+          list(a = sig_coder())
+          )
+    ) +
+    themes_IC() +
+    ggplot2::theme(axis.line = ggplot2::element_blank())
+
+  # whether to return latex parsable labels
   if (! is.null(label)) {
+
     # latex
     tb_model <- filter(
       point::names_model,
       .data$type == "Restricted Maximum Likelihood optimization"
-      )
+    )
     # Model args augment
     model_args <- args[paste(tb_model$name, tb_model$derived, sep = "_")]
     ls_latex <- set_names(
       sapply(model_args, as_name),
       point:::tex_labeller(tb_model, tb_model$name, label)
-      )
-    } else {
-      ls_latex <- sapply(model_args, as_name)
-      }
+    )
 
-  if (grid_print) {
-    {
-      print(gg_final(IC) + grid_loc)
-    }
-    return(distinct(select(IC, .data$dim_name.nm,!!!ls_latex)))
   } else {
-    suppressWarnings(print(gg_final(IC)))
-    return(distinct(select(IC, .data$dim_name.nm,!!!ls_latex)))
+    ls_latex <- sapply(model_args, as_name)
+  }
+
+  # should grid numbering be plotted ?
+  if (isTRUE(grid_print)) {
+
+    # print plot with grid numbering
+    p + ggplot2::geom_text(
+      data = IC,
+      mapping = ggplot2::aes(
+        x = .data$width.mt + grid_cell * 0.375,
+        y = .data$height.mt + grid_cell * 0.375,
+        label = data$grid.nm
+      ),
+      size = 3,
+      inherit.aes = FALSE
+    )
+
+    # return data
+    dplyr::select(IC, .data$dim_name.nm, !!! ls_latex) |>
+      dplyr::distinct()
+
+  } else {
+
+    # print plot
+    print(p)
+
+    # return data
+    dplyr::select(IC, .data$dim_name.nm, !!! ls_latex) |>
+      dplyr::distinct()
   }
 }
 #' @rdname gg_effect
@@ -234,7 +240,7 @@ dim_folds <- function(IC, geom, res, grid_cell){
 
   # the mutation differs depending on the chosen geom
   calcs <- rlang::exprs(
-    tile = as.integer(res) + as.integer(grid_cell),
+    grid = as.numeric(res) + as.numeric(grid_cell),
     raster = depth.mt + as.integer(res) +  as.integer(grid_cell / 2)
   )
 
@@ -246,7 +252,7 @@ dim_folds <- function(IC, geom, res, grid_cell){
     width.mt =
       dplyr::if_else(.data$dim_name.nm == "width", !! calcs[[geom]], width.mt)
   ) |>
-    dplyr::select(-depth.mt)
+    dplyr::select(-.data$depth.mt)
 
 }
 

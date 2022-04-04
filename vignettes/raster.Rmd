@@ -48,7 +48,7 @@ For this example aggregated and processed ion count data is loaded with grid-cel
 
 ```{r load}
 # load e.g. grid aggregated counts
-load_point("map_sum_grid", "MEX", 64, return_name = FALSE)
+load_point("map_sum_grid", "MEX", 64)
 ```
 
 

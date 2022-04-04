@@ -124,7 +124,7 @@ vc_px <- sapply(6:7, function(x) 2 ^ x)
 # tuning the perfect grid dimensions (MEX)
 grid_aggregate(MEX, c("height", "width", "depth"), grid_cell = 64, 
                species = c("12C", "13C"), title = "MEX", name = "map_sum_grid", 
-               corrected = TRUE, save = TRUE) |> 
+               save = TRUE) |> 
 # `tune_grid` allows parallel computing  by setting number of cores  
   tune_grid(vc_px, 4) 
 
