@@ -48,7 +48,7 @@ For this example aggregated and processed ion count data is loaded with grid-cel
 
 ```{r load}
 # load e.g. grid aggregated counts
-load_point("map_sum_grid", "MEX", 64)
+load_point("map_sum_grid", "MEX", 64) 
 ```
 
 
@@ -58,13 +58,8 @@ load_point("map_sum_grid", "MEX", 64)
 The function `gg_cnts()` is designed for plotting of ion count ratios, i.e. the background ion map of Figures 7 and 8 and Supplementary Figure 7. This function simply produces a raster of ion count ratios according to spatial dimensions; height, width and depth, by using `ggplot() +  geom_raster()`[@ggplot2; @ggplot22016], and mapping a colour to the numeric value of the ion ratio. The viridis colour scale is used as it provides a perceptually uniform scale in both colour and black-and-white (`scale_fill_viridis_c()`).
 
 
-```{r raster}
+```{r raster, eval = TRUE}
 gg_cnts("MEX", "12C14N", "12C", viri = "D")
-```
-
-
-```{r echo=FALSE, eval=TRUE, fig.cap="Simple ion ratio map (MEX).", out.width="80%"}
-knitr::include_graphics("figures/simple_raster_Mex_12C-14N-12C.png")
 ```
 
 
@@ -74,7 +69,9 @@ The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the da
 
 
 ```{r diag1}
+# load point
 library(point)
+
 # diagnostics
 diag_R(
   map_sum_grid_64_MEX, 
@@ -101,13 +98,7 @@ In the first example (Fig. 7), high-precision grid-cells for ^13^C/^12^C is comb
 
 ```{r grid1}
 # combination plot
-diag_64_MON <- gg_effect(ls_diag, map_raster_image_MON, "MON", "12C-40Ca16O", 
-                         viri = "B")
-# save plot
-save_point("raster_MON_12C-40Ca16O", ggplot2::last_plot(), width = 16, 
-           height = 14, unit = "cm")
-# save data
-write_point("diag_64_MON")
+gg_effect("MON", "12C-40Ca16O", viri = "B", save = TRUE)
 ```
 
 

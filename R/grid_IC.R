@@ -1,8 +1,8 @@
 #' Combination plot
 #'
 #' \code{gg_effect} combines raster images for ion count ratios with high
-#' precision isotope ratios. \code{gg_sketch} draws the layout of the
-#' grid_cells.
+#'  precision isotope ratios. \code{gg_sketch} draws the layout of the
+#'  grid_cells.
 #'
 #' @param title Character string for the analyte ("MEX" or "MON") to be used.
 #' @param ratio A character string constituting the ion ratio, where the two
@@ -23,13 +23,14 @@
 #' @param .t Variable for time increment (default = t.nm).
 #' @param .ion1 Character string for rare isotope (default = "13C").
 #' @param .ion2 Character string for common isotope (default = "12C").
+#' @param save Boolean whether to save the plot as an png.
 #'
 #' @return \code{\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
 gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
                       res = 256, grid_cell = 64, scaler = 40 / 256,
-                      label = "latex", .X = NULL, .N = NULL,
+                      label = "latex", save = FALSE, .X = NULL, .N = NULL,
                       .species = NULL, .t = NULL, .ion1 = "13C",
                       .ion2 = "12C") {
 
@@ -71,10 +72,14 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
     compilation = TRUE
   )
 
-  # unfold metadata
+  # unfold metadata and select distinct grid-cell per plane
   meta <- point::unfold(IC, merge = FALSE) |>
-    dplyr::distinct(dplyr::across(-species.nm))
-  IC <- dplyr::bind_cols(IC, dplyr::select(meta, depth.mt, width.mt, height.mt))
+    dplyr::distinct(.data$dim_name.nm, .data$grid.nm, .keep_all = TRUE) |>
+    dplyr::select(.data$depth.mt, .data$width.mt, .data$height.mt)
+  # select grid-cell per plane for IC
+  IC <- dplyr::distinct(IC, .data$dim_name.nm, .data$grid.nm, .keep_all = TRUE)
+  # merge IC and meta
+  IC <- dplyr::bind_cols(IC, meta)
 
   # reduce dimensions to 2D grid
   IC <- dim_folds(IC, "grid", res, grid_cell)
@@ -155,7 +160,7 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
   if (isTRUE(grid_print)) {
 
     # print plot with grid numbering
-    p + ggplot2::geom_text(
+    p <- p + ggplot2::geom_text(
       data = IC,
       mapping = ggplot2::aes(
         x = .data$width.mt + grid_cell * 0.375,
@@ -165,20 +170,26 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
       size = 3,
       inherit.aes = FALSE
     )
-
-    # return data
-    dplyr::select(IC, .data$dim_name.nm, !!! ls_latex) |>
-      dplyr::distinct()
-
-  } else {
-
-    # print plot
-    print(p)
-
-    # return data
-    dplyr::select(IC, .data$dim_name.nm, !!! ls_latex) |>
-      dplyr::distinct()
   }
+
+  # distill data
+  IC <- dplyr::select(IC, .data$dim_name.nm, !!! ls_latex) |>
+    dplyr::distinct()
+
+  if (isTRUE(save)) {
+    # save plot
+    nm <- paste("raster", title, ratio, sep = "_")
+    save_point(nm, p, width = 16, height = 14, unit = "cm")
+    # save diagnostics
+    nm <- paste("diag", grid_cell, title, sep = "_")
+    write_point(IC, nm)
+  }
+
+  # print plot
+  print(p)
+
+  # return data
+  IC
 }
 #' @rdname gg_effect
 #'

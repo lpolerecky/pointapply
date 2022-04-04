@@ -23,7 +23,7 @@
 #' @export
 grid_aggregate <- function(IC, plane, grid_cell = NULL, species = NULL,
                            title = character(1), name = character(1),
-                           corrected = TRUE, scalar = 40 / 256,
+                           corrected = FALSE, scalar = 40 / 256,
                            save = FALSE) {
 
   # get original mat file names

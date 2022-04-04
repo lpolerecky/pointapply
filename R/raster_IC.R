@@ -34,9 +34,6 @@ gg_cnts <- function(title, ion1, ion2, viri = "D", res = 256,
   # filter data to only include the species of interest
   IC <- rlang::inject(dplyr::filter(!!IC, species.nm %in% c(ion1, ion2)))
 
-  #  unfolding attributes (point function) to get coordinate system
-  IC <- point::unfold(IC)
-
   # make height and width of similar size as grid_cell
   if (isTRUE(compilation)) {
     IC <- dim_aggregate(IC, grid_cell)
@@ -44,6 +41,9 @@ gg_cnts <- function(title, ion1, ion2, viri = "D", res = 256,
   } else {
     IC <- dplyr::filter(IC, dim_name.nm == "depth")
   }
+
+  # correct ion counts
+  IC <- point::cor_IC(IC, .bl_t = 0, .det = "EM", .hide = FALSE)
 
   # reduce dimensions to 2D grid
   IC <- dim_folds(IC, "raster", res, grid_cell)
@@ -94,6 +94,8 @@ gg_cnts <- function(title, ion1, ion2, viri = "D", res = 256,
     nm <- paste("simple_raster", title)
     save_point(nm, p, width = 10, height = 8, unit = "cm")
   }
+
+
   # print
   p
 }

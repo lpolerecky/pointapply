@@ -18,6 +18,16 @@ test_that("multiplication works", {
     "ggplot2 with gridded R and ion raster image",
     ggplot2::last_plot()
     )
+
+  # execute
+  xc <- gg_effect("MON", "12C-40Ca16O", viri = "B")
+  # snapshot data
+  expect_snapshot(xc)
+  # snapshot plot
+  vdiffr::expect_doppelganger(
+    "ggplot2 with gridded R and ion raster image",
+    ggplot2::last_plot()
+  )
 })
 
 test_that("3D configuration can be converted to 2D configuration", {

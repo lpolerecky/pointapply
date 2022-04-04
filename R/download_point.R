@@ -10,23 +10,23 @@
 #' @param obj Character string of object to store.
 #' @param ggplot ggplot object to be stored.
 #' @param name Character string for graphic based on ggplot or file to be
-#' loaded.
+#'  loaded.
 #' @param width Numeric value for width of graphic based on ggplot.
 #' @param height Numeric value for height of graphic based on ggplot.
 #' @param unit Character string indicating dimension units for graphic based
-#' on ggplot.
+#'  on ggplot.
 #' @param output_dir Character string for directory containing the rendered
-#' document.
+#'  document.
 #' @param type Character string for type of file to be loaded.
 #' @param grid_cell Numeric value of grid_cell size in pixels.
 #' @param return_name Logical whether to return file names.
 #' @param type_ms Character string for type manuscript, either \code{"preprint"}
-#' or \code{"paper"}.
+#'  or \code{"paper"}.
 #'
 #' @return Raw matlab files are stored in the directories
-#' `extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
-#' processed data is stored in the directory `data`. Figures are stored in the
-#' directory `paper/2020-08-20-GLENDON`
+#'  `extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
+#'  processed data is stored in the directory `data`. Figures are stored in the
+#'  directory `paper/2020-08-20-GLENDON`
 #'
 #' @export
 download_point <- function (type = "all") {
@@ -91,7 +91,9 @@ write_point <- function (obj, name) {
 #'
 #' @export
 save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
-                        unit, type_ms = "preprint", output_dir = fs::path_wd()) {
+                        unit, type_ms = "preprint",
+                        output_dir = fs::path_package("pointapply", "vignettes")
+                        ) {
 
   args <- rlang::list2(
     filename = fs::path(output_dir, "figures", name, ext = "png"),
