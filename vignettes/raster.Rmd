@@ -65,7 +65,7 @@ gg_cnts("MEX", "12C14N", "12C", viri = "D")
 
 ## Combination plot
 
-The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the data-grid with a 100$\,\mu$m^2 (64 pixels by 64 pixels) size, as this aggregation resulted in normally distributed ion counts; see *Validation of regression assumptions* (`vignette("assumptions")`), and, as described in the paper. The core `point`[@point] functions `diag_R()` and `eval_diag()` are subsequently applied to the gridded datasets to assess the intra- and inter- ^13^C/^12^C variability comprised in, respectively, the individual grid-cells and the whole target area of the analyte.
+The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the data-grid with a 100$\,\mu$m^2 (64 pixels by 64 pixels) size, as this aggregation resulted in normally distributed ion counts; see *Validation of regression assumptions* (`vignette("assumptions")`), and, as described in the paper. The core `point`[@point] functions `diag_R()` and `eval_diag()` are subsequently applied to the gridded data-sets to assess the intra- and inter-analysis ^13^C/^12^C variability comprised in, respectively, the individual grid-cells and the whole target area of the analyte.
 
 
 ```{r diag1}
@@ -74,7 +74,7 @@ library(point)
 
 # diagnostics
 diag_R(
-  map_sum_grid_64_MEX, 
+  map_sum_grid_64_MON, 
   "13C", 
   "12C", 
   dim_name.nm, 
@@ -89,7 +89,6 @@ diag_R(
 
 
 The results can be visualized by application of the function `gg_effect()`, which combines the previous `gg_cnts()` function with tiles (`geom_tiles()`) and text (`geom_text()`)[@ggplot2; @ggplot22016] mapping the outcomes of regression diagnostic on ^13^C/^12^C. This produces the Figures 7 and 8, and Supplementary Figure 7 of the paper. 
-
 
 ### Figure 7 (MON)
 
@@ -109,26 +108,23 @@ knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
 
 ### Figure 8 (MEX)
 
-The same procedure is repeated for the MEX analyte, starting by performing the intra- and inter-isotope test of the `point` package.
+The same procedure is repeated for the MEX analyte, starting by performing the intra- and inter- analysis isotope test of the `point` package.
 
 
 ```{r diag2}
 # diagnostics
-ls_diag <- purrr::map(
-  map_sum_grid_64_MEX,
-  ~point::diag_R(
-    .x, 
-    "13C", 
-    "12C", 
-    dim_name.nm, 
-    sample.nm, 
-    file.nm, 
-    grid.nm,
-    .nest = grid.nm, 
-    .output = "complete", 
-    .meta = TRUE
-    )
-) 
+diag_R(
+  map_sum_grid_64_MEX, 
+  "13C", 
+  "12C", 
+  dim_name.nm, 
+  sample.nm, 
+  file.nm, 
+  grid.nm, 
+  .nest = grid.nm, 
+  .output = "complete", 
+  .meta = TRUE
+)
 ```
 
 
@@ -136,22 +132,8 @@ Thereafter, the ion ratio map (`r point::R_labeller("12C", "40Ca16O")`) is combi
 
 
 ```{r grid2}
-# combination plot (organic C enrichment)
-diag_64_MEX  <- gg_effect(
-  ls_diag, 
-  map_raster_image_MEX, 
-  "MEX", 
-  "12C-40Ca16O", 
-  viri = "B"
-  )
-# rectangle identifying area of in depth analyses (see below)
-p <- ggplot2::last_plot() + 
-  ggplot2::annotate("rect", xmin = 0, xmax = 64, ymin = 64, ymax = 128, 
-           fill = "transparent", color = "red", size = 1)
-# save plot
-save_point("raster_MEX_12C-40Ca16O", p, width = 16, height = 14, unit = "cm")
-# save data
-write_point("diag_64_MEX")
+# combination plot
+gg_effect("MEX", "12C-40Ca16O", viri = "B", save = TRUE)
 ```
 
 
@@ -167,21 +149,7 @@ The same procedure for MEX is repeated, but then with `r point::R_labeller("12C1
 
 
 ```{r}
-# combination plot (nitrogen enrichment)
-gg_MEX_raster2 <- gg_effect(
-  ls_diag, 
-   map_raster_image_MEX, 
-  "MEX", 
-  "12C14N-12C", 
-  viri = "D"
-  )
-# rectangle identifying area of in depth analyses  (see below)
-p <- ggplot2::last_plot() + 
-  ggplot2::annotate("rect", xmin = 128, xmax = 192, ymin = 0, ymax = 64, 
-           fill = "transparent", color = "red", size = 1) 
-# save
-save_point("raster_MEX_12C14N-12C", p, width = 16, 
-           height = 14, unit = "cm")
+gg_effect("MEX", "12C14N-12C", viri = "B", save = TRUE)
 ```
 
 

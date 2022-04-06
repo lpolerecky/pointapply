@@ -35,7 +35,7 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
                       .ion2 = "12C") {
 
   # grid data
-  IC <-  load_point("map_sum_grid", title, grid_cell, return_name = TRUE)  |>
+  IC <- load_point("map_sum_grid", title, grid_cell, return_name = TRUE)  |>
     rlang::sym()
 
   # quoting the call (user-supplied expressions) and complete if NULL
@@ -180,9 +180,18 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
     # save plot
     nm <- paste("raster", title, ratio, sep = "_")
     save_point(nm, p, width = 16, height = 14, unit = "cm")
+
+    message(
+      paste0("Effects plot has been saved with name ", nm, " .")
+    )
+
     # save diagnostics
     nm <- paste("diag", grid_cell, title, sep = "_")
     write_point(IC, nm)
+
+    message(
+      paste0("Diagnostics has been saved with name ", nm, " .")
+    )
   }
 
   # print plot
@@ -194,51 +203,76 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
 #' @rdname gg_effect
 #'
 #' @export
-gg_sketch <- function(res = 256, grid_cell = 64, scaler = 40 / 256) {
+gg_sketch <- function(grid_cell = 64, res = 256, scaler = 40 / 256, save) {
 
   # dimensions
-  dim_names <- c("height", "width", "depth")
+  dims <- c("height" = res, "width" = res, depth = 1)
+  # grid numbers
+  numb <- purrr::map(
+    names(dims),
+    ~c(kronecker_subsample_grid(
+      dims,
+      .x,
+      grid_cell,
+      expand = FALSE
+    ))
+  ) |>
+    rlang::set_names(names(dims))
 
-  ls_sketch <- purrr::map(
-    dim_names,
-    ~grid_gen(c(256, 256, 400), rlang::parse_expr(.x), grid_cell, dim_names)
-    ) %>%
-    rlang::set_names(nm = dim_names) %>%
-    purrr::map(flatten_matrix, var = "grid.nm") %>%
-    purrr::map(
-      ~summarise(
-        group_by(.x, grid.nm),
-        across(.fns = mean),
-        .groups = "drop"
-        )
-      ) %>%
-    purrr::map(tibble::add_column, sample.nm = "sketch")
+  # dimension names
+  nms <- purrr::map(names(dims), ~rlang::rep_along(numb[[.x]], .x))
 
-  fold <- dim_folds(ls_sketch, height, width,  depth, "sketch", "tile", res,
-                    grid_cell)
-  ggplot(fold, aes(x = .data$width, y = .data$height)) +
-    geom_tile(fill = "transparent", color = "black") +
-    geom_text(aes(label = .data$grid.nm)) +
+  # grid positions
+  pos <- purrr::map_dfr(
+    names(dims),
+    ~c(grid_positions(
+      dims,
+      .x,
+      grid_cell,
+      expand = FALSE
+    ))
+  )
+
+  # combine
+  sketch <- tibble::tibble(
+    grid.nm = purrr::flatten_int(numb),
+    dim_name.nm = purrr::flatten_chr(nms),
+    !!pos,
+    sample.nm = "sketch"
+  )
+
+  fold <- dim_folds(sketch, "grid", res, grid_cell)
+
+  p <- ggplot2::ggplot(fold, ggplot2::aes(x = .data$width.mt, y = .data$height.mt)) +
+    ggplot2::geom_tile(fill = "transparent", color = "black") +
+    ggplot2::geom_text(aes(label = .data$grid.nm)) +
     ggplot2::coord_fixed(clip = "off") +
     depth_arrows(res, grid_cell) +
-    scale_y_continuous(
+    ggplot2::scale_y_continuous(
       expression("height"~"("*mu*"m)"),
-      limits = c(res + grid_cell * 1.5 + 1, 0),
       trans = "reverse",
-      breaks = seq(1, res + 1, grid_cell),
-      labels =  function(x) (x - 1) * scaler,
+      breaks = seq(0, res, grid_cell),
+      labels =  function(x) x * scaler,
       expand = c(0, 0)
-      ) +
-    scale_x_continuous(
+    ) +
+    ggplot2::scale_x_continuous(
       expression("width"~"("*mu*"m)"),
-      limits = c(0, res + grid_cell * 1.5 + 1),
-      breaks = seq(1, res + 1, grid_cell),
-      labels = function(x) (x - 1) * scaler,
+      breaks = seq(0, res, grid_cell),
+      labels = function(x) x * scaler,
       expand = c(0, 0)
-      ) +
-    ggtitle("Grid layout") +
+    ) +
+    ggplot2::ggtitle("Grid layout") +
     ggplot2::theme(axis.line = ggplot2::element_blank()) +
     themes_IC(base = ggplot2::theme_void())
+
+  if (isTRUE(save)) {
+    # save plot
+    save_point("grid_sketch", p, width = 16, height = 14, unit = "cm")
+
+    message(
+      paste0("Grid layout figure has been saved with name `grid_sketch`.")
+    )
+  }
 }
 
 #-------------------------------------------------------------------------------

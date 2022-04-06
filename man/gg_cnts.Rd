@@ -5,32 +5,25 @@
 \title{Raster images for ion count ratios}
 \usage{
 gg_cnts(
-  IC,
+  title,
   ion1,
   ion2,
-  ttl,
-  viri,
-  height = 256,
-  width = 256,
+  viri = "D",
+  res = 256,
   grid_cell = 64,
   scaler = 40/256,
-  compilation = FALSE
+  compilation = FALSE,
+  save = FALSE
 )
 }
 \arguments{
-\item{IC}{Ion count dataframe.}
+\item{title}{Character string for the analyte ("MEX" or "MON") to be used.}
 
 \item{ion1}{A character string constituting the rare isotope ("13C").}
 
 \item{ion2}{A character string constituting the common isotope ("12C").}
 
-\item{ttl}{Character string or expression for plot title.}
-
 \item{viri}{Character string selecting the viriditas color scheme.}
-
-\item{height}{Pixels of height.}
-
-\item{width}{Pixels of width.}
 
 \item{grid_cell}{Pixel size of grid_cells (one side of the square).}
 
@@ -40,6 +33,12 @@ measurement (default is the conversion used in this study).}
 \item{compilation}{Logical whether to plot all three dimensions according to
 the grid layout
 (see \code{pointapply::\link[pointapply:gg_sketch]{gg_sketch}}).}
+
+\item{save}{Boolean whether to save the plot as an png.}
+
+\item{height}{Pixels of height.}
+
+\item{width}{Pixels of width.}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.

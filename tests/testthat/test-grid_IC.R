@@ -1,13 +1,12 @@
-#-------------------------------------------------------------------------------
-# Change over time (golden test)
-#-------------------------------------------------------------------------------
-
-test_that("multiplication works", {
+test_that("gg_effect is consistent", {
 
   skip_if_not(
     exists("loaded", "package:pointapply"),
     "Skip test if not in development mode."
   )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
 
   # execute
   xc <- gg_effect("MEX", "12C-40Ca16O", viri = "B")
@@ -30,7 +29,32 @@ test_that("multiplication works", {
   )
 })
 
+test_that("gg_sketch is consistent", {
+
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
+
+  # snapshot plot
+  vdiffr::expect_doppelganger(
+    "ggplot2 sketch of grid numbering",
+    gg_sketch(32)
+  )
+})
+
 test_that("3D configuration can be converted to 2D configuration", {
+
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
 
   load_point("map_raster_image", "MEX")
   load_point("map_sum_grid", "MEX", 64)
@@ -55,6 +79,14 @@ test_that("3D configuration can be converted to 2D configuration", {
 })
 
 test_that("diagnostics preserve metadata", {
+
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
 
   load_point("map_sum_grid", "MEX", 64)
   xc <- point::diag_R(map_sum_grid_64_MEX, "13C", "12C", dim_name.nm,

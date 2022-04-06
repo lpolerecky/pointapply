@@ -78,7 +78,6 @@ MON <- purrr::map(MON_files, ~readmat::read_mat(.x))
 
 The `grid_aggregate ` function is designed to aggregate over a specified dimension (e.g. `"height"` see example below) and a set of species (e.g. `c("12C", "13C")` see example below). The grid-cell size for aggregation can be set by the `grid_cell` argument, which should be an integer exponent with base two (64 pixels by 64 pixels in this example).
 
-
 ```{r read}
 grid_aggregate(MEX, "height", 64, c("12C", "13C"))
 ```
@@ -102,10 +101,7 @@ The grid-cell size has important consequences for the data structure of the ion 
 
 ```{r sketch}
 # generate sketch of grid layout
-gg_sketch() 
-# save
-save_point("grid_sketch", ggplot2::last_plot(), width = 12, height = 12, 
-           unit = "cm")
+gg_sketch(grid_cell = 64, save = TRUE) 
 ```
 
 
@@ -121,7 +117,7 @@ The following code was use to produce data aggregation for ^12^C and ^13^C over 
 
 ```{r all}
 # 4, 8, 16, 32, 64, and 128 px grid-cell size  for aggregating data
-vc_px <- sapply(6:7, function(x) 2 ^ x)
+vc_px <- sapply(2:7, function(x) 2 ^ x)
 
 # tuning the perfect grid dimensions (MEX)
 # the ion counts are corrected for systematic bias (`corrected` = TRUE)
@@ -129,7 +125,7 @@ grid_aggregate(MEX, c("height", "width", "depth"), grid_cell = 64,
                species = c("12C", "13C"), title = "MEX", name = "map_sum_grid", 
                corrected = TRUE, save = TRUE) |> 
 # `tune_grid` allows parallel computing  by setting number of cores  
-  tune_grid(vc_px, 4) 
+  tune_grid_cell(vc_px, 6) 
 
 # MON
 grid_aggregate(MON, c("height", "width", "depth"), grid_cell = 64, 
@@ -143,7 +139,7 @@ grid_aggregate(MON, c("height", "width", "depth"), grid_cell = 64,
 
 ## Read data for raster images
 
-By keeping grid-cell size to 1 pixel we can also produce ion maps for each of the planes of ion count aggregation.
+By keeping the original raster we can also produce ion maps by aggregation of ion counts for each of the planes.
 
 
 ```{r raster}
@@ -168,24 +164,21 @@ grid_aggregate(
 
 ## Read data for selected grid-cells
 
-Load full datasets for two selected grid-cells on the depth plane (2 and 9, see Figure above for orientation) on the 64 pixel by 64 pixel sized grid for MEX.
+Finally, we can subset full ion count data cubes from selected grid-cells on a specified plane. Here grid-cells 2 and 9 were extracted on a 64 pixel by 64 pixel sized grid for MEX (see schematic figure above for orientation of grid-cells).
 
 
 ```{r full}
-# full datasets for grid-cell 2 and 9 of the depth plane
-ls_GC <- purrr::map(
-  c(2, 9), 
-  ~read_matlab(
-    get_matlab("2020-08-20-GLENDON"),
-    plane = depth,
-    title = "MEX", 
-    output = "complete", 
-    grid_sel = .x
-    )
-  ) %>% 
-  rlang::set_names(nm = paste("map_full_grid_64", c(2, 9), "MEX", sep = "_"))
-assign("map_full_grid_64_MEX", ls_GC)
-write_point(map_full_grid_64_MEX)
+# full data-sets for grid-cell 2 and 9 of the depth plane
+grid_select(
+  MEX, 
+  "depth", 
+  grid_cell = 64,
+  select_cell = c(2, 9),
+  title = "MON", 
+  name = "map_full_grid", 
+  corrected = TRUE, 
+  save = TRUE
+)
 ```
 
 

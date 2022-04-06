@@ -2,46 +2,85 @@
 % Please edit documentation in R/grid_aggregate.R
 \name{grid_aggregate}
 \alias{grid_aggregate}
-\title{Read matlab ion count data}
+\alias{grid_select}
+\alias{tune_grid_cell}
+\title{Manipulate ion count data cubes}
 \usage{
 grid_aggregate(
   IC,
   plane,
-  title = character(1),
+  grid_cell = NULL,
+  select_cell = NULL,
   species = NULL,
-  grid_cell = 64,
+  title = character(1),
   name = character(1),
-  output = "sum",
-  grid_sel = NULL,
-  scalar = 40/256
+  corrected = FALSE,
+  scalar = 40/256,
+  save = FALSE
 )
+
+grid_select(
+  IC,
+  plane,
+  grid_cell = NULL,
+  select_cell = NULL,
+  species = NULL,
+  title = character(1),
+  name = character(1),
+  corrected = FALSE,
+  scalar = 40/256,
+  save = FALSE
+)
+
+tune_grid_cell(grid_expr, tune, mc.cores = 1)
 }
 \arguments{
-\item{IC}{Ion Count data cube}
+\item{IC}{list of Ion Count (IC) data cubes.}
 
-\item{plane}{Variable for the dimension over which to be aggregated}
-
-\item{title}{Character string for sample name.}
-
-\item{species}{Character string or vector with chemical species.}
+\item{plane}{Character string for the dimension over which to be aggregated
+(vectors are allowed).}
 
 \item{grid_cell}{Integer indicating size of cells in pixels, only exponent of
-base two allowed (default = 64).}
+base two allowed (default = NULL). If NULL then 2D raster images are
+created.}
 
-\item{output}{Character string for type of output; \code{"complete"} or
-\code{"sum"}.}
+\item{select_cell}{Integer indicating a grid cell to be extracted.}
 
-\item{grid_sel}{Integer selecting an grid-cell for in-depth analysis.}
+\item{species}{Character string or vector with chemical species. Default is
+NULL and is extracted from the IC data cubes. When supplied it will be used
+to filter the list of IC data cubes.}
+
+\item{title}{Character string for file name.}
+
+\item{name}{Character string for sample name.}
+
+\item{corrected}{If TRUE then IC is corrected with
+\code{point::\link[point:cor_IC]{cor_IC}()}.}
 
 \item{scalar}{Numeric converting the pixels to metric dimension of
 measurement (default is the conversion used in this study).}
+
+\item{save}{Boolean indicating whether to save the file in the package
+internal data store (default = FALSE).}
+
+\item{grid_expr}{The function `grid_select` or `grid_aggregate` to be tuned.}
+
+\item{tune}{A numeric vector for grid_cell size tuning (following: 2 ^ x).}
+
+\item{mc.cores}{An integer value for multi-threading.}
 }
 \value{
-A \code{tibble::\link[tibble:tibble]{tibble}} containing the ion counts
-aggregated over the plane of choice, if \code{output = "sum"}. If
-\code{output = "complete"} only works in combination with \code{grid_sel} and
-produces a pixel-by-pixel dataset for that grid-cell.
+A \code{tibble::\link[tibble:tibble]{tibble}} containing the ion
+ counts aggregated or extracted over the plane of choice.
 }
 \description{
 \code{grid_aggregate} Aggregate ion count data cubes on a 2D grid.
+\code{grid_select} Select ion count data cubes from a grid.
+\code{tune_grid_cell} Allows calibration of the grid_cell size.
+}
+\details{
+These functions are designed to work with data cubes as produced by the
+Matlab based program Look At NanoSims (LANS). They allow sub-setting as well
+as flattening of the cube. This is required for calculating high precision
+isotope estimates.
 }

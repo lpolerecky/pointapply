@@ -1,5 +1,9 @@
 test_that("raster ion image plotting is consistent", {
 
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
   skip_on_ci()
   skip_on_covr()
   skip_on_cran()
@@ -15,6 +19,14 @@ test_that("raster ion image plotting is consistent", {
 })
 
 test_that("height and depth dimensions can be aggregated", {
+
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
 
   load_point("map_raster_image", "MEX")
 
