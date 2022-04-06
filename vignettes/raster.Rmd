@@ -170,11 +170,16 @@ This function has been applied to `r point::R_labeller("12C", "40Ca16O")` of Fig
 
 ```{r inclusion1}
 gg_point(
-  IC = map_full_grid_64_MEX$map_full_grid_64_2_MEX, # full dataset
-  image = map_raster_image_MEX$depth, # raster image
-  ion1_thr = "12C", ion2_thr = "40Ca16O", thr = 20, # ion ratio for filtering
-  ion1_R = "13C", ion2_R = "12C" # isotope ratio
-  )
+  title = "MEX",
+  grid_cell = 2,
+  # ion ratio for filtering
+  ion1_thr = "12C",  
+  ion2_thr = "40Ca16O", 
+  thr = 20, 
+  # isotope ratio
+  ion1_R = "13C", 
+  ion2_R = "12C" 
+)
 # save
 save_point("point_MEX_ROI9", ggplot2::last_plot(), width = 6.75, height = 9, 
            unit = "cm")

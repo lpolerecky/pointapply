@@ -54,7 +54,7 @@ test_that("reading the matlab ion count cubes works", {
   expect_snapshot(head(IC, 35)) # head
   expect_snapshot(tail(IC, 35)) # tail
   expect_equal(nrow(IC), 6553600) # number of rows
-  expect_equal(ncol(IC), 8) # number of variables
+  expect_equal(ncol(IC), 9) # number of variables
 
   # selection (outer function)
   IC <- grid_select(all_files, c("width", "height"), grid_cell = 64,

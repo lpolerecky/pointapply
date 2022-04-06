@@ -168,15 +168,14 @@ Finally, we can subset full ion count data cubes from selected grid-cells on a s
 
 
 ```{r full}
-# full data-sets for grid-cell 2 and 9 of the depth plane
+# full data-sets for grid-cell 2 and 9 of the depth plane (MEX)
 grid_select(
   MEX, 
   "depth", 
   grid_cell = 64,
   select_cell = c(2, 9),
-  title = "MON", 
+  title = "MEX", 
   name = "map_full_grid", 
-  corrected = TRUE, 
   save = TRUE
 )
 ```

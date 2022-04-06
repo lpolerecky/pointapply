@@ -187,16 +187,19 @@ extract_cube_ <- function(IC, dims, plane, species, grid_cell, select_cell) {
   # sub-sample
   x <- subsample(IC, dims, plane, grid_cell, select_cell, output = "select")
 
-  # dimensions of grid_cell adapted to new dataset
+  # dimensions of grid_cell adapted to new data format
+  dimr <- list(height.mt = 1:dim(IC)[1], width.mt = 1:dim(IC)[2],
+               depth.mt = 1:dim(IC)[3])
   if (plane == "depth") {
-    dimr <- c(height = grid_cell, width = grid_cell, depth = dim(IC)[3])
+    dimr[["height.mt"]] <- dimr[["width.mt"]] <- 1:grid_cell
+    dimr <- tidyr::expand_grid(!!! dimr)
   } else if (plane == "height") {
-    dimr <- c(height = grid_cell, width = dim(IC)[2], depth = dim(IC)[3])
+    dimr[["height.mt"]] <- 1:grid_cell
+    dimr <- tidyr::expand_grid(!!! dimr)
   } else if (plane == "width") {
-    dimr <- c(height = dim(IC)[1], width = grid_cell, depth = dim(IC)[3])
+    dimr[["width.mt"]] <- 1:grid_cell
+    dimr <- tidyr::expand_grid(!!! dimr)
   }
-
-  dimr <- purrr::map_dfr(select_cell, ~grid_positions(dimr, plane, grid_cell = 1))
 
   # cast in tibble
   out <- tibble::tibble(
@@ -209,7 +212,9 @@ extract_cube_ <- function(IC, dims, plane, species, grid_cell, select_cell) {
     t.nm = 1e-3 # time (1 pixel per millisecond)
   )
 
-  # new dimension after reduction
+  # expand new dimension to length of `select_cell` vector
+  dimr <- dimr[rep(seq_len(nrow(dimr)), times = length(select_cell)), ]
+  # bind to values
   dplyr::bind_cols(out, dimr)
 }
 
