@@ -23,7 +23,7 @@ gg_effect(
   .ion2 = "12C"
 )
 
-gg_sketch(grid_cell = 64, res = 256, scaler = 40/256)
+gg_sketch(grid_cell = 64, res = 256, scaler = 40/256, save)
 }
 \arguments{
 \item{title}{Character string for the analyte ("MEX" or "MON") to be used.}

@@ -21,7 +21,7 @@ test_that("reading the matlab ion count cubes works", {
 
   # aggregation (inner function)
   IC <- flatten_cube_(
-    all_files[[1]],
+    unlist(all_files[[1]], recursive = FALSE),
     c(height = 256, width = 256, depth = 400),
     "depth",
     "12C",

@@ -46,10 +46,10 @@ grid_aggregate <- function(IC, plane, grid_cell = NULL, select_cell = NULL,
     stop("Provide a title for the file to be saved.", call. = FALSE)
   }
 
-  # get original mat file names
-  nms <- vapply(IC, attr, character(1), "file")
-  nms <- gsub("_cnt", "", nms)
-  IC <- set_names(IC, nms)
+  # # get original mat file names
+  # nms <- vapply(IC, attr, character(1), "file")
+  # nms <- gsub("_cnt", "", nms)
+  # IC <- set_names(IC, nms)
 
   # dimensions
   dim_names <- c("height", "width", "depth")
@@ -57,8 +57,8 @@ grid_aggregate <- function(IC, plane, grid_cell = NULL, select_cell = NULL,
 
   # reduce list to include only selected species
   if (!is.null(species)) {
-    IC <- IC[nms %in% species]
-    all_dims <- all_dims[nms %in% species]
+    IC <- IC[names(IC) %in% species]
+    all_dims <- all_dims[names(IC) %in% species]
   }
 
   # species names
@@ -283,7 +283,8 @@ subsample <- function(IC, dims, plane, grid_cell, select_cell =  NULL,
 
     # sub-sample
     if (output == "subsample") {
-      c(tapply(IC, grid, sum))
+      #c(tapply(IC, grid, sum))
+      mytapply_(c(grid), c(IC)) |> set_names(unique(c(grid)))
     } else if (output == "select") {
       c(IC[grid %in% select_cell])
     }

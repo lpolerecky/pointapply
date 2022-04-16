@@ -52,5 +52,7 @@ Suggests:
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
-Remotes: MartinSchobben/point
 Config/testthat/edition: 3
+LinkingTo: 
+    cpp11
+SystemRequirements: C++11
