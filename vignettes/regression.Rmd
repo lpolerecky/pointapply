@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   eval = FALSE
-  )
+)
 ```
 
 
@@ -23,7 +23,7 @@ The R package `pointapply` contains the code and data to reconstruct the publica
 
 # Introduction
 
-The validity of inter- and intra- isotope models is verified for the nanoSIMS-generated data by an assessment of the implicit assumptions of the linear regression model (Eq. (4) of the paper, and see below); normality, homogeneity and independence of residuals (see also `vignette("IC-diagnostics", package = "point")`). 
+The validity of inter- and intra-analysis isotope models is verified for the nanoSIMS-generated data by an assessment of the implicit assumptions of the linear regression model (Eq. (4) of the paper, and see below); normality, homogeneity and independence of residuals (see also `vignette("IC-diagnostics", package = "point")`). 
 
 $$\text{The ideal linear model:} \quad \hat{X}_i^b = \hat{R}X_i^a +  \hat{e}_i \text{.}$$
 
@@ -35,7 +35,7 @@ The function to perform regression diagnostics `diag_R()` is a core feature of t
 
 ```{r setup, eval=TRUE}
 library(point) # regression diagnostics
-library(pointapply) # load package
+library(pointapply) # this paper
 ```
 
 
@@ -56,6 +56,10 @@ For this example processed data is loaded with different grid-cell sizes to gaug
 
 
 ```{r }
+library(purrr)
+library(rlang)
+library(dplyr)
+
 # grid-cell sizes
 grid_cell <- sapply(2:7, function(x) 2 ^ x)
 # names of the analytes in the paper
@@ -63,7 +67,7 @@ name <- c("MEX", "MON")
 # load
 name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE)
 # data frame aggregated over depth
-tb <- purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
+tb <- map_dfr(syms(name), ~dplyr::filter(eval(.x), .data$dim_name.nm == "depth"))
 ```
 
 
@@ -107,7 +111,7 @@ tb_CV <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm,
 
 ## Independence of residuals 
 
-The independence of the distributions, or autocorrelation among measurements, is checked by calculating the correlation of the series of $\hat{e}_i^*$ with a time-lagged version of itself. This is done by setting the argument `.method` to `"IR"`. Also, this can be cast in a hypothesis test. The `diag_R()` function applies as a *Ljung-Box* hypothesis test, where the timeseries is cross-validated with a timeseries without autocorrelation ("white noise"); the later forms the basis for the $H_0$ of "no auto-correlation". 
+The independence of the distributions, or autocorrelation among measurements, is checked by calculating the correlation of the series of $\hat{e}_i^*$ with a time-lagged version of itself. This is done by setting the argument `.method` to `"IR"`. Also, this can be cast in a hypothesis test. The `diag_R()` function applies as a *Ljung-Box* hypothesis test, where the time series is cross-validated with a time series without autocorrelation ("white noise"); the later forms the basis for the $H_0$ of "no autocorrelation". 
 
 
 ```{r IR}
@@ -120,8 +124,7 @@ tb_IR <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm,
 # Visualization
 ## Classification plots
 
-
-Barplots (`ggplot` with `geom_bar()`[@ggplot2; @ggplot22016]) are chosen to visualise (Supplementary Fig. 6), and summarise, the outcomes of the different hypothesis tests for the different grid-cell sizes. Besides a bin selection based on grid-cell size, a secondary x-axis is added to further emphasize the importance of count statistics (Poisson statistics) on the underlying data structure, and thus a crucial aspects in the outcome of various hypothesis tests. For this the mean count of the rare isotope (^13^C) is calculated ove both samples added together and for each grid-cell size separately. 
+Barplots (`ggplot` with `geom_bar()`[@ggplot2; @ggplot22016]) are chosen to visualise (Supplementary Fig. 6), and summarise, the outcomes of the different hypothesis tests for the different grid-cell sizes. Besides a bin selection based on grid-cell size, a secondary x-axis is added to further emphasize the importance of count statistics (Poisson statistics) on the underlying data structure, and thus a crucial aspects in the outcome of various hypothesis tests. For this the mean count of the rare isotope (^13^C) is calculated for both samples added together and for each grid-cell size separately. 
 
 
 ```{r}
@@ -132,7 +135,7 @@ vc_N_13C <- dplyr::group_by(tb, grid_size.nm, species.nm) %>%
 vc_N_13C <- rlang::set_names(
   sprintf("%.0f", vc_N_13C$N) , 
   nm = vc_N_13C$grid_size.nm
-  )
+)
 ```
 
 
@@ -188,7 +191,7 @@ save_point("bar_IR_class", IR_class, width = 7, height = 7, unit = "cm") # save
 p <- gridExtra::grid.arrange(
   gridExtra::arrangeGrob(QQ_class, CV_class, ncol = 2), 
   gridExtra::arrangeGrob(mu_class, IR_class, ncol = 2)
-  ) 
+) 
 png(filename = "figures/bar_over_class.png", width = 14, height = 14, 
     units = "cm", res = 256)
 grid::grid.draw(p)
@@ -216,7 +219,7 @@ QQ_dens <- gg_dens(
   1, 
   c(-4, 4), 
   c(-4, 4)
-  )  
+)  
 
 # add abline
 QQ_dens <- QQ_dens + ggplot2::geom_abline(alpha = 0.7, linetype = 3) 
@@ -226,7 +229,7 @@ save_point(QQ_dens, name = "point_QQ", width = 12, height = 10, unit = "cm")
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Quantile--Quantile normality plot", out.width="75%"}
- knitr::include_graphics("figures/point_QQ.png")
+knitr::include_graphics("figures/point_QQ.png")
 ```
 
 
@@ -258,6 +261,5 @@ save_point(CV_dens, name = "point_CV", width = 12, height = 10, unit = "cm")
 ```{r echo=FALSE, eval=TRUE, fig.cap="Scale--location plot", out.width="75%"}
  knitr::include_graphics("figures/point_CV.png")
 ```
-
 
 # References

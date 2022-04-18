@@ -4,7 +4,6 @@
 #' \code{grid_select} Select ion count data cubes from a grid.
 #' \code{tune_grid_cell} Allows calibration of the grid_cell size.
 #'
-#'
 #' These functions are designed to work with data cubes as produced by the
 #' Matlab based program Look At NanoSims (LANS). They allow sub-setting as well
 #' as flattening of the cube. This is required for calculating high precision
@@ -46,11 +45,6 @@ grid_aggregate <- function(IC, plane, grid_cell = NULL, select_cell = NULL,
     stop("Provide a title for the file to be saved.", call. = FALSE)
   }
 
-  # # get original mat file names
-  # nms <- vapply(IC, attr, character(1), "file")
-  # nms <- gsub("_cnt", "", nms)
-  # IC <- set_names(IC, nms)
-
   # dimensions
   dim_names <- c("height", "width", "depth")
   all_dims <- purrr::map(IC, ~set_names(dim(.x), nm = dim_names))
@@ -62,7 +56,7 @@ grid_aggregate <- function(IC, plane, grid_cell = NULL, select_cell = NULL,
   }
 
   # species names
-  if (is.null(species)) all_species <- nms else all_species <- species
+  if (is.null(species)) all_species <- names(IC) else all_species <- species
 
   # grid surface
   gridd <- ifelse(is.null(grid_cell), scalar ^ 2, grid_cell * scalar  ^ 2)
@@ -145,15 +139,19 @@ tune_grid_cell <- function(grid_expr, tune, mc.cores = 1) {
 
   # catch call and check arguments
   gcall <- rlang::call_match(substitute(grid_expr), grid_aggregate)
+
   # remove grid_cell arg if needed and extract caller args
   args <- rlang::call_modify(gcall, grid_cell = rlang::zap()) |>
     rlang::call_args()
 
   # Aggregate and save (in parallel with `mclapply`). By using multiple cores
   # this exercise can be sped up significantly.
-  rlang::inject(
-    parallel::mclapply(tune, tune_grid_cell, !!!args, mc.cores = mc.cores)
-  )
+  inner <- function(x) {
+    rlang::call2("grid_aggregate", !!!args, grid_cell = x) |> eval()
+  }
+
+  parallel::mclapply(tune, inner, mc.cores = mc.cores)
+
 }
 
 #-------------------------------------------------------------------------------
@@ -187,19 +185,23 @@ extract_cube_ <- function(IC, dims, plane, species, grid_cell, select_cell) {
   # sub-sample
   x <- subsample(IC, dims, plane, grid_cell, select_cell, output = "select")
 
-  # dimensions of grid_cell adapted to new data format
-  dimr <- list(height.mt = 1:dim(IC)[1], width.mt = 1:dim(IC)[2],
-               depth.mt = 1:dim(IC)[3])
-  if (plane == "depth") {
-    dimr[["height.mt"]] <- dimr[["width.mt"]] <- 1:grid_cell
-    dimr <- tidyr::expand_grid(!!! dimr)
-  } else if (plane == "height") {
-    dimr[["height.mt"]] <- 1:grid_cell
-    dimr <- tidyr::expand_grid(!!! dimr)
-  } else if (plane == "width") {
-    dimr[["width.mt"]] <- 1:grid_cell
-    dimr <- tidyr::expand_grid(!!! dimr)
-  }
+  # complete grid overview
+  dimr <- grid_positions(dims, plane, grid_cell = NULL)
+  dimr <- tidyr::expand_grid("{paste0(plane, '.mt')}" := 1:dims[names(dims) == plane], dimr)
+
+  dimr <- tibble::add_column(
+    # positions
+    dimr,
+    # sub-sample grid
+    grid.nm =
+      c(kronecker_subsample_grid(dims = dims, plane = plane,
+                                 grid_cell = grid_cell, output = "select"))
+  )
+
+ # filter for selected cell(s)
+  dimr <- dplyr::filter(dimr, .data$grid.nm %in% select_cell) |>
+    # drop selected cell(s)
+    dplyr::select(-.data$grid.nm)
 
   # cast in tibble
   out <- tibble::tibble(
@@ -212,9 +214,7 @@ extract_cube_ <- function(IC, dims, plane, species, grid_cell, select_cell) {
     t.nm = 1e-3 # time (1 pixel per millisecond)
   )
 
-  # expand new dimension to length of `select_cell` vector
-  dimr <- dimr[rep(seq_len(nrow(dimr)), times = length(select_cell)), ]
-  # bind to values
+  # bind grid to values
   dplyr::bind_cols(out, dimr)
 }
 
@@ -284,6 +284,7 @@ subsample <- function(IC, dims, plane, grid_cell, select_cell =  NULL,
     # sub-sample
     if (output == "subsample") {
       #c(tapply(IC, grid, sum))
+      # custom C++ function
       mytapply_(c(grid), c(IC)) |> set_names(unique(c(grid)))
     } else if (output == "select") {
       c(IC[grid %in% select_cell])

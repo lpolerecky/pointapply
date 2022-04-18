@@ -48,7 +48,11 @@ Suggests:
     tidyselect,
     usethis,
     testthat (>= 3.0.0),
-    vdiffr
+    vdiffr,
+    diffviewer,
+    gridExtra,
+    nortest,
+    stats
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)

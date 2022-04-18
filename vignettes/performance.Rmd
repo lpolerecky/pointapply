@@ -13,8 +13,8 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval=FALSE
-  )
+  eval = FALSE
+)
 ```
 
 
@@ -23,7 +23,7 @@ The R package `pointapply` contains the code and data to reconstruct the publica
 
 # Introduction 
 
-This vignette provides the details on how to assess the performance of the intra- and inter-isotope variability tests of the paper with synthetic ion count data. The details on the procedure of generating synthetic ion counts can be found in the vignette *Sensitivity by simulation* (`vignette("simulation")`).
+This vignette provides the details on how to assess the performance of the intra- and inter-analysis isotope variability tests of the paper with synthetic ion count data. The details on the procedure of generating synthetic ion counts can be found in the vignette *Sensitivity by simulation* (`vignette("simulation")`).
 
 The following packages are required for the evaluation of model performance.
 

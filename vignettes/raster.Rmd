@@ -46,9 +46,10 @@ download_point(type = "processed")
 For this example aggregated and processed ion count data is loaded with grid-cell sizes of 64 pixels by 64 pixels, which as determined based on regression diagnostics yields the most accurate isotope ratio *Validation of regression assumptions* (`vignette("regression")`). In addition, ion ratio maps, which provide auxiliary information on the spatial distributions of e.g. organic inclusions, and two full (pixel-by-pixel) grid-cell datasets for the MEX analyte are loaded.
 
 
-```{r load}
+```{r load, eval=TRUE}
 # load e.g. grid aggregated counts
 load_point("map_sum_grid", "MEX", 64) 
+load_point("map_sum_grid", "MON", 64) 
 ```
 
 
@@ -58,8 +59,16 @@ load_point("map_sum_grid", "MEX", 64)
 The function `gg_cnts()` is designed for plotting of ion count ratios, i.e. the background ion map of Figures 7 and 8 and Supplementary Figure 7. This function simply produces a raster of ion count ratios according to spatial dimensions; height, width and depth, by using `ggplot() +  geom_raster()`[@ggplot2; @ggplot22016], and mapping a colour to the numeric value of the ion ratio. The viridis colour scale is used as it provides a perceptually uniform scale in both colour and black-and-white (`scale_fill_viridis_c()`).
 
 
-```{r raster, eval = TRUE}
+```{r raster}
 gg_cnts("MEX", "12C14N", "12C", viri = "D")
+
+# save
+save_point("simple_raster_Mex_12C-14N-12C", ggplot2::last_plot(), width = 10, 
+           height = 8, unit = "cm")
+```
+
+```{r echo=FALSE, eval=TRUE, fig.cap="Simple ion ratio map (MEX).", out.width="80%"}
+knitr::include_graphics("figures/simple_raster_Mex_12C-14N-12C.png")
 ```
 
 
@@ -68,7 +77,7 @@ gg_cnts("MEX", "12C14N", "12C", viri = "D")
 The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the data-grid with a 100$\,\mu$m^2 (64 pixels by 64 pixels) size, as this aggregation resulted in normally distributed ion counts; see *Validation of regression assumptions* (`vignette("assumptions")`), and, as described in the paper. The core `point`[@point] functions `diag_R()` and `eval_diag()` are subsequently applied to the gridded data-sets to assess the intra- and inter-analysis ^13^C/^12^C variability comprised in, respectively, the individual grid-cells and the whole target area of the analyte.
 
 
-```{r diag1}
+```{r diag1, eval=TRUE}
 # load point
 library(point)
 
@@ -92,14 +101,13 @@ The results can be visualized by application of the function `gg_effect()`, whic
 
 ### Figure 7 (MON)
 
-In the first example (Fig. 7), high-precision grid-cells for ^13^C/^12^C is combined with a high spatial resolution map for `r point::R_labeller("12C", "40Ca16O")`. Although no pattern can be discerned in the ion ratio map, the high-precision ^13^C/^12^C reveal a distinct gradient traversing the targeted analyte, which is reflected in both the intra- and inter-isotope variability (as designated by significance stars and colour of the text, respectively).
+In the first example (Fig. 7), high-precision grid-cells for ^13^C/^12^C is combined with a high spatial resolution map for `r point::R_labeller("12C", "40Ca16O")`. Although no pattern can be discerned in the ion ratio map, the high-precision ^13^C/^12^C reveal a distinct gradient traversing the targeted analyte, which is reflected in both the intra- and inter-analysis isotope variability (as designated by significance stars and colour of the text, respectively).
 
 
 ```{r grid1}
 # combination plot
 gg_effect("MON", "12C-40Ca16O", viri = "B", save = TRUE)
 ```
-
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C", "40Ca16O"), ")--grid-cell combination plot (MON)."), out.width="80%"}
 knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
@@ -108,27 +116,7 @@ knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
 
 ### Figure 8 (MEX)
 
-The same procedure is repeated for the MEX analyte, starting by performing the intra- and inter- analysis isotope test of the `point` package.
-
-
-```{r diag2}
-# diagnostics
-diag_R(
-  map_sum_grid_64_MEX, 
-  "13C", 
-  "12C", 
-  dim_name.nm, 
-  sample.nm, 
-  file.nm, 
-  grid.nm, 
-  .nest = grid.nm, 
-  .output = "complete", 
-  .meta = TRUE
-)
-```
-
-
-Thereafter, the ion ratio map (`r point::R_labeller("12C", "40Ca16O")`) is combined with high ^13^C/^12^C tiles for the 100$\,\mu$m^2 grid-cells. For this analyte, however, there appear to be distinct cluster of elevated `r point::R_labeller("12C", "40Ca16O")` (e.g. red rectangle), which could indicate the presence of organic inclusions in the sedimentary carbonate. 
+The same procedure is repeated for the MEX analyte, starting by performing the intra- and inter- analysis isotope test of the `point` package. Thereafter, the ion ratio map (`r point::R_labeller("12C", "40Ca16O")`) is combined with high ^13^C/^12^C tiles for the 100$\,\mu$m^2 grid-cells. For this analyte, however, there appear to be distinct cluster of elevated `r point::R_labeller("12C", "40Ca16O")` (e.g. red rectangle), which could indicate the presence of organic inclusions in the sedimentary carbonate. 
 
 
 ```{r grid2}
@@ -143,7 +131,6 @@ knitr::include_graphics("figures/raster_MEX_12C-40Ca16O.png")
 
 
 ### Supplementary Figure 7 (MEX)
-
 
 The same procedure for MEX is repeated, but then with `r point::R_labeller("12C14N", "12C")` as a background raster image. This revealed additional spatial patterns related to nitrogen enrichment. Notably, the grid-cell highlighted with the red rectangle.
 
@@ -171,23 +158,21 @@ This function has been applied to `r point::R_labeller("12C", "40Ca16O")` of Fig
 ```{r inclusion1}
 gg_point(
   title = "MEX",
-  grid_cell = 2,
+  grid_cell = 9,
   # ion ratio for filtering
   ion1_thr = "12C",  
   ion2_thr = "40Ca16O", 
   thr = 20, 
   # isotope ratio
   ion1_R = "13C", 
-  ion2_R = "12C" 
+  ion2_R = "12C",
+  save = TRUE
 )
-# save
-save_point("point_MEX_ROI9", ggplot2::last_plot(), width = 6.75, height = 9, 
-           unit = "cm")
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("In-depth analysis of the potential influence of anomolous ", point::R_labeller("12C", "40Ca16O"), " values on the ",  point::R_labeller("13C", "12C")," (MEX)."), out.width="50%"}
-knitr::include_graphics("figures/point_MEX_ROI9.png")
+knitr::include_graphics("figures/point_MEX_gridcell9.png")
 ```
 
 
@@ -199,19 +184,22 @@ The in-depth analysis of the nitrogen enriched region on Supplementary Figure 8 
 
 ```{r inclusion2}
 gg_point(
-  IC = map_full_grid_64_MEX$map_full_grid_64_9_MEX, 
-  image = map_raster_image_MEX$depth, 
-  ion1_thr = "12C14N", ion2_thr = "12C", thr = 0.75, 
-  ion1_R = "13C",  ion2_R = "12C"
-  ) 
-# save
-save_point("point_MEX_ROI2", ggplot2::last_plot(), width = 6.75, height = 9, 
-           unit = "cm")
+  title = "MEX",
+  grid_cell = 2,
+  # ion ratio for filtering
+  ion1_thr = "12C14N",  
+  ion2_thr = "12C", 
+  thr = 0.75, 
+  # isotope ratio
+  ion1_R = "13C", 
+  ion2_R = "12C",
+  save = TRUE
+)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("In-depth analysis of the potential influence of anomolous ", point::R_labeller("12C14N", "12C"), " values on the ",  point::R_labeller("13C", "12C")," (MEX)."), out.width="50%"}
-knitr::include_graphics("figures/point_MEX_ROI2.png")
+knitr::include_graphics("figures/point_MEX_gridcell2.png")
 ```
 
 

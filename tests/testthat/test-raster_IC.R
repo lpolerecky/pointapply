@@ -30,13 +30,11 @@ test_that("height and depth dimensions can be aggregated", {
 
   load_point("map_raster_image", "MEX")
 
-  IC <- point::unfold(map_raster_image_MEX)
-
   expect_snapshot(
-    dim_aggregate_(IC, 64, "height")
+    dim_aggregate_(map_raster_image_MEX, 64, "height")
   )
 
   expect_snapshot(
-    dim_aggregate(IC, 64)
+    dim_aggregate(map_raster_image_MEX, 64)
   )
 })

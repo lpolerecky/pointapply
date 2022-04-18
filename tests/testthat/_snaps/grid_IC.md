@@ -11,10 +11,23 @@
       3 depth                    0.0103                          2.20             4.58
       # ... with 1 more variable: `$p_{\\bar{R}}$` <dbl>
 
+---
+
+    Code
+      xc
+    Output
+      # A tibble: 3 x 5
+        dim_name.nm `$\\hat{\\bar{R}}$` `$\\hat{\\epsilon}_{\\bar{R~` `$\\Delta AIC_~`
+        <chr>                     <dbl>                         <dbl>            <dbl>
+      1 height                   0.0103                          8.13            40.2 
+      2 width                    0.0103                          1.31            -3.32
+      3 depth                    0.0103                          5.56            36.8 
+      # ... with 1 more variable: `$p_{\\bar{R}}$` <dbl>
+
 # 3D configuration can be converted to 2D configuration
 
     Code
-      dim_folds(im, "raster", 256, 64)
+      dim_folds(map_raster_image_MEX, "raster", 256, 64)
     Output
       # A tibble: 1,081,344 x 11
          sample.nm file.nm    grid_size.nm grid.nm dim.nm dim_name.nm species.nm  N.rw

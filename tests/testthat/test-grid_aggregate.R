@@ -11,22 +11,27 @@ test_that("reading the matlab ion count cubes works", {
   # search pattern
   search_pattern <- paste0(paste0(c("12C", "13C"), "_cnt.mat$"), collapse = "|")
   # list files
-  ls_files <- list.files(
+  MEX_files <- list.files(
     get_matlab("2020-08-20-GLENDON"),
     pattern = search_pattern,
     full.names = TRUE
   )
-  # read ion count mat files
-  all_files <- purrr::map(ls_files, ~readmat::read_mat(.x))
+  # read files (alternatively use R.matlab)
+  MEX <- lapply(MEX_files, readmat::read_mat)
+  # get measured species names
+  MEX_species <- vapply(MEX, attr, character(1), "file")
+  MEX_species <- gsub("_cnt", "", MEX_species)
+  # set names
+  MEX <- unlist(MEX, recursive = FALSE) |>  stats::setNames(MEX_species)
 
   # aggregation (inner function)
   IC <- flatten_cube_(
-    unlist(all_files[[1]], recursive = FALSE),
+    unlist(MEX[[1]], recursive = FALSE),
     c(height = 256, width = 256, depth = 400),
     "depth",
     "12C",
     grid_cell = 64
-   )
+  )
 
   expect_snapshot(head(IC, 35)) # head
   expect_snapshot(tail(IC, 35)) # tail
@@ -34,7 +39,7 @@ test_that("reading the matlab ion count cubes works", {
   expect_equal(ncol(IC), 8) # number of variables
 
   # aggregation (outer function)
-  IC <- grid_aggregate(all_files, c("width", "height"), grid_cell = 64)
+  IC <- grid_aggregate(MEX, c("width", "height"), grid_cell = 64)
 
   expect_snapshot(head(IC, 35)) # head
   expect_snapshot(tail(IC, 35)) # tail
@@ -43,7 +48,7 @@ test_that("reading the matlab ion count cubes works", {
 
   # selection (inner function)
   IC <- extract_cube_(
-    all_files[[1]],
+    MEX[[1]],
     c(height = 256, width = 256, depth = 400),
     "height",
     "12C",
@@ -57,8 +62,8 @@ test_that("reading the matlab ion count cubes works", {
   expect_equal(ncol(IC), 9) # number of variables
 
   # selection (outer function)
-  IC <- grid_select(all_files, c("width", "height"), grid_cell = 64,
-                    select_cell = c(2,4))
+  IC <- grid_select(MEX, c("width", "height"), grid_cell = 64,
+                    select_cell = c(2, 4))
 
   expect_snapshot(head(IC, 35)) # head
   expect_snapshot(tail(IC, 35)) # tail
@@ -67,7 +72,7 @@ test_that("reading the matlab ion count cubes works", {
 
   # some errors
   expect_error(
-    grid_aggregate(all_files, "width", save = TRUE),
+    grid_aggregate(MEX, "width", save = TRUE),
     "Provide a title for the file to be saved."
   )
   dims <- c("height" = 256, "width" = 256, "depth" = 400)
@@ -76,12 +81,12 @@ test_that("reading the matlab ion count cubes works", {
     NULL
   )
   expect_error(
-    grid_select(all_files, c("width", "height"), grid_cell = 64,
+    grid_select(MEX, c("width", "height"), grid_cell = 64,
                 select_cell = 5),
     NULL
   )
   expect_warning(
-    grid_aggregate(all_files, "height", grid_cell = 64,
+    grid_aggregate(MEX, "height", grid_cell = 64,
                    select_cell = 5),
     NULL
   )
@@ -98,17 +103,23 @@ test_that("metadata is retained", {
   skip_on_cran()
 
   # search pattern
-  search_pattern <- paste0(paste0(c("13C", "12C"), "_cnt.mat$"), collapse = "|")
+  search_pattern <- paste0(paste0(c("12C", "13C"), "_cnt.mat$"), collapse = "|")
   # list files
-  ls_files <- list.files(
+  MEX_files <- list.files(
     get_matlab("2020-08-20-GLENDON"),
     pattern = search_pattern,
     full.names = TRUE
   )
-  # read ion count mat files
-  all_files <- purrr::map(ls_files, ~readmat::read_mat(.x))
+  # read files (alternatively use R.matlab)
+  MEX <- lapply(MEX_files, readmat::read_mat)
+  # get measured species names
+  MEX_species <- vapply(MEX, attr, character(1), "file")
+  MEX_species <- gsub("_cnt", "", MEX_species)
+  # set names
+  MEX <- unlist(MEX, recursive = FALSE) |>  stats::setNames(MEX_species)
 
-  IC <- grid_aggregate(all_files, c("height", "depth", "width"), grid_cell = 64,
+
+  IC <- grid_aggregate(MEX, c("height", "depth", "width"), grid_cell = 64,
                        corrected = TRUE)
 
   expect_snapshot(

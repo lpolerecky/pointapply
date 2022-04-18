@@ -42,7 +42,7 @@ test_that("gg_sketch is consistent", {
   # snapshot plot
   vdiffr::expect_doppelganger(
     "ggplot2 sketch of grid numbering",
-    gg_sketch(32)
+    gg_sketch(32, save = FALSE)
   )
 })
 
@@ -59,18 +59,18 @@ test_that("3D configuration can be converted to 2D configuration", {
   load_point("map_raster_image", "MEX")
   load_point("map_sum_grid", "MEX", 64)
 
-  im <- point::unfold(map_raster_image_MEX)
   expect_snapshot(
-    dim_folds(im, "raster", 256, 64)
+    dim_folds(map_raster_image_MEX, "raster", 256, 64)
   )
 
   IC <- point::unfold(map_sum_grid_64_MEX)
+
   expect_equal(
     dim_folds(IC, "grid", 256, 64) |>
       dplyr::filter(dim_name.nm == "depth") |>
       dplyr::pull(width.mt) |>
       sum(),
-      1638400
+    1638400
   )
 
   expect_snapshot(

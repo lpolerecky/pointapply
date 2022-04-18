@@ -16,7 +16,9 @@ cpp11::doubles mytapply_(cpp11::doubles  x, cpp11::doubles  y) {
     if (seen) {
       out.push_back(y[i]);
     } else {
-      out[out.size() - 1] += y[i];
+      // iterator to find location based on x
+      int it = x[i] - 1;
+      out[it] += y[i];
     }
 
   }

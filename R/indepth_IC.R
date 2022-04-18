@@ -13,6 +13,7 @@
 #' @param ion2_R A character string constituting the common isotope ("12C").
 #' @param colors Colour palette to identify matrix and inclusion (default =
 #'  \code{ c("#8E063B", "#023FA5")}).
+#' @param save Boolean whether to save the plot as an png.
 #' @param .X Variable for ion count rates (default = NULL).
 #' @param .N Variable for ion counts (default = NULL).
 #' @param .species Variable for species names (default = NULL).
@@ -22,10 +23,10 @@
 #'
 #' @export
 gg_point <- function(title, grid_cell, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
-                     colors = c("#8E063B", "#023FA5"), .X = NULL, .N = NULL,
-                     .species = NULL, .t = NULL) {
+                     colors = c("#8E063B", "#023FA5"), save = FALSE, .X = NULL,
+                     .N = NULL, .species = NULL, .t = NULL) {
 
-  # raster data
+   # raster data
   IC <-  load_point("map_full_grid_64", title, return_name = TRUE) |>
     rlang::sym()
   # filter grid_cell
@@ -57,6 +58,8 @@ gg_point <- function(title, grid_cell, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
   N.rw <- point:::quo_updt(args[[".N"]], post = "rw", update_post = TRUE)
 
   # ratio bounds
+  lower <- point:::quo_updt(args[[".X"]], pre = "lower")
+  upper <- point:::quo_updt(args[[".X"]], pre = "upper")
   lower1 <- point:::quo_updt(args[[".X"]], pre = "lower", post = ion1_R)
   lower2 <- point:::quo_updt(args[[".X"]], pre = "lower", post = ion2_R)
   upper1 <- point:::quo_updt(args[[".X"]], pre = "upper", post = ion1_R)
@@ -66,15 +69,18 @@ gg_point <- function(title, grid_cell, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
   im_ROI <- dplyr::filter(
     image,
     # which species
-    species.nm %in% ions,
+    species.nm %in% c(ion1_thr, ion2_thr),
     # ROI
     .data$width.mt %in% unique(IC$width.mt),
     .data$height.mt %in% unique(IC$height.mt)
-    )  %>%
+  )  %>%
     # wide format conversion
-    point::cov_R(ions, .data$height.mt, .data$width.mt, .data$grid.nm,
-                 .data$sample.nm) %>%
-    dplyr::summarise(
+    point::cov_R(c(ion1_thr, ion2_thr), .data$sample.nm, .data$file.nm,
+                 .data$grid.nm, .data$dim_name.nm, .data$height.mt,
+                 .data$width.mt) |>
+    # point::cov_R(ions, .data$height.mt, .data$width.mt, .data$grid.nm,
+    #              .data$sample.nm) %>%
+    dplyr::transmute(
       height.mt = .data$height.mt,
       width.mt = .data$width.mt,
       R_depth = !! args_ion[[ion1_thr]] / !! args_ion[[ion2_thr]],
@@ -98,6 +104,7 @@ gg_point <- function(title, grid_cell, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
       .data$depth.mt
     ) %>%
     dplyr::summarise(
+      # t.nm = unique(t.nm),
       pxl = unique(.data$pxl),
       frac = unique(.data$frac),
       !! args[[".N"]] := sum(!! N.rw),
@@ -107,18 +114,17 @@ gg_point <- function(title, grid_cell, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
     dplyr::mutate(!! args[[".X"]] := !! args[[".N"]] / (.data$pxl * 1e-3))
 
   # sum stats
-  tb_X <- point::stat_X(tb_inc, .data$sample.nm, .data$flag, .data$frac,
-                        .t = .data$depth.mt) %>%
+  tb_X <- point::stat_X(tb_inc, .data$sample.nm, .data$flag, .data$frac) %>%
     dplyr::group_by(.data$flag, .data$species.nm) %>%
     dplyr::mutate(
       t.nm = dplyr::row_number(),
-      "lower_{{.X}}" :=
+      !! lower :=
         dplyr::if_else(
           !! args_thr[["M_X"]] - 2 * !! args_thr[["S_X"]] < 0,
           0,
           !! args_thr[["M_X"]] - 2 * !! args_thr[["S_X"]]
         ),
-      "upper_{{.X}}" := !! args_thr[["M_X"]] + 2 * !! args_thr[["S_X"]]
+      !! upper := !! args_thr[["M_X"]] + 2 * !! args_thr[["S_X"]]
     ) %>%
     dplyr::ungroup()
 
@@ -157,7 +163,7 @@ gg_point <- function(title, grid_cell, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
     list(a = point::ion_labeller(ion1_R, "expr"))
     )
 
-  ggplot2::ggplot(
+  p <- ggplot2::ggplot(
     tb_wide,
     ggplot2::aes(
       x = !! args_R[["M_X2"]],
@@ -190,6 +196,18 @@ gg_point <- function(title, grid_cell, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
       breaks = scales::pretty_breaks(3)
     ) +
     ggplot2::scale_fill_manual("", values = colors, labels = labels) +
-    ggplot2::themes_IC(base = ggplot2::theme_bw()) +
+    themes_IC(base = ggplot2::theme_bw()) +
     ggplot2::theme(legend.direction = "vertical")
+
+  if (isTRUE(save)) {
+    # save plot
+    nm <- paste("point", title, paste0("gridcell", grid_cell), sep = "_")
+    save_point(nm, p, width = 6.75, height = 9, unit = "cm")
+
+    message(
+      paste0("In-depth plot has been saved with name ", nm, " .")
+    )
   }
+  # print
+  p
+}

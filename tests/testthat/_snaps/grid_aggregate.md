@@ -86,18 +86,18 @@
       head(IC, 35)
     Output
       # A tibble: 35 x 9
-         grid.nm dim.nm dim_name.nm species.nm  N.rw  t.nm height.mt width.mt depth.mt
+         grid.nm dim.nm dim_name.nm species.nm  N.rw  t.nm height.mt depth.mt width.mt
            <dbl>  <int> <chr>       <chr>      <dbl> <dbl>     <int>    <int>    <int>
-       1       2      1 height      12C            9 0.001         1        1        1
-       2       2      1 height      12C            7 0.001         1        1        2
-       3       2      1 height      12C           14 0.001         1        1        3
-       4       2      1 height      12C           21 0.001         1        1        4
-       5       2      1 height      12C           13 0.001         1        1        5
-       6       2      1 height      12C           15 0.001         1        1        6
-       7       2      1 height      12C            9 0.001         1        1        7
-       8       2      1 height      12C           17 0.001         1        1        8
-       9       2      1 height      12C            9 0.001         1        1        9
-      10       2      1 height      12C           12 0.001         1        1       10
+       1       2      1 height      12C            9 0.001         1        1       65
+       2       2      1 height      12C            7 0.001         1        1       66
+       3       2      1 height      12C           14 0.001         1        1       67
+       4       2      1 height      12C           21 0.001         1        1       68
+       5       2      1 height      12C           13 0.001         1        1       69
+       6       2      1 height      12C           15 0.001         1        1       70
+       7       2      1 height      12C            9 0.001         1        1       71
+       8       2      1 height      12C           17 0.001         1        1       72
+       9       2      1 height      12C            9 0.001         1        1       73
+      10       2      1 height      12C           12 0.001         1        1       74
       # ... with 25 more rows
 
 ---
@@ -106,18 +106,18 @@
       tail(IC, 35)
     Output
       # A tibble: 35 x 9
-         grid.nm dim.nm dim_name.nm species.nm  N.rw  t.nm height.mt width.mt depth.mt
+         grid.nm dim.nm dim_name.nm species.nm  N.rw  t.nm height.mt depth.mt width.mt
            <dbl>  <int> <chr>       <chr>      <dbl> <dbl>     <int>    <int>    <int>
-       1       2      1 height      12C         7.21 0.001        64      256      366
-       2       2      1 height      12C        11.7  0.001        64      256      367
-       3       2      1 height      12C         7.85 0.001        64      256      368
-       4       2      1 height      12C        10.4  0.001        64      256      369
-       5       2      1 height      12C        10.5  0.001        64      256      370
-       6       2      1 height      12C         7.05 0.001        64      256      371
-       7       2      1 height      12C         6.74 0.001        64      256      372
-       8       2      1 height      12C        12.2  0.001        64      256      373
-       9       2      1 height      12C        11.8  0.001        64      256      374
-      10       2      1 height      12C        11.7  0.001        64      256      375
+       1       2      1 height      12C         7.21 0.001       256      400       94
+       2       2      1 height      12C        11.7  0.001       256      400       95
+       3       2      1 height      12C         7.85 0.001       256      400       96
+       4       2      1 height      12C        10.4  0.001       256      400       97
+       5       2      1 height      12C        10.5  0.001       256      400       98
+       6       2      1 height      12C         7.05 0.001       256      400       99
+       7       2      1 height      12C         6.74 0.001       256      400      100
+       8       2      1 height      12C        12.2  0.001       256      400      101
+       9       2      1 height      12C        11.8  0.001       256      400      102
+      10       2      1 height      12C        11.7  0.001       256      400      103
       # ... with 25 more rows
 
 ---
@@ -138,8 +138,8 @@
        8 ""        ""              1.56       2      2 width       12C           15
        9 ""        ""              1.56       2      2 width       12C            6
       10 ""        ""              1.56       2      2 width       12C            8
-      # ... with 25 more rows, and 4 more variables: t.nm <dbl>, height.mt <int>,
-      #   width.mt <int>, depth.mt <int>
+      # ... with 25 more rows, and 4 more variables: t.nm <dbl>, width.mt <int>,
+      #   depth.mt <int>, height.mt <int>
 
 ---
 
@@ -159,8 +159,8 @@
        8 ""        ""              1.56       4      1 height      13C        0       
        9 ""        ""              1.56       4      1 height      13C        0       
       10 ""        ""              1.56       4      1 height      13C        0       
-      # ... with 25 more rows, and 4 more variables: t.nm <dbl>, height.mt <int>,
-      #   width.mt <int>, depth.mt <int>
+      # ... with 25 more rows, and 4 more variables: t.nm <dbl>, width.mt <int>,
+      #   depth.mt <int>, height.mt <int>
 
 # metadata is retained
 
