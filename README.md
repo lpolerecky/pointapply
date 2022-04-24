@@ -28,9 +28,11 @@ pointapply::download_point()
 # Render the paper
 
 Use the function `pointapply::render_paper()` and specify the directory
-to save the paper.
+to save the paper. Make sure to have latex installed on your system.
+Check e.g., <https://yihui.org/tinytex/> for a light weight tex version.
 
 ``` r
+# install.packages('tinytex')
 # Knit
 pointapply::render_paper(title = "Schobbenetal_SIMS_method", 
                          output_dir = "mydir")
@@ -61,10 +63,9 @@ Wickham 2016), *ggrepel* (Slowikowski 2021), *RColorBrewer* (Neuwirth
 The package *rlang* (Henry and Wickham 2021) was used for tidy
 evaluation.
 
-Some specialised specialised packages where used, notably; *R.matlab*
-for loading the matlab LANS files (Bengtsson 2018) and *cubelyr*
-(Wickham 2020) for flattening the 3D arrays, and *MASS* (Ripley 2021;
-Venables and Ripley 2002) for 2D density estimates.
+Some specialised packages where used, notably; *readmat* for loading the
+matlab LANS files (**readmat?**) and *MASS* (Ripley 2021; Venables and
+Ripley 2002) for 2D density estimates.
 
 The data download from Zenodo with an api is facilitated by *zen4R*
 (Blondel 2020).
@@ -141,13 +142,6 @@ Machinery, et al. 2021. *Rticles: Article Formats for r Markdown*.
 Bache, Stefan Milton, and Hadley Wickham. 2020. *Magrittr: A
 Forward-Pipe Operator for r*.
 <https://CRAN.R-project.org/package=magrittr>.
-
-</div>
-
-<div id="ref-R.matlab" class="csl-entry">
-
-Bengtsson, Henrik. 2018. *R.matlab: Read and Write MAT Files and Call
-MATLAB from Within r*. <https://github.com/HenrikBengtsson/R.matlab>.
 
 </div>
 
@@ -256,13 +250,6 @@ Springer-Verlag New York. <https://ggplot2.tidyverse.org>.
 
 ———. 2019. *Stringr: Simple, Consistent Wrappers for Common String
 Operations*. <https://CRAN.R-project.org/package=stringr>.
-
-</div>
-
-<div id="ref-cubelyr" class="csl-entry">
-
-———. 2020. *Cubelyr: A Data Cube Dplyr Backend*.
-<https://github.com/hadley/cubelyr>.
 
 </div>
 

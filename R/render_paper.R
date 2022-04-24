@@ -21,20 +21,21 @@ render_paper <- function(
   output_dir = fs::path_wd(),
   type_ms = "preprint",
   copy_figures = TRUE
-  ){
+){
 
   # paths
   paper <- fs::path("paper", type_ms)
   # dirs
   paper_dirs <- fs::path_package("pointapply", c(paper, "data"))
   # bibs
-  purrr::walk(c("packages", "rversion"), ~bib_copy(paper_dirs[1], .x))
+  bibs <- fs::path("vignettes", c("packages", "rversion"), ext = "bib")
+  purrr::walk(bibs, ~bib_copy(paper_dirs[1], .x))
 
   # make links
   fs::link_create(
     fs::path_package("pointapply", "paper", "templates"),
     fs::path(fs::path_package("pointapply", "paper", type_ms), "templates")
-    ) # templates
+  ) # templates
 
   # make bookdown_yml
   cat(
@@ -45,20 +46,20 @@ render_paper <- function(
     # "clean: [\"\"]",
     file = fs::path_package("pointapply", "paper", type_ms, "_bookdown.yml"),
     sep = "\n"
-    )
+  )
 
   # render paper
   rmarkdown::render_site(
     input = fs::path_package("pointapply", "paper", type_ms),
     encoding = 'UTF-8'
-    )
+  )
 
   # copy figures
   fs::dir_copy(
     fs::path_package("pointapply", "paper", type_ms, "figures"),
     fs::path(output_dir, "figures"),
     overwrite = TRUE
-    )
+  )
 }
 #' @rdname render_paper
 #'
@@ -78,7 +79,5 @@ bib_copy <- function(path_new, bib) {
       fs::path(path_new, bib),
       overwrite = TRUE
     )
-    }
   }
-
-
+}

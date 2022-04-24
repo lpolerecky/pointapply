@@ -4,7 +4,7 @@
 \alias{hyp_class}
 \title{Barplots for hypothesis testing}
 \usage{
-hyp_class(IC, sec_vc, ttl)
+hyp_class(IC, sec_vc, ttl, save = FALSE)
 }
 \arguments{
 \item{IC}{Ion count data}
@@ -12,6 +12,8 @@ hyp_class(IC, sec_vc, ttl)
 \item{sec_vc}{Named vector for secondary axis.}
 
 \item{ttl}{Character string or expression for plot title.}
+
+\item{save}{Boolean whether to save the plot as an png.}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.

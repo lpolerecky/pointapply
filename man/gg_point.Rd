@@ -13,6 +13,7 @@ gg_point(
   ion1_R,
   ion2_R,
   colors = c("#8E063B", "#023FA5"),
+  save = FALSE,
   .X = NULL,
   .N = NULL,
   .species = NULL,
@@ -36,6 +37,8 @@ the map.}
 
 \item{colors}{Colour palette to identify matrix and inclusion (default =
 \code{ c("#8E063B", "#023FA5")}).}
+
+\item{save}{Boolean whether to save the plot as an png.}
 
 \item{.X}{Variable for ion count rates (default = NULL).}
 

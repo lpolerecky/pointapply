@@ -1,4 +1,0 @@
-book_filename: "Schobbenetal_SIMS_method"
-delete_merged_file: true
-rmd_files: ["index.Rmd", "main.Rmd", "SI.Rmd",  "references.Rmd"]
-output_dir: /home/amandus/Documents/work/projects/code/pointapply

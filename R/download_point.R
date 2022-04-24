@@ -70,7 +70,7 @@ download_point <- function (type = "all") {
 #' @rdname download_point
 #'
 #' @export
-write_point <- function (obj, name) {
+write_point <- function (obj, name = NULL) {
 
   # if loaded exists then it is in development mode
   if (exists("loaded", "package:pointapply")) {
@@ -78,6 +78,10 @@ write_point <- function (obj, name) {
   } else {
     path <- fs::path_package("pointapply", "data")
   }
+
+  # if name is NULL susbstitue `obj` name
+  if (is.null(name)) name <- deparse(substitute(obj))
+
   # path for saving file
   fpath <- fs::path(path, name, ext =  "rda")
 

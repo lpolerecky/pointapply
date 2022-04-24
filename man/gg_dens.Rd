@@ -19,7 +19,8 @@ gg_dens(
   sds = 22,
   geom = "point",
   facet_sc = "fixed",
-  flag = NULL
+  flag = NULL,
+  save = FALSE
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ density contour lines.}
 \item{facet_sc}{The \code{scales} parameter of `ggplot2::facet_grid`}
 
 \item{flag}{A variable representing a flag for outliers.}
+
+\item{save}{Boolean whether to save the plot as an png.}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.

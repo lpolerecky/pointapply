@@ -64,16 +64,16 @@ The combination of measuring under high ionisation efficiencies and the usage of
 
 
 ```{r QSA}
-# bind data frames
-tb <- dplyr::bind_rows(map_sum_grid_64_MEX$depth, map_sum_grid_64_MON$depth)
+# combine data
+tb <- bind_rows(map_sum_grid_64_MEX, map_sum_grid_64_MON)
 # QSA test
-test_QSA_64_all <- point::QSA_test(tb, "13C", "12C", file.nm, sample.nm, 
-                                   grid.nm, .nest = grid.nm)
+test_QSA_64_all <- QSA_test(tb, "13C", "12C", file.nm, sample.nm, grid.nm, 
+                            .nest = grid.nm)
 # make mlm model line
 test_QSA_64_all <- dplyr::mutate(
   test_QSA_64_all, 
   hat_R = alpha_grid.nm + beta_grid.nm * Xt.pr.12C
-  )
+)
 ```
 
 
@@ -86,29 +86,29 @@ xlab <- substitute(
   a ~ "(count sec"^"-"*")", 
   list(a = point::ion_labeller("12C", "expr"))
   )
+ylab <- point::R_labeller("13C", "12C", "expr")
 
 # plot
 QSA_dens <- gg_dens(
-  test_QSA_64_all, 
-  Xt.pr.12C,
-  R_Xt.pr, 
-  xlab, 
-  point::R_labeller("13C", "12C", "expr"), 
-  "QSA test",
-  1,
+  IC = test_QSA_64_all, 
+  x = Xt.pr.12C,
+  y = R_Xt.pr, 
+  xlab = xlab, 
+  ylab = ylab, 
+  ttl = "QSA test",
   gr = sample.nm,
   unit = "dim",
   facet_sc = "free"
-  )
+)
 
 # add lm line
 QSA_dens + ggplot2::geom_line(ggplot2::aes(y = hat_R)) 
 
 # save data
-write_point("test_QSA_64_all")
+write_point(test_QSA_64_all)
  
 # save plot  
-save_point("point_QSA", ggplot2::last_plot(), width = 12, height = 8, 
+save_point("point_QSA", ggplot2::last_plot(), width = 12, height = 8,
            unit = "cm")
 ```
 
@@ -127,11 +127,8 @@ First we will calculate some standard predictive and descriptive statistics for 
 
 ```{r statXt}
 # single ion statistics
-stat_X_64_all <- purrr::map_dfr(
-  purrr::flatten(list(map_sum_grid_64_MEX, map_sum_grid_64_MON)),
-  ~stat_X(.x, file.nm, sample.nm, dim_name.nm, grid.nm)
-  )
-write_point("stat_X_64_all")
+stat_X_64_all <- stat_X(tb, file.nm, sample.nm, dim_name.nm, grid.nm)
+write_point(stat_X_64_all)
 head(stat_X_64_all)
 ```
 
@@ -141,11 +138,9 @@ The same can be done for the statistics of isotope analysis with appropriate err
 
 ```{r statR}
 # single ion statistics
-stat_R_64_all <- purrr::map_dfr(
-  purrr::flatten(list(map_sum_grid_64_MEX, map_sum_grid_64_MON)),
-  ~stat_R(.x, "13C", "12C", file.nm, sample.nm, dim_name.nm, grid.nm)
-  )
-write_point("stat_R_64_all")
+stat_R_64_all <- stat_R(tb, "13C", "12C", file.nm, sample.nm, dim_name.nm, 
+                        grid.nm)
+write_point(stat_R_64_all)
 head(stat_R_64_all)
 ```
 
@@ -158,29 +153,30 @@ The reduced $\chi^2$ can then be used to assess the machine performance and anal
 
 where values close to $1$ suggest good agreement between the actual measurement and the predicted value [@Kilburn2015a]. Values lower than $1$ suggest that the analysis was better than predicted, and values higher than $1$ indicate that the analysis was worse than predicted by Poisson statistics.
 
-Intra-isotope variation is measured by the test (based on F-statistic) as outlined in the paper. Varying degrees of variance in the ionization efficiency of the analyte cause a systematic trend that is mirrored in both isotopes. This ionization efficiency trend has been parameterized as the difference between the relative standard deviation of the common isotope $\epsilon_{X^{a}}$ and the theoretical standard deviation $\hat{\epsilon}_{N^{a}}$, based on Poisson statistics (so-called "excess" ionization, see paper). This ionization efficiency trend has an impact on the accuracy of the intra-isotope test (see paper), and therefore has been included in the simulated data. For this comparative approach an excess ionization of below < 6% has been omitted, because of limited detection at the lower ranges of ionization efficiency. The remainder has been divided into three groups; low (5--15%), medium (15--25%) and high (25--35%) excess ionization with the `ggplot::cut_width()` function [@ggplot2; @ggplot22016].
+Intra-isotope variation is measured by the test (based on F-statistic) as outlined in the paper. Varying degrees of variance in the ionization efficiency of the analyte cause a systematic trend that is mirrored in both isotopes. This ionization efficiency trend has been parameterized as the difference between the relative standard deviation of the common isotope $\epsilon_{X^{a}}$ and the theoretical standard deviation $\hat{\epsilon}_{N^{a}}$, based on Poisson statistics (so-called "excess" ionization, see paper). This ionization efficiency trend has an impact on the accuracy of the intra-isotope test (see paper), and therefore has been included in the simulated data. For this comparative approach an excess ionization of below < 6% has been omitted, because of limited detection at the lower ranges of ionization efficiency. The remainder has been divided into three groups; low (5--15%), medium (15--25%) and high (25--35%) excess ionization with the `ggplot2::cut_width()` function [@ggplot2; @ggplot22016].
 
 
 ```{r cut}
+library(purrr)
+library(rlang)
+library(ggplot2)
+
 # groups
-grps <- rlang::quos(type.nm, trend.nm, force.nm, spot.nm)
+grps <- quos(type.nm, trend.nm, force.nm, spot.nm)
 # R stats synthetic data
-tb_R <- point::stat_R(simu_sens_IC_intra, "13C", "12C", !!!grps, .X = Xt.sm, 
-                      .N = N.sm) 
+tb_R <- stat_R(simu_sens_IC_intra, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm) 
 # single ions stats
-tb_X <- point::stat_X(simu_sens_IC_intra, !!!grps, .X = Xt.sm, .N = N.sm) %>% 
-  dplyr::filter(species.nm == "12C")
+tb_X <- stat_X(simu_sens_IC_intra, !!!grps, .X = Xt.sm, .N = N.sm) |> 
+  filter(species.nm == "12C")
 # filter and cut continuous ionization efficiency
 simu_stat_eval_intra <- list(simu_CD_eval_intra, tb_X, tb_R) %>% 
-  purrr::reduce(left_join, by = sapply(grps, rlang::as_name)) %>% 
-  dplyr::mutate(ion_trend = RS_Xt.sm - hat_RS_N.sm) %>% 
-  dplyr::filter(ion_trend > 6) %>% 
-  dplyr::mutate(ion_trend =
-                  factor(
-                    ggplot2::cut_width(ion_trend, 10),
-                    labels = c("low", "medium", "high")
-                    )
-                )
+  reduce(left_join, by = sapply(grps, as_name)) %>% 
+  mutate(ion_trend = RS_Xt.sm - hat_RS_N.sm) %>% 
+  filter(ion_trend > 6) %>% 
+  mutate(
+    ion_trend =
+      factor(cut_width(ion_trend, 10), labels = c("low", "medium", "high"))
+  )
 ```
   
   
@@ -189,23 +185,25 @@ A simple ggplot (`ggplot() + geom_point()`) [@ggplot2; @ggplot22016] has been us
   
 ```{r FvsChi}
 # plot F vs Chi2
-ggplot(simu_stat_eval_intra, aes(x = chi2_R_N.sm, y = F_R_Xt.sm, color = force.nm)) +
+ggplot(
+  data = simu_stat_eval_intra, 
+  mapping = aes(x = chi2_R_N.sm, y = F_R_Xt.sm, color = force.nm)) +
   geom_point() +
   facet_grid(cols = vars(type.nm), rows = vars(ion_trend)) +
   scale_color_distiller(
     expression("isotope variation in substrate ("* Delta[B - A] *" \u2030 )"),
     palette = "YlOrRd"
-    ) +
+  ) +
   scale_y_continuous(
     expression(F["(2),(n-3)"]),
     expand = c(0, 0),
     breaks = scales::pretty_breaks(4),
-    ) +
+  ) +
   scale_x_continuous(
     expression(chi^2),
     expand = c(0, 0),
     breaks = scales::pretty_breaks(4),
-    ) +
+  ) +
   ggtitle("Precision vs. accuracy") +
   themes_IC(base = ggplot2::theme_bw()) 
 

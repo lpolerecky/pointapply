@@ -1,5 +1,13 @@
 test_that("consistency of plotting", {
-  skip_if_not(exists("loaded", "package:pointapply"), "Skip test if not in development mode.")
+
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
+
   # grid-cell sizes
   grid_cell <- sapply(2:7, function(x) 2 ^ x)
   # names of the analytes in the paper
@@ -7,7 +15,10 @@ test_that("consistency of plotting", {
   # load
   name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE)
   # data frame aggregated over depth
-  tb <- purrr::map_dfr(rlang::syms(name), ~purrr::pluck(eval(.x), "depth"))
+  tb <- purrr::map_dfr(
+    rlang::syms(name),
+    ~dplyr::filter(eval(.x), .data$dim_name.nm == "depth")
+    )
 
   # calc QQ
   tb_QQ <- point::diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm,
@@ -24,7 +35,8 @@ test_that("consistency of plotting", {
     grid_size.nm,
     1,
     c(-4, 4),
-    c(-4, 4)
+    c(-4, 4),
+    unit = "um"
   )
   # ggplot plotting
   expect_true(ggplot2::is.ggplot(QQ_dens))

@@ -52,7 +52,9 @@ Suggests:
     diffviewer,
     gridExtra,
     nortest,
-    stats
+    stats,
+    bibtex,
+    broom.mixed
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)

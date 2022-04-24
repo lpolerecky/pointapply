@@ -4,6 +4,4 @@
 ^\.Rproj\.user$
 data-raw
 ^README\.Rmd$
-^packages\.bib$
-^rversion\.bib$
 ^LICENSE\.md$

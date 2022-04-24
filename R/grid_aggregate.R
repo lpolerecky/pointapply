@@ -58,8 +58,8 @@ grid_aggregate <- function(IC, plane, grid_cell = NULL, select_cell = NULL,
   # species names
   if (is.null(species)) all_species <- names(IC) else all_species <- species
 
-  # grid surface
-  gridd <- ifelse(is.null(grid_cell), scalar ^ 2, grid_cell * scalar  ^ 2)
+  # grid surface size
+  gridd <- ifelse(is.null(grid_cell), scalar ^ 2, (grid_cell * scalar)  ^ 2)
 
   # function name of inner function
   fun_nm <- rlang::as_name(match.call()[[1]])

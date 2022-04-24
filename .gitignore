@@ -20,5 +20,5 @@ inst/paper/preprint/templates
 
 inst/doc
 
-# derived files
-/**/*.svg
+# derived files (comparing vdiffr images)
+tests/**/*.svg

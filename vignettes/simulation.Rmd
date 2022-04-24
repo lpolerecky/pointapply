@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   eval = FALSE
-  )
+)
 ```
 
 
@@ -43,14 +43,18 @@ The first simulation is designed to assess the sensitivity of the intra-analysis
 
 
 ```{r estimates}
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
 # stable ionization efficiency
 stable_ion <- point::simu_R(0, "ideal", "13C", "12C", "VPDB", 1) %>% 
-  dplyr::mutate(type.nm = "stable ionization")
+  mutate(type.nm = "stable ionization")
 # fluctuating ionization efficiency
 fluc_ion <- point::simu_R(10, "ideal", "13C", "12C", "VPDB", 1)  %>% 
-  dplyr::mutate(type.nm = "fluctuating ionization")
+  mutate(type.nm = "fluctuating ionization")
 # combine
-ion_eff <- dplyr::bind_rows(stable_ion, fluc_ion)
+ion_eff <- bind_rows(stable_ion, fluc_ion)
 # single ion stats
 tb_X <- stat_X(
   ion_eff, 
@@ -58,7 +62,7 @@ tb_X <- stat_X(
   .X = Xt.sm, 
   .N = N.sm, 
   .stat = c("M", "S", "hat_S")
-  )
+)
 
 # stat ranges
 mean_y <- filter(tb_X, species.nm == "13C")$M_Xt.sm %>% mean
@@ -80,8 +84,8 @@ gg_dens(
   ttl = "Excess ionization",
   y_lim = y_range,
   gr = type.nm 
-  ) +
-  ggplot2::geom_smooth(
+) +
+  geom_smooth(
     method = "lm", 
     formula = y ~ x - 1, 
     color = "black", 
@@ -89,31 +93,31 @@ gg_dens(
     linetype = 2,
     size = 0.5,
     fullrange = TRUE
-    ) +
-  ggplot2::geom_errorbarh(
+  ) +
+  geom_errorbarh(
     data = filter(tb_X, species.nm == "12C"), 
     aes(xmin = M_Xt.sm - S_Xt.sm, xmax = M_Xt.sm + S_Xt.sm, y = 180),
     height = 20, 
     inherit.aes = FALSE
-    ) +
-  ggplot2::geom_errorbarh(
+  ) +
+  geom_errorbarh(
     data = filter(tb_X, species.nm == "12C"), 
     aes(xmin = M_Xt.sm - hat_S_N.sm, xmax = M_Xt.sm + hat_S_N.sm, y = 215),
     height = 20, 
     inherit.aes = FALSE
-    ) +
-  ggrepel::geom_text_repel(
+  ) +
+  geom_text_repel(
     data = filter(tb_X, species.nm == "12C"), 
     aes(x = M_Xt.sm - S_Xt.sm, y = 180, label = "true"),
     nudge_x = -10,
     size = 3
-    ) +
-  ggrepel::geom_text_repel(
+  ) +
+  geom_text_repel(
     data = filter(tb_X, species.nm == "12C"), 
     aes(x = M_Xt.sm - hat_S_N.sm, y = 215, label = "predicted"),
     nudge_x = -10,
     size = 3
-    )
+  )
 
 # save and print
 save_point("ionization_concept", last_plot(), width = 15, height = 10, 
@@ -129,19 +133,21 @@ The isotope offset encompasses two end-member components that cause intra-analys
 
 
 ```{r label, options}
-purrr::map2_dfr(
+library(purrr)
+
+map2_dfr(
   c(4, 10),
   c(-32, 0), 
-  ~point::simu_R(60, "asymmetric", "13C", "12C", "VPDB", .seed = .x, .devR = .y)
+  ~simu_R(60, "asymmetric", "13C", "12C", "VPDB", .seed = .x, .devR = .y)
+) %>% 
+  mutate(
+    force.nm = if_else(force.nm == -32, "heterogeneity", "ideal")
   ) %>% 
-  dplyr::mutate(
-    force.nm = dplyr::if_else(force.nm == -32, "heterogeneity", "ideal")
-    ) %>% 
   diag_R("13C", "12C", force.nm, .plot = TRUE, .N = N.sm, .X = Xt.sm, 
          .plot_outlier_labs = c("organic", "carbonate")) 
 
-p <- ggplot2::last_plot() + 
-  themes_IC(base = ggplot2::theme_bw()) + 
+p <- last_plot() + 
+  themes_IC(base = theme_bw()) + 
   ggtitle("Isotopic heterogeneity")
 
 
@@ -162,6 +168,9 @@ These parameters are then crossed for all possible combination with the `tidyr` 
 
 
 ```{r paramsintra}
+library(tidyr)
+library(tibble)
+
 # repetition
 reps <- 10
 # types of R variation
@@ -174,10 +183,11 @@ var_I <- seq(0, -22, length.out = 12)
 n_tot <- prod(sapply(list(var_T, var_R, var_I), length))
 var_seed <- 1:n_tot
 # cross all possible parameter combinations
-ls_parms <- tidyr::crossing(.sys = var_T, .type = var_R, .devR = var_I) %>%
-  tibble::add_column(.seed = var_seed) %>%
-  summarise(across(.fns = list)) %>% 
-  purrr::flatten()
+ls_parms <- crossing(.sys = var_T, .type = var_R, .devR = var_I) %>%
+  add_column(.seed = var_seed) %>%
+  summarise(across(.fns = list)) 
+
+ls_parms <- unlist(ls_parms, recursive = FALSE)
 ```
 
 
@@ -190,15 +200,15 @@ Besides the isotope-offset introduced above, two scenarios (object `var_R` of th
 # ideal
 Xt2 <- c(1.1e5, 1.3e5) # common
 # start (ideal) R
-R0 <- point::calib_R(0, "VPDB", "13C", input = "delta", output = "R")
+R0 <- calib_R(0, "VPDB", "13C", input = "delta", output = "R")
 # perturbation
-R1 <- point::calib_R(-30, "VPDB", "13C", input = "delta", output = "R")
+R1 <- calib_R(-30, "VPDB", "13C", input = "delta", output = "R")
 # linear R gradient
 a.R <- ((R1 - R0) / (Xt2[2] - Xt2[1]))
 b.R <- R0 - (a.R * Xt2[1])
 # dataframe
 tb_cp <- tibble(Xt2 = Xt2[1]:Xt2[2]) %>% 
-  dplyr::mutate(
+  mutate(
     ideal = Xt2 * R0,
     symmetric = (b.R + a.R * Xt2) * Xt2,
     asymmetric = approx(
@@ -207,15 +217,15 @@ tb_cp <- tibble(Xt2 = Xt2[1]:Xt2[2]) %>%
       n = n(),
       method = "constant"
       )$y * Xt2
-    ) %>% 
-  tidyr::pivot_longer(-Xt2, values_to = "Xt1")
+  ) %>% 
+  pivot_longer(-Xt2, values_to = "Xt1")
 
 colors <- c("simulated Ri" = "black", "mean R" = "#FEB24C")
 # plot
 ggplot(tb_cp, aes(x = Xt2, y = Xt1, group = name, color = "simulated Ri")) +
   geom_line() +
   facet_grid(cols = vars(name)) + 
-  ggplot2::geom_smooth(
+  geom_smooth(
     aes(color = "mean R", weight = 1 / Xt2), 
     method = "lm", 
     formula = y~x - 1
@@ -238,10 +248,10 @@ ggplot(tb_cp, aes(x = Xt2, y = Xt1, group = name, color = "simulated Ri")) +
     labels = c(expression(bar(R)), expression(R[i]))
     ) +
   ggtitle("Scenarios for intra-analysis isotope variability") +
-  themes_IC(base = ggplot2::theme_bw())
+  themes_IC(base = theme_bw())
 
 # save and print
-save_point("simu_intra_concept", ggplot2::last_plot(), width = 14, height = 7, 
+save_point("simu_intra_concept", last_plot(), width = 14, height = 7,
            unit = "cm")
 ```
 
@@ -257,9 +267,8 @@ The function `simu_R()` of the `point` [@point] package is especially designed t
 
 
 ```{r execintra}
-simu_sens_IC_intra <- purrr::pmap_dfr(ls_parms, point::simu_R, .reps = reps, 
-                                      .ion1 = "13C", .ion2 = "12C", 
-                                      .reference = "VPDB")
+simu_sens_IC_intra <- pmap_dfr(ls_parms, simu_R, .reps = reps, .ion1 = "13C", 
+                               .ion2 = "12C", .reference = "VPDB")
 ```
 
 
@@ -268,8 +277,8 @@ simu_sens_IC_intra <- purrr::pmap_dfr(ls_parms, point::simu_R, .reps = reps,
 The function `write_point()` is included in this package and saves the generated data in the appropriate directory (`data` directory of the package).
 
 
-```{r saveintra, options}
-write_point("simu_sens_IC_intra")
+```{r saveintra}
+write_point(simu_sens_IC_intra)
 ```
 
 
@@ -301,9 +310,10 @@ The Cook's D method is the default method of `diag_R()`, and is therefore simple
 
 ```{r CD}
 # diagnostics
-simu_CD_eval_intra <- point::diag_R(simu_sens_IC_intra, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
+simu_CD_eval_intra <- diag_R(simu_sens_IC_intra, "13C", "12C", !!!grps, 
+                             .X = Xt.sm, .N = N.sm)
 # export
-write_point("simu_CD_eval_intra")
+write_point(simu_CD_eval_intra)
 ```
 
 
@@ -314,15 +324,14 @@ The $\sigma_R$-rejection method requires the `.method` to be set to `"Cameca"`. 
 
 ```{r CM}
 # diagnostics
-tb_dia <- point::diag_R(simu_sens_IC_intra , "13C", "12C", !!! grps, bl.nm, 
-                        .X = Xt.sm, .N = N.sm, .method = "Cameca", 
-                        .output = "diagnostic")
+tb_dia <- diag_R(simu_sens_IC_intra , "13C", "12C", !!! grps, bl.nm, .X = Xt.sm, 
+                 .N = N.sm, .method = "Cameca", .output = "diagnostic")
 # evaluation of performance (intra-analysis isotope test)
-CM_eval <- point::eval_diag(tb_dia, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
+CM_eval <- eval_diag(tb_dia, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
 # extract distinct groups omitting block-wise means
-simu_CM_eval_intra <- dplyr::distinct(CM_eval, !!!grps, .keep_all = TRUE)
+simu_CM_eval_intra <- distinct(CM_eval, !!!grps, .keep_all = TRUE)
 # export
-write_point("simu_CM_eval_intra")
+write_point(simu_CM_eval_intra)
 ```
 
 
@@ -349,8 +358,9 @@ var_seed <- 1:n_tot
 # cross all possible parameter combinations
 ls_parms <- tidyr::crossing(.sys = var_T, .baseR = var_B) %>%
   tibble::add_column(.seed = var_seed) %>%
-  summarise(across(.fns = list)) %>% 
-  purrr::flatten()
+  summarise(across(.fns = list)) 
+
+ls_parms <- unlist(ls_parms, recursive = FALSE)
 ```
 
 
@@ -361,9 +371,9 @@ Execution of the simulation (`simu_R()`) for inter-analysis isotope data follows
 
 ```{r execinter}
 # execute
-simu_sens_IC_inter <- purrr::pmap_dfr(ls_parms,  point::simu_R, .type = "ideal", 
-                                      .reps = reps, .ion1 = "13C",
-                                      .ion2 = "12C", .reference = "VPDB")
+simu_sens_IC_inter <- pmap_dfr(ls_parms,  point::simu_R, .type = "ideal", 
+                               .reps = reps, .ion1 = "13C", .ion2 = "12C", 
+                               .reference = "VPDB")
 ```
 
 
