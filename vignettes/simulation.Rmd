@@ -127,6 +127,7 @@ save_point("ionization_concept", last_plot(), width = 15, height = 10,
 ```{r echo=FALSE, eval=TRUE, fig.cap="Conceptual sketches for ionization efficiency.", out.width="70%"}
 knitr::include_graphics("figures/ionization_concept.png")   
 ```
+
 In the above representation, the label "predicted" and "true" refer to a band of two times the predicted and descriptive standard deviation of $X^a$ around the mean, respectively. The difference in those two error bars during fluctuating ionization is referred to in the paper as "excess ionization".
 
 The isotope offset encompasses two end-member components that cause intra-analysis isotope variability in the analysis, and this is one of the foremost targets in this study. Hence, a range of 22.0‰ is chosen to mimic the divergent isotope composition of carbonate and organic carbon inclusion hosted in a predominant carbonate matrix as a realistic scenario for a SIMS isotope analyses. Whereas, the range in ionization efficiency is varied from 0 to 120%, or 0 to 34% excess ionization. To exemplify this, the following figure shows a scenario of an organic component with a $\delta$^13^C of 32.0‰ in a predominant carbonate matrix with a $\delta$^13^C of 0‰.
@@ -139,10 +140,10 @@ map2_dfr(
   c(4, 10),
   c(-32, 0), 
   ~simu_R(60, "asymmetric", "13C", "12C", "VPDB", .seed = .x, .devR = .y)
-) %>% 
+) |> 
   mutate(
     force.nm = if_else(force.nm == -32, "heterogeneity", "ideal")
-  ) %>% 
+  ) |>  
   diag_R("13C", "12C", force.nm, .plot = TRUE, .N = N.sm, .X = Xt.sm, 
          .plot_outlier_labs = c("organic", "carbonate")) 
 
@@ -164,36 +165,20 @@ knitr::include_graphics("figures/hetero_concept.png")
 
 ## Parameters
 
-These parameters are then crossed for all possible combination with the `tidyr` [@tidyr] function `crossing()`. In addition, a 10 times repetition is included with a specified seed for each of the repetitions to ensure that the study is reproducible. 
+The excess ionization and the isotopic offset are then crossed for all possible combination with the `tidyr` [@tidyr] function `crossing()`. In addition, a 10 times repetition is included with a specified seed for each of the repetitions to ensure that the study is reproducible. 
 
 
 ```{r paramsintra}
-library(tidyr)
-library(tibble)
-
-# repetition
-reps <- 10
-# types of R variation
-var_R <- c("symmetric", "asymmetric")
 # varying linear trends in the ionization efficiency (percent common isotope)
 var_T <- seq(0, 120, length.out = 12)
 # varying isotope offset (delta per mille)
 var_I <- seq(0, -22, length.out = 12)
-# seeds for number generation
-n_tot <- prod(sapply(list(var_T, var_R, var_I), length))
-var_seed <- 1:n_tot
-# cross all possible parameter combinations
-ls_parms <- crossing(.sys = var_T, .type = var_R, .devR = var_I) %>%
-  add_column(.seed = var_seed) %>%
-  summarise(across(.fns = list)) 
-
-ls_parms <- unlist(ls_parms, recursive = FALSE)
 ```
 
 
 ## Conceptual models of intra-analysis isotope variability
 
-Besides the isotope-offset introduced above, two scenarios (object `var_R` of the code chunk above) of intra-analysis isotope variability are tested (Supplementary Section 1.2: *Synthetic data* of the paper). The first scenario, referred to as *"asymmetric"* intra-analysis isotope variation, would approximate, for example, a situation in which the primary ion beams cuts through an organic inclusion (component A) with depth within a predominant carbonate matrix (component B), and thus both the matrix and isotopic composition deviate between components A and B. In a second scenario of *"symmetric"* intra-analysis isotope variation, a simulated gradient in the isotopic composition traverses the complete analyses.
+Besides the isotope-offset introduced above, two scenarios of intra-analysis isotope variability are tested (Supplementary Section 1.2: *Synthetic data* of the paper). The first scenario, referred to as *"asymmetric"* intra-analysis isotope variation, would approximate, for example, a situation in which the primary ion beams cuts through an organic inclusion (component A) with depth within a predominant carbonate matrix (component B), and thus both the matrix and isotopic composition deviate between components A and B. In a second scenario of *"symmetric"* intra-analysis isotope variation, a simulated gradient in the isotopic composition traverses the complete analyses.
 
 
 ```{r concept, echo=FALSE}
@@ -263,12 +248,11 @@ knitr::include_graphics("figures/simu_intra_concept.png")
 
 ## Execute intra-analysis isotope variability simulation
 
-The function `simu_R()` of the `point` [@point] package is especially designed to simulate SIMS isotope count data. Here, the arguments `.ion1`, `ion2` and `.reference` define the isotope system and reference scale used to simulate the data. Together with the previous defined ranges for the sensitivity test (object `ls_parms`) this produces the simulated dataset with intra-analysis isotope variability.
+The function `sensitivity_test` is especially designed to simulate SIMS isotope count data. Here, the arguments `.ion1 = "13C"`, `ion2  = "12C"` and `.reference = "VPDB"` define the isotope system and reference scale used to simulate the data. Together with the previous defined ranges for the sensitivity test (excess ionization and the isotopic offset) this produces the simulated data-set with intra-analysis isotope variability. The execution time of this function benefits from parallelization and the number of used workers can be set with the argument `mc_cores`.
 
 
 ```{r execintra}
-simu_sens_IC_intra <- pmap_dfr(ls_parms, simu_R, .reps = reps, .ion1 = "13C", 
-                               .ion2 = "12C", .reference = "VPDB")
+test_sensitivity(var_T, var_I, reps = 10, mc_cores = 4, save = TRUE)
 ```
 
 
@@ -276,26 +260,9 @@ simu_sens_IC_intra <- pmap_dfr(ls_parms, simu_R, .reps = reps, .ion1 = "13C",
 
 The function `write_point()` is included in this package and saves the generated data in the appropriate directory (`data` directory of the package).
 
-
-```{r saveintra}
-write_point(simu_sens_IC_intra)
-```
-
-
 # Sensitivity intra-analysis isotope variability test
 
 The functions `diag_R()` of the `point` package are the core functions for assessing intra-analysis isotope variability (as introduced in the paper). To gauge the performance of this test, the `simu_sens_IC_intra` is analysed by subsequently applying the `diag_R()`, to first detect potential outliers and then assess their significance in terms on their effect on the "ideal" linear R model (see paper). 
-
-
-## Define groups
-
-Both functions require grouping variable in order to define what constitutes a single analysis which, in turn, consists off the $n$-series of measurements, where the outlier are detected in the measurements (and thus gauge intra-analysis isotope variability).
-
-
-```{r groups}
-# groups
-grps <- rlang::quos(type.nm, trend.nm, force.nm, spot.nm)
-```
 
 
 ## Execute intra-analysis isotope variability test 
@@ -309,11 +276,9 @@ The Cook's D method is the default method of `diag_R()`, and is therefore simple
 
 
 ```{r CD}
-# diagnostics
-simu_CD_eval_intra <- diag_R(simu_sens_IC_intra, "13C", "12C", !!!grps, 
-                             .X = Xt.sm, .N = N.sm)
-# export
-write_point(simu_CD_eval_intra)
+# # diagnostics
+test_sensitivity(var_T, var_I, reps = 10, diag = "CooksD", mc_cores = 4, 
+                 save = TRUE)
 ```
 
 
@@ -324,14 +289,8 @@ The $\sigma_R$-rejection method requires the `.method` to be set to `"Cameca"`. 
 
 ```{r CM}
 # diagnostics
-tb_dia <- diag_R(simu_sens_IC_intra , "13C", "12C", !!! grps, bl.nm, .X = Xt.sm, 
-                 .N = N.sm, .method = "Cameca", .output = "diagnostic")
-# evaluation of performance (intra-analysis isotope test)
-CM_eval <- eval_diag(tb_dia, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
-# extract distinct groups omitting block-wise means
-simu_CM_eval_intra <- distinct(CM_eval, !!!grps, .keep_all = TRUE)
-# export
-write_point(simu_CM_eval_intra)
+test_sensitivity(var_T, var_I, reps = 10, diag = "Cameca", mc_cores = 4, 
+                 save = TRUE)
 ```
 
 
@@ -346,21 +305,10 @@ The same procedure, but with a somewhat different parameter-set, is used to cros
 
 
 ```{r paramsinter}
-# repetition
-reps <- 10
 # varying linear trends in the ionization efficiency (percent common isotope)
 var_T <- seq(0, 120, length.out = 12)
 # varying isotope base (delta per mille)
 var_B <- seq(0, -11, length.out = 12)
-# seeds for number generation
-n_tot <- prod(sapply(list(var_T, var_B), length))
-var_seed <- 1:n_tot
-# cross all possible parameter combinations
-ls_parms <- tidyr::crossing(.sys = var_T, .baseR = var_B) %>%
-  tibble::add_column(.seed = var_seed) %>%
-  summarise(across(.fns = list)) 
-
-ls_parms <- unlist(ls_parms, recursive = FALSE)
 ```
 
 
@@ -369,12 +317,12 @@ ls_parms <- unlist(ls_parms, recursive = FALSE)
 Execution of the simulation (`simu_R()`) for inter-analysis isotope data follows the same procedure as previously outlined for the intra-analysis isotope data simulation. The largest difference is that the parameter `.type` is now fixed to `"ideal`, referring to the ideal linear R model (i.e. the absence of intra-analysis isotope variability).
 
 
-```{r execinter}
-# execute
-simu_sens_IC_inter <- pmap_dfr(ls_parms,  point::simu_R, .type = "ideal", 
-                               .reps = reps, .ion1 = "13C", .ion2 = "12C", 
-                               .reference = "VPDB")
-```
+<!-- ```{r execinter} -->
+<!-- # execute -->
+<!-- simu_sens_IC_inter <- pmap_dfr(ls_parms,  point::simu_R, .type = "ideal",  -->
+<!--                                .reps = reps, .ion1 = "13C", .ion2 = "12C",  -->
+<!--                                .reference = "VPDB") -->
+<!-- ``` -->
 
 
 ## Post-simulation processing
@@ -385,33 +333,36 @@ Two wrapper functions perform this randomization in one call with `purrr::map()`
 
 
 ```{r mixing}
-# isotope anomaly mixer
-mix_R <- function(simu, filter_vec, seed, reps) {
-  set.seed(seed)
-  spot_samp <- sample.int(reps, size = 1)
-  base <- filter(simu, base.nm == 0, spot.nm != spot_samp)
-  anomaly <- filter(simu, base.nm == filter_vec, spot.nm == spot_samp)
-  bind_rows(base, anomaly) %>%
-    mutate(anomaly.nm = filter_vec, .before = base.nm)
- }
+test_sensitivity(var_T, var_B, reps = 10, mc_cores = 4, type = "inter", 
+                 save = TRUE)
 
-# mixer wrapper
-inter_run <- function(vct, n, file_name, reps) {
-  simu <- map_dfr(vct, mix_R, simu = simu_sens_IC_inter, seed = n, reps = reps, 
-                  .id = "study.nm")
-  name <- paste(file_name, n, sep = "_")
-  assign(name, simu)
-  name %T>% 
-    rlang::exec("write_point", .) %>% 
-    rlang::sym() %>% 
-    eval()
-}
-
-# rerun introduction of anomalous R and save to file
-ls_inter <- map(
-  1:10, 
-  ~inter_run(vct = var_B, n = .x, file_name = "simu_sens_IC_inter", reps = reps)
-)
+# # isotope anomaly mixer
+# mix_R <- function(simu, filter_vec, seed, reps) {
+#   set.seed(seed)
+#   spot_samp <- sample.int(reps, size = 1)
+#   base <- filter(simu, base.nm == 0, spot.nm != spot_samp)
+#   anomaly <- filter(simu, base.nm == filter_vec, spot.nm == spot_samp)
+#   bind_rows(base, anomaly) %>%
+#     mutate(anomaly.nm = filter_vec, .before = base.nm)
+# }
+# 
+# # mixer wrapper
+# inter_run <- function(vct, n, file_name, reps) {
+#   simu <- map_dfr(vct, mix_R, simu = simu_sens_IC_inter, seed = n, reps = reps, 
+#                   .id = "study.nm")
+#   name <- paste(file_name, n, sep = "_")
+#   assign(name, simu)
+#   name %T>% 
+#     rlang::exec("write_point", .) %>% 
+#     rlang::sym() %>% 
+#     eval()
+# }
+# 
+# # rerun introduction of anomalous R and save to file
+# ls_inter <- map(
+#   1:10, 
+#   ~inter_run(vct = var_B, n = .x, file_name = "simu_sens_IC_inter", reps = reps)
+# )
 ```
 
 
@@ -443,19 +394,23 @@ Also, the execution over the has been packed in a wrapper function that can be a
 
 
 ```{r inter}
-# diagnose, evaluate and write
-inter_wrap <- function(simu, n, grps, file_name){
-  tb_dia <- diag_R(simu, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
-  name <- paste(file_name, n, sep = "_")
-  assign(name, tb_dia)
-  exec("write_point", name)
-}
+test_sensitivity(var_T, var_B, reps = 10, mc_cores = 4, type = "inter", 
+                 diag = "nlme", save = TRUE)
 
-# execute
-purrr::iwalk(
-  ls_inter, 
-  ~inter_wrap(.x, .y, grps = grps, file_name = "simu_eval_inter")
-)
+
+# # diagnose, evaluate and write
+# inter_wrap <- function(simu, n, grps, file_name){
+#   tb_dia <- diag_R(simu, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
+#   name <- paste(file_name, n, sep = "_")
+#   assign(name, tb_dia)
+#   exec("write_point", name)
+# }
+# 
+# # execute
+# purrr::iwalk(
+#   ls_inter, 
+#   ~inter_wrap(.x, .y, grps = grps, file_name = "simu_eval_inter")
+# )
 ```
 
 

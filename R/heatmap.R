@@ -1,78 +1,146 @@
-#' Heatmaps and summary plots for model performance.
+#' Heatmaps and summary plots for model performance
 #'
 #' \code{heat_map} generates a heatmap for model accuracy evaluation along
 #' two continuous variables and up to two categorical values. Instead
 #' \code{heat_sum} summarise the heatmap over opne of the two continuous and
 #' crossed variables.
 #'
-#' @param simu Ion count data.
+#' @param simu Performance for test statistics on intra-analysis isotope
+#'  variability ("intra") or inter-analysis isotope variability ("inter").
 #' @param x Variable (continuous variable number one) isotope offset in paper.
 #' @param y Variable (continuous variable number two) excess ionization
-#' efficiency in paper.
+#'  efficiency in paper.
 #' @param stat Numeric for the model accuracy (between 0 and 1).
 #' @param grp1 Nominal factorial number one; outlier detection method in paper.
 #' @param grp2 Nominal factorial number one; for intra-isotope variability in
-#' paper.
+#'  paper.
 #' @param conversion Named vector for the conversion of the ionization trend to
-#' excess ionization efficiency.
+#'  excess ionization efficiency.
 #' @param ttl Character string or expression for the plot title.
 #' @param x_lab Character string or expression for the x-axis label.
 #' @param y_lab Character string or expression for the y-axis label.
 #' @param x_sec Character string or expression for the secondary x-axis label.
 #' @param trans_base Isotope value for the scale transformation for fractional
-#' size of the isotope anomaly.
+#'  size of the isotope anomaly.
 #' @param trans_n Initial sample size for the scale transformation for
-#' fractional size of the isotope anomaly.
+#'  fractional size of the isotope anomaly.
+#' @param save Save the produced plot.
 #'
 #' @return \code{\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
 heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
-                     y_lab, x_sec = NULL, trans_base = -2, trans_n = 10){
+                     y_lab, x_sec = NULL, trans_base = -2, trans_n = 10,
+                     save = FALSE) {
 
+  if (simu == "intra") {
+    # load simulated data (intra-analysis isotope variability)
+    sens <- load_point("simu", "sens_IC_intra", NULL, return_name = TRUE) |>
+      rlang::sym()
+    # load test statistics (intra-analysis isotope variability)
+    CD <- load_point("simu", "CooksD_IC_intra", NULL, return_name = TRUE) |>
+      rlang::sym()
+    CM <- load_point("simu", "Cameca_IC_intra", NULL, return_name = TRUE) |>
+      rlang::sym()
+
+    # bind the two diagnostic treatments of simulated ion (Cameca and Cooks D)
+    IC  <- rlang::inject(list(!!CM, !!CD)) |>
+      rlang::set_names(nm = c("Cameca", "CooksD")) |>
+      dplyr::bind_rows(.id = "stat.nm")
+
+    # calculate accuracy of model classification
+    IC <- dplyr::group_by(IC, .data$stat.nm, .data$type.nm, .data$trend.nm,
+                          .data$force.nm) %>%
+      dplyr::summarise(
+        accuracy =
+          acc_fun(unique(.data$force.nm), .data$p_R_Xt.sm, ntot = dplyr::n()),
+        .groups = "drop"
+      )
+
+    # statistics on the single common isotope
+    X <- point::stat_X(
+      eval(sens),
+      .data$trend.nm,
+      .N = N.sm,
+      .X = Xt.sm,
+      .stat = c("RS", "hat_RS")
+    ) |>
+      filter(.data$species.nm == "12C")
+
+    # named vector for secondary axis
+    conversion <- set_names(
+      X$trend.nm,
+      nm = sprintf("%.0f", X$RS_Xt.sm - X$hat_RS_N.sm)
+    )
+
+    # rename methods, make nice labels
+    IC <- mutate(
+      IC,
+      stat.nm =
+        factor(
+          stat.nm,
+          levels = c("Cameca", "Cook's D"),
+          labels = c(sigma[R]~"rejection", "Cook~s~D")
+        )
+    )
+  }
+
+  # grouping
   grp1 <- enquo(grp1)
   grp2 <- enquo(grp2)
 
   # create rectangle annotation
-  rcts <- rect_fun(xaxis = pull(simu, {{x}}), yaxis = pull(simu, {{y}}))
+  rcts <- rect_fun(
+    xaxis = dplyr::pull(IC, {{x}}),
+    yaxis = dplyr::pull(IC, {{y}})
+  )
 
   # transformation of secondary axis
   if (!is.null(x_sec)) {
+
     tr <- rayleigh_trans(trans_base, trans_n)
     second_axis <- ggplot2::sec_axis(
       trans = ~tr$transform(.) * -1 ,
       name = x_sec,
       breaks = scales::pretty_breaks(3)
-      )
-    } else {
-      second_axis <- ggplot2::waiver()
-      }
+    )
+
+  } else {
+
+    second_axis <- ggplot2::waiver()
+
+  }
 
   # plot
-  p <- ggplot(simu, aes(x = {{ x }}, y = {{ y }}, fill = {{ stat }})) +
-    geom_tile()
+  p <- ggplot2::ggplot(
+    data = IC,
+    mapping = ggplot2::aes(x = {{ x }}, y = {{ y }}, fill = {{ stat }})
+  ) +
+    ggplot2::geom_tile()
 
   # facets
   if (!all(purrr::map_lgl(list(grp1, grp2), ~is.null(rlang::get_expr(.x))))) {
-    p <- p + facet_grid(
+    p <- p + ggplot2::facet_grid(
       rows = vars(!! grp1),
       cols = vars(!! grp2),
       labeller = ggplot2::label_parsed
-      )
-    }
+    )
+  }
 
-  p + scale_x_continuous(
+  p <- p + ggplot2::scale_x_continuous(
       labels = scales::label_number(),
       expand = c(0, 0),
       # secondary x axis
       sec.axis = second_axis
-      ) +
-    scale_y_continuous(
+    ) +
+    ggplot2::scale_y_continuous(
       breaks = unname(conversion),
       labels = names(conversion),
       expand = c(0, 0)
       ) +
-    scale_fill_distiller("classification \n accuracy", palette = "YlOrRd") +
+    ggplot2::scale_fill_distiller(
+      "classification \n accuracy", palette = "YlOrRd"
+    ) +
     ggplot2::coord_fixed(ratio = rcts$r_cell[1]) +
     ggplot2::geom_rect(
       data = rcts,
@@ -85,20 +153,32 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
         ),
       fill = "transparent",
       inherit.aes = FALSE
-      ) +
+    ) +
     ggplot2::scale_size(range = c(0.5, 1.5)) +
     ggplot2::scale_color_identity() +
     ggrepel::geom_text_repel(
       data = rcts,
-      aes(x = .data$x, y = .data$y, label = .data$lbl),
+      mapping = ggplot2::aes(x = .data$x, y = .data$y, label = .data$lbl),
       inherit.aes = FALSE,
       size = 3,
       min.segment.length = 1e-3,
       nudge_x = -7,
       nudge_y = 25
-      ) +
-    labs(title = ttl, x = x_lab, y = y_lab) +
+    ) +
+    ggplot2::labs(title = ttl, x = x_lab, y = y_lab) +
     themes_IC(base = ggplot2::theme_bw())
+
+  if (isTRUE(save)) {
+    # save
+    save_point("heat_sens_intra", p, width = 16, height = 14, unit = "cm")
+
+    message(
+      paste0("The performance of the intra-analysis isotope variability test is",
+      " saved with name: 'heat_sens_intra'.")
+    )
+  }
+  # and return
+  p
 }
 
 #-------------------------------------------------------------------------------
@@ -176,3 +256,9 @@ rayleigh_trans <- function(base, frac){
     )
 
 }
+
+acc_fun <- function(x, y, ntot) {
+  if(x != 0) return(sum(y < 0.001) / ntot)
+  if(x == 0) return(1 - (sum(y < 0.001) / ntot))
+}
+
