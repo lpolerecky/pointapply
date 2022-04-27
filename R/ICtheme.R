@@ -1,3 +1,10 @@
+#' Theming for pointapply plots
+#'
+#' @param base Default theme.
+#' @param ... Currently not supported.
+#'
+#' @return Ggplot2 theme.
+#' @export
 themes_IC <- function(base = ggplot2::theme_classic(), ...) {
   `%+replace%` <- ggplot2::`%+replace%`
   base %+replace%

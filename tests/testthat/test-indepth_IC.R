@@ -3,17 +3,24 @@
 #-------------------------------------------------------------------------------
 
 test_that("plot in depth analysis", {
-  skip_if_not(exists("loaded", "package:pointapply"), "Skip test if not in development mode.")
-  # load ion maps
-  load_point("map_raster_image", "MEX", NULL, return_name = FALSE)
-  # full grid-cell datasets for in-depth analysis
-  load_point("map_full_grid", "MEX", 64, return_name = FALSE)
-  # execute
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
+
   p <- gg_point(
-    IC = map_full_grid_64_MEX$map_full_grid_64_2_MEX, # full dataset
-    image = map_raster_image_MEX$depth, # raster image
-    ion1_thr = "12C", ion2_thr = "40Ca16O", thr = 20, # ion ratio for filtering
-    ion1_R = "13C", ion2_R = "12C" # isotope ratio
+    title = "MEX",
+    grid_cell = 2,
+    # ion ratio for filtering
+    ion1_thr = "12C14N",
+    ion2_thr = "12C",
+    thr = 0.75,
+    # isotope ratio
+    ion1_R = "13C",
+    ion2_R = "12C"
   )
   # snapshot
   expect_true(ggplot2::is.ggplot(p))

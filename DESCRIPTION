@@ -10,11 +10,15 @@ Authors@R:
            role = "cre", 
            comment = c(ORCID = "0000-0001-8560-0037"))
 Maintainer: Martin Schobben <schobbenmartin@gmail.com>
-Description: This package accompanies the paper: New methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry, by Martin Schobben, Michiel Kienhuis, and Lubos Polerecky. This paper revolves around the point function diag_R() which allows an assessment of isotopic heterogeneity in SIMS analyses. The package ensures the complete reproduction of this work.
+Description: This package accompanies the paper: New methods to detect isotopic 
+  heterogeneity with Secondary Ion Mass Spectrometry, by Martin Schobben, 
+  Michiel Kienhuis, and Lubos Polerecky. This paper revolves around the point 
+  function diag_R() which allows an assessment of isotopic heterogeneity in SIMS 
+  analyses. The package ensures the complete reproduction of this work.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports: 
     purrr (>= 0.3.4),
     magrittr (>= 2.0.1),
@@ -39,14 +43,21 @@ Suggests:
     grid,
     tidyr,
     tibble,
-    cubelyr,
     R.matlab,
     tidyselect,
     usethis,
     testthat (>= 3.0.0),
-    vdiffr
+    vdiffr,
+    diffviewer,
+    gridExtra,
+    nortest,
+    stats,
+    bibtex,
+    broom.mixed
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
-Remotes: MartinSchobben/point
 Config/testthat/edition: 3
+LinkingTo: 
+    cpp11
+SystemRequirements: C++11

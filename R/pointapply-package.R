@@ -7,7 +7,11 @@
 #' @importFrom stats qt
 #' @importFrom utils data unzip
 #'
+# usethis namespace: start
+#' @useDynLib pointapply, .registration = TRUE
+# usethis namespace: end
 #'
 #' @docType package
 #' @name pointapply
 NULL
+

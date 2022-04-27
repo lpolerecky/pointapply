@@ -2,27 +2,28 @@
 % Please edit documentation in R/indepth_IC.R
 \name{gg_point}
 \alias{gg_point}
-\title{In-depth analysis of one grid_cell}
+\title{In-depth analysis of IC data cubes}
 \usage{
 gg_point(
-  IC,
-  image,
+  title,
+  grid_cell,
   ion1_thr,
   ion2_thr,
   thr,
   ion1_R,
   ion2_R,
   colors = c("#8E063B", "#023FA5"),
-  .X = Xt.pr,
-  .N = N.pr,
-  .species = species.nm,
-  .t = t.nm
+  save = FALSE,
+  .X = NULL,
+  .N = NULL,
+  .species = NULL,
+  .t = NULL
 )
 }
 \arguments{
-\item{IC}{Ion count data.}
+\item{title}{Character string for the analyte ("MEX" or "MON") to be used.}
 
-\item{image}{Data frame for ion raster map.}
+\item{grid_cell}{Selected grid cell.}
 
 \item{ion1_thr}{Character string for ion in the enumerator of ion ratio of
 the map.}
@@ -39,18 +40,20 @@ the map.}
 \item{colors}{Colour palette to identify matrix and inclusion (default =
 \code{ c("#8E063B", "#023FA5")}).}
 
-\item{.X}{Variable for ion count rates (default = Xt.pr).}
+\item{save}{Boolean whether to save the plot as an png.}
 
-\item{.N}{Variable for ion counts (default = N.pr).}
+\item{.X}{Variable for ion count rates (default = NULL).}
 
-\item{.species}{Variable for species names (default = species.nm).}
+\item{.N}{Variable for ion counts (default = NULL).}
 
-\item{.t}{Variable for time increment (default = t.nm).}
+\item{.species}{Variable for species names (default = NULL).}
+
+\item{.t}{Variable for time increment (default = NULL).}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 }
 \description{
-\code{gg_effect} This plot function is used to produce the scatter plots of
+\code{gg_point} This plot function is used to produce the scatter plots of
 Figure 8 and Supplementary Figure 9.
 }

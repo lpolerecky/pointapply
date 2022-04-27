@@ -1,32 +1,32 @@
 #' Download, write and plot ion count data
 #'
 #' \code{download_point()} is a wrapper around zen4R in order to download the
-#' large matlab files as well as processed data cubes and simulated data.
+#'  large matlab files as well as processed data cubes and simulated data.
 #' \code{write_point()} stores processed  matlab files in the correct directory.
 #' \code{save_point()} stores ggplots in the correct directory for usage in the
-#' paper.
+#'  paper.
 #' \code{load_point()} load .rda files of the package.
 #'
 #' @param obj Character string of object to store.
 #' @param ggplot ggplot object to be stored.
 #' @param name Character string for graphic based on ggplot or file to be
-#' loaded.
+#'  loaded.
 #' @param width Numeric value for width of graphic based on ggplot.
 #' @param height Numeric value for height of graphic based on ggplot.
 #' @param unit Character string indicating dimension units for graphic based
-#' on ggplot.
+#'  on ggplot.
 #' @param output_dir Character string for directory containing the rendered
-#' document.
+#'  document.
 #' @param type Character string for type of file to be loaded.
 #' @param grid_cell Numeric value of grid_cell size in pixels.
 #' @param return_name Logical whether to return file names.
 #' @param type_ms Character string for type manuscript, either \code{"preprint"}
-#' or \code{"paper"}.
+#'  or \code{"paper"}.
 #'
 #' @return Raw matlab files are stored in the directories
-#' `extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
-#' processed data is stored in the directory `data`. Figures are stored in the
-#' directory `paper/2020-08-20-GLENDON`
+#'  `extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
+#'  processed data is stored in the directory `data`. Figures are stored in the
+#'  directory `paper/2020-08-20-GLENDON`
 #'
 #' @export
 download_point <- function (type = "all") {
@@ -53,65 +53,77 @@ download_point <- function (type = "all") {
     pointdata <- zen4R::download_zenodo(
       "10.5281/zenodo.4748667",
       path = path_ext
-      )
+    )
   }
 
   if (type == "all" | type == "raw") {
     # extract matlab
     ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
-    purrr::walk(
-      ls_mat,
-      ~utils::unzip(.x, exdir = fs::path_ext_remove(.x), junkpaths = TRUE)
-      )
-    }
+  }
 
   if (type == "all" | type == "processed") {
     # extract data (.rda format)
     ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
     utils::unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
-    }
+  }
 }
 #' @rdname download_point
 #'
 #' @export
-write_point <- function (obj) {
+write_point <- function (obj, name = NULL) {
+
   # if loaded exists then it is in development mode
   if (exists("loaded", "package:pointapply")) {
-    data_dir <- "extdata"
+    path <- fs::path_package("pointapply", "extdata", "data")
   } else {
-    data_dir <- NULL
+    path <- fs::path_package("pointapply", "data")
   }
-  path <- fs::path_package("pointapply", data_dir, "data",  obj, ext = "rda")
-  envir <- parent.frame()
-  args <- rlang::list2(
-    obj,
-    file = path,
-    envir = envir,
-    compress = "xz",
-    version = 2
-    )
-  rlang::exec("save", !!! args)
+
+  # if name is NULL susbstitue `obj` name
+  if (is.null(name)) name <- deparse(substitute(obj))
+
+  # path for saving file
+  fpath <- fs::path(path, name, ext =  "rda")
+
+  # assign name to dataframe
+  assign(name, obj)
+  rlang::inject(
+    save(!!rlang::sym(name), file = fpath, compress = "xz", version = 2)
+  )
 }
 #' @rdname download_point
 #'
 #' @export
 save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
-                        unit, type_ms = "preprint", output_dir = fs::path_wd()) {
+                        unit, type_ms = "preprint",
+                        output_dir = NULL) {
 
+  # default to paper directory
+  if (is.null(output_dir)) {
+    output_dir <- fs::path_package("pointapply", "paper", type_ms)
+  }
+
+  # check for dir figures (otherwise make one)
+  if (!fs::dir_exists(fs::path(output_dir, "figures"))) {
+    fs::dir_create(fs::path(output_dir, "figures"))
+  }
+
+  # save figure
   args <- rlang::list2(
     filename = fs::path(output_dir, "figures", name, ext = "png"),
     plot = ggplot,
     width = width,
     height = height,
     unit = unit
-    )
+  )
   rlang::exec("ggsave", !!! args)
+
   # if loaded exists then it is in development mode
   if (exists("loaded", "package:pointapply")) {
     # copy whole dir to paper
     fs::dir_copy(
-      fs::path_package("pointapply", "vignettes", "figures"),
       fs::path_package("pointapply", "paper", type_ms, "figures"),
+      fs::path_package("pointapply", "vignettes", "figures"),
       overwrite = TRUE
     )
   }
@@ -119,7 +131,8 @@ save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
 #' @rdname download_point
 #'
 #' @export
-load_point <- function(type, name, grid_cell, return_name = FALSE){
+load_point <- function(type, name, grid_cell = NULL, return_name = FALSE) {
+  # combine type of analysis, name of file and grid_cell size
   name <- tidyr::crossing(grid_cell, name) %>%
     dplyr::rowwise() %>%
     dplyr::transmute(
@@ -132,13 +145,37 @@ load_point <- function(type, name, grid_cell, return_name = FALSE){
       ) %>%
     dplyr::pull(name)
   # if loaded exists then it is in development mode
+  error_msg <- paste0(". Check the supplied type, name and/or",
+  " grid_cell, or see the pointapply vignette 'data' for more",
+  " information on how to generate the data.")
   if (exists("loaded", "package:pointapply")) {
-    fs::path(fs::path_package("pointapply"), "extdata", "data", name, ext = "rda") %>%
-      purrr::walk(load, envir = .GlobalEnv)
-    } else {
-    data(list = name, envir = environment())
-    }
-  if (return_name) return(name)
+    # make sure that file exists
+    tryCatch(
+      {
+        pkg <- fs::path_package("pointapply", "extdata", "data")
+        fs::path(pkg, name, ext = "rda") |>
+          purrr::walk(load, envir = rlang::caller_env())
+      },
+      error = function(c) {
+        c$message <- paste0(c$message, error_msg)
+        stop(c)
+      }
+    )
+
+  } else {
+    # make sure that file exists
+    tryCatch(
+      {
+        data(list = name, envir = rlang::caller_env())
+      },
+      warning = function(c) {
+        c$message <- paste0(c$message, error_msg)
+        warning(c)
+      }
+    )
+  }
+  # return name if required
+  if (isTRUE(return_name)) return(name)
 }
 
 # some pointer to check whether load_all is used

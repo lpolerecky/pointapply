@@ -1,6 +1,6 @@
 ---
 output: github_document
-bibliography: ["rversion.bib", "packages.bib"]
+bibliography: ["vignettes/packages.bib"]
 biblio-style: apalike
 ---
 
@@ -9,7 +9,6 @@ biblio-style: apalike
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  # fig.path = "man/figures/README-",
   out.width = "100%"
 )
 ```
@@ -19,45 +18,49 @@ knitr::opts_chunk$set(
 # Required packages
 pkgs <- c(
 # tidy data manipulation    
-    "purrr", "dplyr", "tibble", "tidyr", "stringr", "cubelyr", "magrittr", 
+    "purrr", "dplyr", "tibble", "tidyr", "stringr", "magrittr", 
 # plots
     "ggplot2", "scales", "ggrepel", "RColorBrewer",
-# tidyverse
-    "tidyverse",
 # package dev
     "devtools", "roxygen2", "rlang", "fs", "testthat", "vdiffr",
 # documentation and paper
-    "knitr", "rmarkdown", "bookdown", "rticles", "kableExtra", "Cairo", "bibtex",
+    "knitr", "rmarkdown", "bookdown", "rticles", "kableExtra", "bibtex",
 # reading and downloading data
-    "R.matlab", "zen4R",
+    "readmat", "R.matlab", "zen4R",
 # statistics
-    "point", "MASS"
-    )
-knitr::write_bib(pkgs, "packages.bib", prefix = "")
-# copy bib to vignettes
-fs::file_copy(
-  fs::path("packages.bib"), 
-  fs::path("vignettes/packages.bib"), 
-  overwrite = TRUE
-  )
+    "point", "MASS", "nortest"
+)
+knitr::write_bib(pkgs, fs::path("vignettes", "packages.bib"), prefix = "")
 fs::file_copy(
   fs::path("inst/paper/preprint/SIMS_method.bib"), 
-  fs::path("vignettes/SIMS_method.bib"), 
+  fs::path("vignettes", "SIMS_method.bib"), 
   overwrite = TRUE
-  )
+)
+hadley <- bibentry(
+  key = "Wickham2015",
+  bibtype = "Book",
+  title = "R packages: organize, test, document, and share your code",
+  author =  person("Hadley","Wickham"),
+  year = "2015",
+  publisher = " O'Reilly Media, Inc.",
+  url = "https://r-pkgs.org/"
+)
 # Get the R reference
 rref <- citation()
 # Create ref key
 rref$key <- "rversion"
 # Write the R reference
-bibtex::write.bib(rref, "rversion.bib")
+pkgs <- bibtex::read.bib("vignettes/packages.bib")
+bibtex::write.bib(
+  purrr::reduce(list(rref, hadley, pkgs), append), 
+  file = fs::path("vignettes", "packages.bib")
+)
 ```
 
 
 # pointapply
 
 [![DOI](https://zenodo.org/badge/340077309.svg)](https://zenodo.org/badge/latestdoi/340077309)
-
 
 The R package *pointapply* contains the code and data to reconstruct the publication: Martin Schobben, Michiel Kienhuis, and Lubos Polerecky. 2021. *New methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry*, preprint on [Eartharxiv](https://eartharxiv.org/).
 
@@ -72,19 +75,18 @@ The data can be directly downloaded with `download_point()`, which is build arou
 
 ``` r
 # Download
-pointapply::download_point()
+download_point()
 ```
 
 # Render the paper
 
-Use the function `pointapply::render_paper()` and specify the directory to save the paper. Make sure to have latex installed on your system. Check e.g., https://yihui.org/tinytex/ for a light weight tex version.
+Use the function `render_paper()` and specify the directory to save the paper. Make sure to have latex installed on your system. Check e.g., https://yihui.org/tinytex/ for a light weight LaTeX version.
 
 
 ``` r
 # install.packages('tinytex')
 # Knit
-pointapply::render_paper(title = "Schobbenetal_SIMS_method", 
-                         output_dir = "mydir")
+render_paper(title = "Schobbenetal_SIMS_method", output_dir = "mydir")
 ```
 
 ## Credits
@@ -99,7 +101,7 @@ Data plots are constructed with *ggplot2* [@ggplot2; @ggplot22016], *ggrepel* [@
 
 The package *rlang* [@rlang] was used for tidy evaluation.
 
-Some specialised specialised packages where used, notably; *R.matlab* for loading the matlab LANS files [@R.matlab] and *cubelyr* [@cubelyr] for flattening the 3D arrays, and *MASS* [@MASS; @MASS2002] for 2D density estimates.
+Some specialised packages where used, notably; *readmat* for loading the matlab LANS files [@readmat] and *MASS* [@MASS; @MASS2002] for 2D density estimates.
 
 The data download from Zenodo with an api is facilitated by *zen4R* [@zen4R].
 

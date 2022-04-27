@@ -1,37 +1,99 @@
-#-------------------------------------------------------------------------------
-# Change over time (golden test)
-#-------------------------------------------------------------------------------
+test_that("gg_effect is consistent", {
 
-test_that("multiplication works", {
-  skip_if_not(exists("loaded", "package:pointapply"), "Skip test if not in development mode.")
-  # load ion maps
-  load_point("map_raster_image", "MON", NULL, return_name = FALSE)
-  # gridded data
-  load_point("map_sum_grid", "MON", 64, return_name = FALSE)
-  # diagnostics
-  ls_diag <- purrr::map(
-    map_sum_grid_64_MON,
-    ~point::diag_R(
-      .x,
-      "13C",
-      "12C",
-      dim_name.nm,
-      sample.nm,
-      file.nm,
-      grid.nm,
-      .nest = grid.nm,
-      .output = "complete",
-      .meta = TRUE
-    )
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
   )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
+
   # execute
-  diag_64_MON <- gg_effect(ls_diag, map_raster_image_MON, "MON", "12C-40Ca16O",
-                           viri = "B")
+  xc <- gg_effect("MEX", "12C-40Ca16O", viri = "B")
   # snapshot data
-  expect_snapshot(diag_64_MON)
+  expect_snapshot(xc)
   # snapshot plot
   vdiffr::expect_doppelganger(
     "ggplot2 with gridded R and ion raster image",
     ggplot2::last_plot()
     )
+
+  # execute
+  xc <- gg_effect("MON", "12C-40Ca16O", viri = "B")
+  # snapshot data
+  expect_snapshot(xc)
+  # snapshot plot
+  vdiffr::expect_doppelganger(
+    "ggplot2 with gridded R and ion raster image",
+    ggplot2::last_plot()
+  )
+})
+
+test_that("gg_sketch is consistent", {
+
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
+
+  # snapshot plot
+  vdiffr::expect_doppelganger(
+    "ggplot2 sketch of grid numbering",
+    gg_sketch(32, save = FALSE)
+  )
+})
+
+test_that("3D configuration can be converted to 2D configuration", {
+
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
+
+  load_point("map_raster_image", "MEX")
+  load_point("map_sum_grid", "MEX", 64)
+
+  expect_snapshot(
+    dim_folds(map_raster_image_MEX, "raster", 256, 64)
+  )
+
+  IC <- point::unfold(map_sum_grid_64_MEX)
+
+  expect_equal(
+    dim_folds(IC, "grid", 256, 64) |>
+      dplyr::filter(dim_name.nm == "depth") |>
+      dplyr::pull(width.mt) |>
+      sum(),
+    1638400
+  )
+
+  expect_snapshot(
+    dim_folds(IC, "grid", 256, 64)
+  )
+})
+
+test_that("diagnostics preserve metadata", {
+
+  skip_if_not(
+    exists("loaded", "package:pointapply"),
+    "Skip test if not in development mode."
+  )
+  skip_on_ci()
+  skip_on_covr()
+  skip_on_cran()
+
+  load_point("map_sum_grid", "MEX", 64)
+  xc <- point::diag_R(map_sum_grid_64_MEX, "13C", "12C", dim_name.nm,
+                      sample.nm, file.nm, grid.nm, .nest = grid.nm,
+                      .output = "complete", .meta = TRUE)
+
+  expect_snapshot(
+    point::unfold(xc, merge = FALSE)
+  )
 })

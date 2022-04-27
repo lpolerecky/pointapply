@@ -6,9 +6,7 @@
 \title{Combination plot}
 \usage{
 gg_effect(
-  ls,
-  ls_im,
-  ttl,
+  title,
   ratio,
   grid_print = FALSE,
   viri = "A",
@@ -16,24 +14,19 @@ gg_effect(
   grid_cell = 64,
   scaler = 40/256,
   label = "latex",
-  .X = Xt.pr,
-  .N = N.pr,
-  .species = species.nm,
-  .t = t.nm,
+  save = FALSE,
+  .X = NULL,
+  .N = NULL,
+  .species = NULL,
+  .t = NULL,
   .ion1 = "13C",
   .ion2 = "12C"
 )
 
-gg_sketch(res = 256, grid_cell = 64, scaler = 40/256)
+gg_sketch(grid_cell = 64, res = 256, scaler = 40/256, save)
 }
 \arguments{
-\item{ls}{Named list containing data frames for planes of ion counts for
-high precision isotope ratios.}
-
-\item{ls_im}{Named list containing data frames for planes of ion counts for
-ion raster map.}
-
-\item{ttl}{Character string or expression for plot title.}
+\item{title}{Character string for the analyte ("MEX" or "MON") to be used.}
 
 \item{ratio}{A character string constituting the ion ratio, where the two
 ions are separated by a dash ("12C14N-40Ca16O").}
@@ -54,6 +47,8 @@ measurement (default is the conversion used in this study).}
 \item{label}{Character string indicating how to name tibble columns
 (default = "latex").}
 
+\item{save}{Boolean whether to save the plot as an png.}
+
 \item{.X}{Variable for ion count rates (default = Xt.pr).}
 
 \item{.N}{Variable for ion counts (default = N.pr).}
@@ -71,6 +66,6 @@ measurement (default is the conversion used in this study).}
 }
 \description{
 \code{gg_effect} combines raster images for ion count ratios with high
-precision isotope ratios. \code{gg_sketch} draws the layout of the
-grid_cells.
+ precision isotope ratios. \code{gg_sketch} draws the layout of the
+ grid_cells.
 }

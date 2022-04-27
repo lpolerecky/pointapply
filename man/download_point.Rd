@@ -9,7 +9,7 @@
 \usage{
 download_point(type = "all")
 
-write_point(obj)
+write_point(obj, name = NULL)
 
 save_point(
   name,
@@ -18,10 +18,10 @@ save_point(
   height,
   unit,
   type_ms = "preprint",
-  output_dir = fs::path_wd()
+  output_dir = NULL
 )
 
-load_point(type, name, grid_cell, return_name = FALSE)
+load_point(type, name, grid_cell = NULL, return_name = FALSE)
 }
 \arguments{
 \item{type}{Character string for type of file to be loaded.}
@@ -52,15 +52,15 @@ document.}
 }
 \value{
 Raw matlab files are stored in the directories
-`extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
-processed data is stored in the directory `data`. Figures are stored in the
-directory `paper/2020-08-20-GLENDON`
+ `extdata/2020-08-20-GLENDON` and `extdata/2020-08-28-GLENDON`, whereas
+ processed data is stored in the directory `data`. Figures are stored in the
+ directory `paper/2020-08-20-GLENDON`
 }
 \description{
 \code{download_point()} is a wrapper around zen4R in order to download the
-large matlab files as well as processed data cubes and simulated data.
+ large matlab files as well as processed data cubes and simulated data.
 \code{write_point()} stores processed  matlab files in the correct directory.
 \code{save_point()} stores ggplots in the correct directory for usage in the
-paper.
+ paper.
 \code{load_point()} load .rda files of the package.
 }

@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   eval = FALSE
-  )
+)
 ```
 
 
@@ -23,7 +23,7 @@ The R package `pointapply` contains the code and data to reconstruct the publica
 
 # Introduction 
 
-This vignette shows how ion count data of a Secondary Ion Mass Spectrometry (SIMS) isotope analysis is simulated, which forms the basis to test the intra- and inter-analysis isotope test as introduced in the paper (Section 4.1 *Simulated data*). The accompanying vignette *Visualise test performance* (`vignette("performance")`) provide the code to plot these results (Figs 4 and 5).
+This vignette shows how ion count data of a Secondary Ion Mass Spectrometry (SIMS) isotope analysis is simulated, which forms the basis to test the performance of th intra- and inter-analysis isotope test as introduced in the paper (Section 4.1 *Simulated data*). The accompanying vignette *Visualise test performance* (`vignette("performance")`) provides the code to plot the synthetic data produced here (Figs 4 and 5).
 
 The following packages are used for the simulation.
 
@@ -34,23 +34,28 @@ library(pointapply) # load package
 ```
 
 
-The performance of the intra- and inter-analysis isotope tests, bundled in this package, are tested with the simulated (or synthetic) data.
+The performance of the intra- and inter-analysis isotope tests bundled in the `point` package are tested with the simulated (or synthetic) data.
 
 
 # Simulate intra-analysis isotope variability data
 
-The first simulation is designed to assess the sensitivity of the intra-analysis isotope variability test for two continuous variables; 1) ionization efficiency and, 2) the isotope offset between two components. The ionization efficiency is a systematic fluctuation in the emitted secondary ions, that should normally be mirrored in strength among both isotopes of the same element [@Fitzsimons2000a]. The ionization effect will have a bearing on the intra-analysis isotope variability test, as it is a regression-based method, where variance of the independent variable yields more precise estimation of the coefficients in the linear model. See the figure below to see how the difference in ionization efficiency affects how data point cluster, where a dense cluster signifies the absence of variability in in ionization effeciency and an elongated cluster with increased variance of ionization.
+The first simulation is designed to assess the sensitivity of the intra-analysis isotope variability test for two continuous variables; 1) ionization efficiency and, 2) the isotope offset between two components. The ionization efficiency is a systematic fluctuation in the emitted secondary ions, that should normally be mirrored in strength among both isotopes of the same element [@Fitzsimons2000a] (and see the paper). The ionization effect will have a bearing on the intra-analysis isotope variability test, as it is a regression-based method, where variance of the independent variable yields more precise estimation of the coefficients in the linear model. See the figure below to see how the difference in ionization efficiency affects how data points cluster, where a dense cluster signifies the absence of variability in in ionization efficiency and an elongated cluster with increased variance of ionization.
 
 
-```{r estimates}
+```{r estimates, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(ggrepel)
+
 # stable ionization efficiency
 stable_ion <- point::simu_R(0, "ideal", "13C", "12C", "VPDB", 1) %>% 
-  dplyr::mutate(type.nm = "stable ionization")
+  mutate(type.nm = "stable ionization")
 # fluctuating ionization efficiency
 fluc_ion <- point::simu_R(10, "ideal", "13C", "12C", "VPDB", 1)  %>% 
-  dplyr::mutate(type.nm = "fluctuating ionization")
+  mutate(type.nm = "fluctuating ionization")
 # combine
-ion_eff <- dplyr::bind_rows(stable_ion, fluc_ion)
+ion_eff <- bind_rows(stable_ion, fluc_ion)
 # single ion stats
 tb_X <- stat_X(
   ion_eff, 
@@ -58,7 +63,7 @@ tb_X <- stat_X(
   .X = Xt.sm, 
   .N = N.sm, 
   .stat = c("M", "S", "hat_S")
-  )
+)
 
 # stat ranges
 mean_y <- filter(tb_X, species.nm == "13C")$M_Xt.sm %>% mean
@@ -79,9 +84,10 @@ gg_dens(
   ylab = expression(X^b~"(count sec"^"-"*")"), 
   ttl = "Excess ionization",
   y_lim = y_range,
-  gr = type.nm 
-  ) +
-  ggplot2::geom_smooth(
+  gr = type.nm,
+  labels = "scientific"
+) +
+  geom_smooth(
     method = "lm", 
     formula = y ~ x - 1, 
     color = "black", 
@@ -89,31 +95,31 @@ gg_dens(
     linetype = 2,
     size = 0.5,
     fullrange = TRUE
-    ) +
-  ggplot2::geom_errorbarh(
+  ) +
+  geom_errorbarh(
     data = filter(tb_X, species.nm == "12C"), 
     aes(xmin = M_Xt.sm - S_Xt.sm, xmax = M_Xt.sm + S_Xt.sm, y = 180),
     height = 20, 
     inherit.aes = FALSE
-    ) +
-  ggplot2::geom_errorbarh(
+  ) +
+  geom_errorbarh(
     data = filter(tb_X, species.nm == "12C"), 
     aes(xmin = M_Xt.sm - hat_S_N.sm, xmax = M_Xt.sm + hat_S_N.sm, y = 215),
     height = 20, 
     inherit.aes = FALSE
-    ) +
-  ggrepel::geom_text_repel(
+  ) +
+  geom_text_repel(
     data = filter(tb_X, species.nm == "12C"), 
     aes(x = M_Xt.sm - S_Xt.sm, y = 180, label = "true"),
     nudge_x = -10,
     size = 3
-    ) +
-  ggrepel::geom_text_repel(
+  ) +
+  geom_text_repel(
     data = filter(tb_X, species.nm == "12C"), 
     aes(x = M_Xt.sm - hat_S_N.sm, y = 215, label = "predicted"),
     nudge_x = -10,
     size = 3
-    )
+  ) 
 
 # save and print
 save_point("ionization_concept", last_plot(), width = 15, height = 10, 
@@ -123,27 +129,29 @@ save_point("ionization_concept", last_plot(), width = 15, height = 10,
 ```{r echo=FALSE, eval=TRUE, fig.cap="Conceptual sketches for ionization efficiency.", out.width="70%"}
 knitr::include_graphics("figures/ionization_concept.png")   
 ```
+
 In the above representation, the label "predicted" and "true" refer to a band of two times the predicted and descriptive standard deviation of $X^a$ around the mean, respectively. The difference in those two error bars during fluctuating ionization is referred to in the paper as "excess ionization".
 
 The isotope offset encompasses two end-member components that cause intra-analysis isotope variability in the analysis, and this is one of the foremost targets in this study. Hence, a range of 22.0‰ is chosen to mimic the divergent isotope composition of carbonate and organic carbon inclusion hosted in a predominant carbonate matrix as a realistic scenario for a SIMS isotope analyses. Whereas, the range in ionization efficiency is varied from 0 to 120%, or 0 to 34% excess ionization. To exemplify this, the following figure shows a scenario of an organic component with a $\delta$^13^C of 32.0‰ in a predominant carbonate matrix with a $\delta$^13^C of 0‰.
 
 
-```{r label, options}
-purrr::map2_dfr(
-  c(4, 10),
-  c(-32, 0), 
-  ~point::simu_R(60, "asymmetric", "13C", "12C", "VPDB", .seed = .x, .devR = .y)
-  ) %>% 
-  dplyr::mutate(
-    force.nm = dplyr::if_else(force.nm == -32, "heterogeneity", "ideal")
-    ) %>% 
+```{r label, echo=FALSE}
+library(purrr)
+
+map2_dfr(
+  c(4, 10), # seeds
+  c(-32, 0), # anomalous R value
+  ~simu_R(60, "asymmetric", "13C", "12C", "VPDB", .seed = .x, .devR = .y)
+) |> 
+  mutate(
+    force.nm = if_else(force.nm == -32, "heterogeneity", "ideal")
+  ) |>  
   diag_R("13C", "12C", force.nm, .plot = TRUE, .N = N.sm, .X = Xt.sm, 
          .plot_outlier_labs = c("organic", "carbonate")) 
 
-p <- ggplot2::last_plot() + 
-  themes_IC(base = ggplot2::theme_bw()) + 
+p <- last_plot() + 
+  themes_IC(base = theme_bw()) + 
   ggtitle("Isotopic heterogeneity")
-
 
 # save and print
 save_point("hetero_concept", p, width = 15, height = 10, 
@@ -158,90 +166,81 @@ knitr::include_graphics("figures/hetero_concept.png")
 
 ## Parameters
 
-These parameters are then crossed for all possible combination with the `tidyr` [@tidyr] function `crossing()`. In addition, a 10 times repetition is included with a specified seed for each of the repetitions to ensure that the study is reproducible. 
+For the sensitivity test (`test_sensitivity`), excess ionization and the isotopic offset are crossed for all possible combination with the `tidyr` [@tidyr] function `crossing()`. In addition, a 10 times repetition is included with a specified seed for each of the repetitions to ensure that the study is reproducible. 
 
 
 ```{r paramsintra}
-# repetition
-reps <- 10
-# types of R variation
-var_R <- c("symmetric", "asymmetric")
 # varying linear trends in the ionization efficiency (percent common isotope)
 var_T <- seq(0, 120, length.out = 12)
 # varying isotope offset (delta per mille)
 var_I <- seq(0, -22, length.out = 12)
-# seeds for number generation
-n_tot <- prod(sapply(list(var_T, var_R, var_I), length))
-var_seed <- 1:n_tot
-# cross all possible parameter combinations
-ls_parms <- tidyr::crossing(.sys = var_T, .type = var_R, .devR = var_I) %>%
-  tibble::add_column(.seed = var_seed) %>%
-  summarise(across(.fns = list)) %>% 
-  purrr::flatten()
 ```
 
 
 ## Conceptual models of intra-analysis isotope variability
 
-Besides the isotope-offset introduced above, two scenarios (object `var_R` of the code chunk above) of intra-analysis isotope variability are tested (Supplementary Section 1.2: *Synthetic data* of the paper). The first scenario, referred to as *"asymmetric"* intra-analysis isotope variation, would approximate, for example, a situation in which the primary ion beams cuts through an organic inclusion (component A) with depth within a predominant carbonate matrix (component B), and thus both the matrix and isotopic composition deviate between components A and B. In a second scenario of *"symmetric"* intra-analysis isotope variation, a simulated gradient in the isotopic composition traverses the complete analyses.
+Besides the isotope-offset introduced above, two scenarios of intra-analysis isotope variability are tested (Supplementary Section 1.2: *Synthetic data* of the paper). The first scenario, referred to as *"asymmetric"* intra-analysis isotope variation, would approximate, for example, a situation in which the primary ion beams cuts through an organic inclusion (component A) with depth within a predominant carbonate matrix (component B), and thus both the matrix and isotopic composition deviate between components A and B. In a second scenario of *"symmetric"* intra-analysis isotope variation, a simulated gradient in the isotopic composition traverses the complete analyses.
 
 
 ```{r concept, echo=FALSE}
+library(tidyr)
+
 # ideal
 Xt2 <- c(1.1e5, 1.3e5) # common
 # start (ideal) R
-R0 <- point::calib_R(0, "VPDB", "13C", input = "delta", output = "R")
+R0 <- calib_R(0, "VPDB", "13C", input = "delta", output = "R")
 # perturbation
-R1 <- point::calib_R(-30, "VPDB", "13C", input = "delta", output = "R")
+R1 <- calib_R(-30, "VPDB", "13C", input = "delta", output = "R")
 # linear R gradient
-a.R <- ((R1 - R0) / (Xt2[2] - Xt2[1]))
-b.R <- R0 - (a.R * Xt2[1])
+a_R <- ((R1 - R0) / (Xt2[2] - Xt2[1]))
+b_R <- R0 - (a_R * Xt2[1])
 # dataframe
-tb_cp <- tibble(Xt2 = Xt2[1]:Xt2[2]) %>% 
-  dplyr::mutate(
+tb_cp <- tibble(Xt2 = Xt2[1]:Xt2[2]) |> 
+  mutate(
     ideal = Xt2 * R0,
-    symmetric = (b.R + a.R * Xt2) * Xt2,
+    symmetric = (b_R + a_R * Xt2) * Xt2,
     asymmetric = approx(
       c(1, 5 * n() / 6, n()),
       c(R0, R1, R1),
       n = n(),
       method = "constant"
       )$y * Xt2
-    ) %>% 
-  tidyr::pivot_longer(-Xt2, values_to = "Xt1")
+  ) |> 
+  pivot_longer(-Xt2, values_to = "Xt1")
 
 colors <- c("simulated Ri" = "black", "mean R" = "#FEB24C")
+
 # plot
 ggplot(tb_cp, aes(x = Xt2, y = Xt1, group = name, color = "simulated Ri")) +
-  geom_line() +
+  geom_point() +
   facet_grid(cols = vars(name)) + 
-  ggplot2::geom_smooth(
+  geom_smooth(
     aes(color = "mean R", weight = 1 / Xt2), 
     method = "lm", 
-    formula = y~x - 1
-    ) +
+    formula = y ~ x - 1
+  ) +
   scale_y_continuous(
     expression(X^b~"(count sec"^"-"*")"), 
     expand = c(0, 0),
     breaks = scales::pretty_breaks(3),
     labels = NULL
-    ) +
+  ) +
   scale_x_continuous(
     expression(X^a~"(count sec"^"-"*")"), 
     expand = c(0, 0),
     breaks = scales::pretty_breaks(2),
     labels = NULL
-    ) +
+  ) +
   scale_color_manual(
     "", 
     values = colors, 
-    labels = c(expression(bar(R)), expression(R[i]))
-    ) +
+    labels = c(expression(R[i]), expression(bar(R)))
+  ) +
   ggtitle("Scenarios for intra-analysis isotope variability") +
-  themes_IC(base = ggplot2::theme_bw())
+  themes_IC(base = theme_bw())
 
 # save and print
-save_point("simu_intra_concept", ggplot2::last_plot(), width = 14, height = 7, 
+save_point("simu_intra_concept", last_plot(), width = 15, height = 8,
            unit = "cm")
 ```
 
@@ -253,83 +252,50 @@ knitr::include_graphics("figures/simu_intra_concept.png")
 
 ## Execute intra-analysis isotope variability simulation
 
-The function `simu_R()` of the `point` [@point] package is especially designed to simulate SIMS isotope count data. Here, the arguments `.ion1`, `ion2` and `.reference` define the isotope system and reference scale used to simulate the data. Together with the previous defined ranges for the sensitivity test (object `ls_parms`) this produces the simulated dataset with intra-analysis isotope variability.
+The function `sensitivity_test` is especially designed to simulate SIMS isotope count data. The default arguments `.ion1 = "13C"`, `ion2  = "12C"` and `.reference = "VPDB"` define the isotope system and reference scale used to simulate the data. Together with the previous defined ranges for the sensitivity test (excess ionization and the isotopic offset) this produces the simulated data-set with intra-analysis isotope variability. The execution time of this function benefits from parallelization and the number of used workers can be set with the argument `mc_cores`. The generated data in the appropriate directory (`data` directory of the package).
 
 
 ```{r execintra}
-simu_sens_IC_intra <- purrr::pmap_dfr(ls_parms, point::simu_R, .reps = reps, 
-                                      .ion1 = "13C", .ion2 = "12C", 
-                                      .reference = "VPDB")
-```
-
-
-## Save data 
-
-The function `write_point()` is included in this package and saves the generated data in the appropriate directory (`data` directory of the package).
-
-
-```{r saveintra, options}
-write_point("simu_sens_IC_intra")
+# sensitivity
+test_sensitivity(var_T, var_I, reps = 10, mc_cores = 4, save = TRUE)
 ```
 
 
 # Sensitivity intra-analysis isotope variability test
 
-The functions `diag_R()` of the `point` package are the core functions for assessing intra-analysis isotope variability (as introduced in the paper). To gauge the performance of this test, the `simu_sens_IC_intra` is analysed by subsequently applying the `diag_R()`, to first detect potential outliers and then assess their significance in terms on their effect on the "ideal" linear R model (see paper). 
-
-
-## Define groups
-
-Both functions require grouping variable in order to define what constitutes a single analysis which, in turn, consists off the $n$-series of measurements, where the outlier are detected in the measurements (and thus gauge intra-analysis isotope variability).
-
-
-```{r groups}
-# groups
-grps <- rlang::quos(type.nm, trend.nm, force.nm, spot.nm)
-```
-
+The function `diag_R()` of the `point` package are the core functions for assessing intra-analysis isotope variability (as introduced in the paper). To gauge the performance of this test is analysed by applying the function to the synthetic data.
 
 ## Execute intra-analysis isotope variability test 
  
 Two types of outlier detection are available; $\sigma_R$-rejection method (default method in the Cameca software) and the Cook's Distance measure (see paper for details).
 
-
 ### Cooks D
 
-The Cook's D method is the default method of `diag_R()`, and is therefore simple to execute. The argument `.output` is set to `"complete"` so that the generated data frame (`tibble`) contains also metrics for the precision of the isotope and single ion counts.
+The Cook's D method is the default method of the `point` function `diag_R()`, and is therefore simple to execute.
 
 
 ```{r CD}
-# diagnostics
-simu_CD_eval_intra <- point::diag_R(simu_sens_IC_intra, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
-# export
-write_point("simu_CD_eval_intra")
+# performace Cooks D diagnostics
+test_sensitivity(var_T, var_I, reps = 10, diag = "CooksD", mc_cores = 4, 
+                 save = TRUE)
 ```
 
 
 ### Cameca
 
-The $\sigma_R$-rejection method requires the `.method` to be set to `"Cameca"`. In addition, to faithfully mimic the behaviour of the Cameca software the grouping structure needs to be adjusted slightly, where this software uses an intermediate (but artificial) subdivision of a single analysis; the so-called "block" (variable: `bl.nm`), which consists generally of ~50 measurements. To accommodate this, the `diag_R()` and `eval_diag()` functions are successively applied with a respective grouping structure for "blocks" and then "single analysis". Note, that the `.output` of `diag_R()` is set to `"diagnostic"` to only produce outlier detection results. The application of `eval_diag()` produces now mean values for the single blocks, which are irrelevant for the subsequent study, as such the `tibble` [@tibble] is filtered for distinct analysis only by using `dplyr::distinct()` [@dplyr].
+The $\sigma_R$-rejection method requires the `.method` of `diag_R()` to be set to `"Cameca"`. In addition, to faithfully mimic the behaviour of the Cameca software the grouping structure needs to be adjusted slightly, where this software uses an intermediate (but artificial) subdivision of a single analysis; the so-called "block" (variable: `bl.nm`), which consists generally of ~50 measurements. To accommodate this, the `diag_R()` and `eval_diag()` functions are successively applied with a respective grouping structure for "blocks" and then "single analysis". Note, that the `.output` of `diag_R()` is set to `"diagnostic"` to only produce outlier detection results. The application of `eval_diag()` produces now mean values for the single blocks, which are irrelevant for the subsequent study, as such the `tibble` [@tibble] is filtered for distinct analysis only by using `distinct()` [@dplyr]. This functionality has all been wrapped in the function `test_sensitivity`, which, furthermore, allows parallel execution (by setting `mc_cores` to an appropriate number) of this data intensive exercize.
 
 
 ```{r CM}
-# diagnostics
-tb_dia <- point::diag_R(simu_sens_IC_intra , "13C", "12C", !!! grps, bl.nm, 
-                        .X = Xt.sm, .N = N.sm, .method = "Cameca", 
-                        .output = "diagnostic")
-# evaluation of performance (intra-analysis isotope test)
-CM_eval <- point::eval_diag(tb_dia, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
-# extract distinct groups omitting block-wise means
-simu_CM_eval_intra <- dplyr::distinct(CM_eval, !!!grps, .keep_all = TRUE)
-# export
-write_point("simu_CM_eval_intra")
+# performance Cameca diagnostics
+test_sensitivity(var_T, var_I, reps = 10, diag = "Cameca", mc_cores = 4, 
+                 save = TRUE)
 ```
 
 
 # Simulate inter-analysis isotope variability data
 
-The simulated data to assess the performance of the inter-analysis isotope variability test encompasses the same rang as for the intra-analysis isotope variability test. However, for this simulation, no intra-analysis isotope variance is included (i.e., the ideal linear R model), and only the starting value is varied over a range of 12.0‰ with again the VPDB isotope scale as a reference framework.
-
+The simulated data to assess the performance of the inter-analysis isotope variability test encompasses the same rang as for the intra-analysis isotope variability test. However, for this simulation, no intra-analysis isotope variance is included (instead the ideal linear R model is adopted), and only the starting value is varied over a range of 12.0‰ with again the VPDB isotope scale as a reference framework.
 
 ## parameters
 
@@ -337,115 +303,31 @@ The same procedure, but with a somewhat different parameter-set, is used to cros
 
 
 ```{r paramsinter}
-# repetition
-reps <- 10
 # varying linear trends in the ionization efficiency (percent common isotope)
 var_T <- seq(0, 120, length.out = 12)
 # varying isotope base (delta per mille)
 var_B <- seq(0, -11, length.out = 12)
-# seeds for number generation
-n_tot <- prod(sapply(list(var_T, var_B), length))
-var_seed <- 1:n_tot
-# cross all possible parameter combinations
-ls_parms <- tidyr::crossing(.sys = var_T, .baseR = var_B) %>%
-  tibble::add_column(.seed = var_seed) %>%
-  summarise(across(.fns = list)) %>% 
-  purrr::flatten()
 ```
 
 
 ## Execute inter-analysis isotope simulation
 
-Execution of the simulation (`simu_R()`) for inter-analysis isotope data follows the same procedure as previously outlined for the intra-analysis isotope data simulation. The largest difference is that the parameter `.type` is now fixed to `"ideal`, referring to the ideal linear R model (i.e. the absence of intra-analysis isotope variability).
-
-
-```{r execinter}
-# execute
-simu_sens_IC_inter <- purrr::pmap_dfr(ls_parms,  point::simu_R, .type = "ideal", 
-                                      .reps = reps, .ion1 = "13C",
-                                      .ion2 = "12C", .reference = "VPDB")
-```
+Execution of the simulation (`test_sensitivity()`) for inter-analysis isotope data follows the same procedure as previously outlined for the intra-analysis isotope data simulation. 
 
 
 ## Post-simulation processing
 
-The protocol for simulating the inter-analysis isotope dataset differs from the intra-analysis isotope variability protocol in that it includes a post-simulation processing step. Here, the $m$-series of analyses (a typical study along a transect) is recombined by randomly replacing one out of the 10 samples of the 0‰ (VPDB) set with an analysis that has an isotope value along the predefined range of -12--0‰. This replacement is repeated for each of the initial isotope values as defined in the starting parameters, and repeated 10 times, which produces 10 times 10-series of analyses with one anomalous isotope value, for each of the starting isotope values.
-
-Two wrapper functions perform this randomization in one call with `purrr::map()` [@purrr], and, furthermore, directly write the results to the correct directory.
-
-
-```{r mixing}
-# isotope anomaly mixer
-mix_R <- function(simu, filter_vec, seed, reps) {
-  set.seed(seed)
-  spot_samp <- sample.int(reps, size = 1)
-  base <- filter(simu, base.nm == 0, spot.nm != spot_samp)
-  anomaly <- filter(simu, base.nm == filter_vec, spot.nm == spot_samp)
-  bind_rows(base, anomaly) %>%
-    mutate(anomaly.nm = filter_vec, .before = base.nm)
- }
-
-# mixer wrapper
-inter_run <- function(vct, n, file_name, reps) {
-  simu <- map_dfr(vct, mix_R, simu = simu_sens_IC_inter, seed = n, reps = reps, 
-                  .id = "study.nm")
-  name <- paste(file_name, n, sep = "_")
-  assign(name, simu)
-  name %T>% 
-    rlang::exec("write_point", .) %>% 
-    rlang::sym() %>% 
-    eval()
-}
-
-# rerun introduction of anomalous R and save to file
-ls_inter <- map(
-  1:10, 
-  ~inter_run(vct = var_B, n = .x, file_name = "simu_sens_IC_inter", reps = reps)
-)
-```
-
+The protocol for simulating the inter-analysis isotope dataset differs from the intra-analysis isotope variability protocol in that it includes a post-simulation processing step. Here, the $m$-series of analyses (a typical study along a transect) is recombined by randomly replacing one out of the 10 samples of the 0‰ (VPDB) set with an analysis that has an isotope value along the predefined range of -12--0‰. This replacement is repeated for each of the initial isotope values as defined in the starting parameters, and repeated 10 times, which produces 10 times 10-series of analyses with one anomalous isotope value, for each of the starting isotope values. This functionality is wrapped in `test_sensitivity()` , which again, directly writes the results to the correct directory.
 
 # Sensitivity intra-analysis isotope variability test
 
-The intra-analysis isotope variability test is also encapsulated in the sequential usage of `diag_R()` of the `point` package. 
-
-
-## Define groups
-
-However, for this sensitivity run the grouping is a little different as it has to point to the $m$-series of analyses, instead of single measurements (in the $n$-series of measurements.
-
-
-```{r groups2}
-# groups
-grps <- quos(type.nm, trend.nm, anomaly.nm, study.nm, spot.nm)
-```
-
-
-## Execute inter-analysis isotope variability test 
-
-Also, the execution over the has been packed in a wrapper function that can be applied in successive order by using `purrr::walk2()` [@purrr]. One note of caution, running this code requires a high workload from your computer.
-
-
-```{r loadinter, echo=FALSE}
-# load data
-# load_point("simu", paste0("sens_IC_inter_", 1:10), NULL, return_name = FALSE)
-```
+The intra-analysis isotope variability test is also encapsulated in the sequential usage of `diag_R()` of the `point` package. However, for this sensitivity run the grouping is a little different as it has to point to the $m$-series of analyses, instead of single measurements (in the $n$-series of measurements. One note of caution, running this code requires a high workload from your computer.
 
 
 ```{r inter}
-# diagnose, evaluate and write
-inter_wrap <- function(simu, n, grps, file_name){
-  tb_dia <- diag_R(simu, "13C", "12C", !!!grps, .X = Xt.sm, .N = N.sm)
-  name <- paste(file_name, n, sep = "_")
-  assign(name, tb_dia)
-  exec("write_point", name)
-}
-
-# execute
-purrr::iwalk(
-  ls_inter, 
-  ~inter_wrap(.x, .y, grps = grps, file_name = "simu_eval_inter")
-)
+# performance inter-analysis diagnostics
+test_sensitivity(var_T, var_B, reps = 10, mc_cores = 4, type = "inter", 
+                 save = TRUE)
 ```
 
 

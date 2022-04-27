@@ -2,7 +2,7 @@
 % Please edit documentation in R/heatmap.R
 \name{heat_map}
 \alias{heat_map}
-\title{Heatmaps and summary plots for model performance.}
+\title{Heatmaps and summary plots for model performance}
 \usage{
 heat_map(
   simu,
@@ -17,11 +17,13 @@ heat_map(
   y_lab,
   x_sec = NULL,
   trans_base = -2,
-  trans_n = 10
+  trans_n = 10,
+  save = FALSE
 )
 }
 \arguments{
-\item{simu}{Ion count data.}
+\item{simu}{Performance for test statistics on intra-analysis isotope
+variability ("intra") or inter-analysis isotope variability ("inter").}
 
 \item{x}{Variable (continuous variable number one) isotope offset in paper.}
 
@@ -51,6 +53,8 @@ size of the isotope anomaly.}
 
 \item{trans_n}{Initial sample size for the scale transformation for
 fractional size of the isotope anomaly.}
+
+\item{save}{Save the produced plot.}
 }
 \value{
 \code{\link[ggplot2:ggplot]{ggplot}}.
