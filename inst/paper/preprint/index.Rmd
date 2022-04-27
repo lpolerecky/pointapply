@@ -18,7 +18,7 @@ authors:
     location: Utrecht
     email: l.polerecky@uu.nl
 abstract: |
-  The premise of Secondary Ion Mass Spectrometry (SIMS) isotope studies on geological and biological materials is to detect isotope variability between measurement spots of an analytical substrate (inter-isotope variability). However, much is unknown about the spatial scales at which isotopic variability might manifest itself. Considering the indiscriminate secondary ion generation with SIMS, it is often unknown how isotope variability is comprised within one analysis at a single spot (intra-isotope variability). This has important consequences for the averaged isotope value derived from a routine data reduction protocol for a single analysis. It thus follows, that this averaged value can either represent a  truly  homogeneous end-member, or a mixture of two or more components with widely different isotope values. Here, we present a novel method for the detection of both intra- and inter- SIMS isotope variability, based on common regression methods. Homogeneous end-members are a prerequisite when searching for reference materials, but also for the understanding biological and geological processes at a microscopic scale. The here-presented methods are bundled in the R package `point` [Schobben M. 2021, Point: Reading, processing, and analysing raw ion count data. (\href{https://doi.org/10.5281/zenodo.4633104}{DOI: 10.5281/zenodo.4633104})] for convenient application in future studies.
+  The premise of Secondary Ion Mass Spectrometry (SIMS) isotope studies on geological and biological materials is to detect isotope variability between measurement spots of an analytical substrate (inter-analysis isotope variability). However, much is unknown about the spatial scales at which isotopic variability might manifest itself. Considering the indiscriminate secondary ion generation with SIMS, it is often unknown how isotope variability is comprised within one analysis at a single spot (intra-analysis isotope variability). This has important consequences for the averaged isotope value derived from a routine data reduction protocol for a single analysis. It thus follows, that this averaged value can either represent a  truly  homogeneous end-member, or a mixture of two or more components with widely different isotope values. Here, we present a novel method for the detection of both intra- and inter-analysis SIMS isotope variability, based on common regression methods. Homogeneous end-members are a prerequisite when searching for reference materials, but also for the understanding biological and geological processes at a microscopic scale. The here-presented methods are bundled in the R package `point` [Schobben M. 2021, Point: Reading, processing, and analysing raw ion count data. (\href{https://doi.org/10.5281/zenodo.4633104}{DOI: 10.5281/zenodo.4633104})] for convenient application in future studies.
 keywords:
   - Reference Materials, Isotope analysis, Chemometrics
 site: bookdown::bookdown_site
@@ -31,17 +31,22 @@ always_allow_html: true
 
 ```{r setup, include=FALSE}
 # Default knitr options
-knitr::opts_chunk$set(
-  echo = FALSE, 
-	message = FALSE,
-	warning = FALSE,
-	# fig.pos = 'p', # place figs on own page
-	dpi = 300, 
-	digits = 2,
-	results = 'asis',
-	dev = "CairoPDF"
-)
+	knitr::opts_chunk$set(
+	  echo = FALSE, 
+		message = FALSE,
+		warning = FALSE,
+		# fig.pos = 'p', # place figs on own page
+		dpi = 300, 
+		digits = 2,
+		results = 'asis',
+		dev = "CairoPDF"
+		)
 ```
+
+
+```{r bld, echo=FALSE}
+on_build <- FALSE
+```  
 
 
 ```{r units}
@@ -52,20 +57,26 @@ SI <- function(x, unit, not = "fl", word = knitr::pandoc_to("docx")) {
   if (not == "sc") x <- sprintf("%.2e", x)
   if (word) {
     paste0(x, stringr::str_c(unit, collapse = "/")) 
-  } else {
-    paste0("$\\SI{",x,"}{\\", stringr::str_c(unit, collapse = "\\"),"}$")
+    } else {
+      paste0("$\\SI{",x,"}{\\", stringr::str_c(unit, collapse = "\\"),"}$")
+      }
   }
-}
 # deal with per mill latex vs docx
 permille <- function(x, sign = FALSE, word = knitr::pandoc_to("docx")){
   if (sign) x <- sprintf("%+.1f", x)  else x <- sprintf("%.1f", x)  
   if (word) {
     paste0(x, "‰")
-  }  else {
-    paste0("$", x, "\\text{\\textperthousand}$")
+    } else {
+      paste0("$", x, "\\text{\\textperthousand}$")
+      }
   }
-}
 ```
+
+
+<!-- ```{r kable} -->
+<!-- # ensure correct kable output -->
+<!-- options("kableExtra.html.bsTable" = TRUE)  -->
+<!-- ``` -->
 
 
 ```{r sumfun}
@@ -74,12 +85,19 @@ var_mean <- function(data, plane, grid_cell, var) {
   dplyr::filter(data, dim_name.nm == plane, grid.nm %in% grid_cell) %>% 
     dplyr::pull({{ var }}) %>% 
     mean() 
-}
+  }
 ```
-
   
+
+<!-- ```{r child} -->
+<!-- # child duplicate option -->
+<!-- options(knitr.duplicate.label = "allow") -->
+<!-- ``` -->
+
 ```{r pipe}
+
 `%>%` <- magrittr::`%>%`
+
 ```
 
 \newpage
