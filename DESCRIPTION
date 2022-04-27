@@ -63,4 +63,4 @@ LinkingTo:
     cpp11
 SystemRequirements: C++11
 Remotes:  
-    MartinSchobben
+    MartinSchobben/point
