@@ -53,16 +53,16 @@
       # A tibble: 16,896 x 14
          sample.nm file.nm    grid_size.nm grid.nm dim.nm dim_name.nm species.nm  t.nm
          <chr>     <chr>             <dbl>   <int>  <dbl> <chr>       <chr>      <dbl>
-       1 MEX       map_sum_g~         1.56       1      1 height      12C         25.6
-       2 MEX       map_sum_g~         1.56       2      1 height      12C         25.6
-       3 MEX       map_sum_g~         1.56       3      1 height      12C         25.6
-       4 MEX       map_sum_g~         1.56       4      1 height      12C         25.6
-       5 MEX       map_sum_g~         1.56       1      2 height      12C         51.2
-       6 MEX       map_sum_g~         1.56       2      2 height      12C         51.2
-       7 MEX       map_sum_g~         1.56       3      2 height      12C         51.2
-       8 MEX       map_sum_g~         1.56       4      2 height      12C         51.2
-       9 MEX       map_sum_g~         1.56       1      3 height      12C         76.8
-      10 MEX       map_sum_g~         1.56       2      3 height      12C         76.8
+       1 MEX       map_sum_g~          100       1      1 height      12C         25.6
+       2 MEX       map_sum_g~          100       2      1 height      12C         25.6
+       3 MEX       map_sum_g~          100       3      1 height      12C         25.6
+       4 MEX       map_sum_g~          100       4      1 height      12C         25.6
+       5 MEX       map_sum_g~          100       1      2 height      12C         51.2
+       6 MEX       map_sum_g~          100       2      2 height      12C         51.2
+       7 MEX       map_sum_g~          100       3      2 height      12C         51.2
+       8 MEX       map_sum_g~          100       4      2 height      12C         51.2
+       9 MEX       map_sum_g~          100       1      3 height      12C         76.8
+      10 MEX       map_sum_g~          100       2      3 height      12C         76.8
       # ... with 16,886 more rows, and 6 more variables: Xt.pr <dbl>, N.pr <dbl>,
       #   width.mt <dbl>, height.mt <dbl>, tc.mt <dbl>, det_type.mt <chr>
 
@@ -74,16 +74,16 @@
       # A tibble: 16,896 x 13
          sample.nm file.nm    grid_size.nm grid.nm dim.nm dim_name.nm species.nm  t.nm
          <chr>     <chr>             <dbl>   <int>  <dbl> <chr>       <chr>      <dbl>
-       1 MEX       map_sum_g~         1.56       1      1 height      12C         25.6
-       2 MEX       map_sum_g~         1.56       2      1 height      12C         25.6
-       3 MEX       map_sum_g~         1.56       3      1 height      12C         25.6
-       4 MEX       map_sum_g~         1.56       4      1 height      12C         25.6
-       5 MEX       map_sum_g~         1.56       1      2 height      12C         51.2
-       6 MEX       map_sum_g~         1.56       2      2 height      12C         51.2
-       7 MEX       map_sum_g~         1.56       3      2 height      12C         51.2
-       8 MEX       map_sum_g~         1.56       4      2 height      12C         51.2
-       9 MEX       map_sum_g~         1.56       1      3 height      12C         76.8
-      10 MEX       map_sum_g~         1.56       2      3 height      12C         76.8
+       1 MEX       map_sum_g~          100       1      1 height      12C         25.6
+       2 MEX       map_sum_g~          100       2      1 height      12C         25.6
+       3 MEX       map_sum_g~          100       3      1 height      12C         25.6
+       4 MEX       map_sum_g~          100       4      1 height      12C         25.6
+       5 MEX       map_sum_g~          100       1      2 height      12C         51.2
+       6 MEX       map_sum_g~          100       2      2 height      12C         51.2
+       7 MEX       map_sum_g~          100       3      2 height      12C         51.2
+       8 MEX       map_sum_g~          100       4      2 height      12C         51.2
+       9 MEX       map_sum_g~          100       1      3 height      12C         76.8
+      10 MEX       map_sum_g~          100       2      3 height      12C         76.8
       # ... with 16,886 more rows, and 5 more variables: depth.mt <dbl>,
       #   width.mt <dbl>, height.mt <dbl>, tc.mt <dbl>, det_type.mt <chr>
 

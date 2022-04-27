@@ -23,6 +23,8 @@ gg_point(
 \arguments{
 \item{title}{Character string for the analyte ("MEX" or "MON") to be used.}
 
+\item{grid_cell}{Selected grid cell.}
+
 \item{ion1_thr}{Character string for ion in the enumerator of ion ratio of
 the map.}
 

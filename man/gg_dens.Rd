@@ -19,6 +19,7 @@ gg_dens(
   sds = 22,
   geom = "point",
   facet_sc = "fixed",
+  labels = "standard",
   flag = NULL,
   save = FALSE
 )
@@ -58,6 +59,8 @@ density contour lines.}
 
 \item{facet_sc}{The \code{scales} parameter of `ggplot2::facet_grid`}
 
+\item{labels}{Either "scientific" or "standard".}
+
 \item{flag}{A variable representing a flag for outliers.}
 
 \item{save}{Boolean whether to save the plot as an png.}
@@ -67,5 +70,5 @@ density contour lines.}
 }
 \description{
 \code{gg_dens} Scatter plots with 2D density as color and alpha scale to
-visualise very dens data
+beter visualise very dens data.
 }

@@ -34,7 +34,7 @@ library(pointapply) # load package
 Ion count data processed with the `*`point`*` R package [@point] is required to produce the raster plots (Figs 7 and 8, and Supplementary Fig. 7). Information on how to generate processed data from raw data can be found in the vignette *Reading matlab files* (`vignette("data")`). Alternatively, processed data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.4580159) with the function `download_point()`. 
 
 
-```{r data, eval=FALSE}
+```{r data}
 # use download_point() to obtain processed data.
 # this only has to be done once after installation
 download_point(type = "processed")
@@ -46,7 +46,7 @@ download_point(type = "processed")
 For this example aggregated and processed ion count data is loaded with grid-cell sizes of 64 pixels by 64 pixels, which as determined based on regression diagnostics yields the most accurate isotope ratio *Validation of regression assumptions* (`vignette("regression")`). In addition, ion ratio maps, which provide auxiliary information on the spatial distributions of e.g. organic inclusions, and two full (pixel-by-pixel) grid-cell datasets for the MEX analyte are loaded.
 
 
-```{r load, eval=TRUE}
+```{r load}
 # load e.g. grid aggregated counts
 load_point("map_sum_grid", "MEX", 64) 
 load_point("map_sum_grid", "MON", 64) 
@@ -60,11 +60,14 @@ The function `gg_cnts()` is designed for plotting of ion count ratios, i.e. the 
 
 
 ```{r raster}
+library(ggplot2)
+
+# raster
 gg_cnts("MEX", "12C14N", "12C", viri = "D")
 
 # save
-save_point("simple_raster_Mex_12C-14N-12C", ggplot2::last_plot(), width = 10, 
-           height = 8, unit = "cm")
+save_point("simple_raster_Mex_12C-14N-12C", last_plot(), width = 10, height = 8, 
+           unit = "cm")
 ```
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Simple ion ratio map (MEX).", out.width="80%"}
@@ -77,7 +80,7 @@ knitr::include_graphics("figures/simple_raster_Mex_12C-14N-12C.png")
 The regression diagnostics (Cook's D) for ^13^C/^12^C are calculated over the data-grid with a 100$\,\mu$m^2 (64 pixels by 64 pixels) size, as this aggregation resulted in normally distributed ion counts; see *Validation of regression assumptions* (`vignette("assumptions")`), and, as described in the paper. The core `point`[@point] functions `diag_R()` and `eval_diag()` are subsequently applied to the gridded data-sets to assess the intra- and inter-analysis ^13^C/^12^C variability comprised in, respectively, the individual grid-cells and the whole target area of the analyte.
 
 
-```{r diag1, eval=TRUE}
+```{r diag1}
 # load point
 library(point)
 

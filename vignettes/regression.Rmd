@@ -67,7 +67,7 @@ name <- c("MEX", "MON")
 # load
 name <- load_point("map_sum_grid", name, grid_cell, return_name = TRUE)
 # data frame aggregated over depth
-tb <- map_dfr(syms(name), ~dplyr::filter(eval(.x), .data$dim_name.nm == "depth"))
+tb <- map_dfr(syms(name), ~filter(eval(.x), .data$dim_name.nm == "depth"))
 ```
 
 
@@ -82,7 +82,7 @@ up by parallel execution. This can be achieved by setting `.mc_cores` to a numbe
 
 
 ```{r QQ}
-tb_QQ <- diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm,  grid.nm, 
+tb_QQ <- diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm, grid.nm, 
                 .method = "QQ", .hyp = "norm", .output = "diagnostics", 
                 .mc_cores = 4)
 ```
@@ -94,7 +94,7 @@ For the next chunk of code, only the argument `.hyp` is changed to `"ttest"`. Th
 
 
 ```{r mu}
-tb_mu <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm,  grid.nm, 
+tb_mu <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, grid.nm, 
                 .method = "QQ", .hyp = "ttest", .output = "diagnostics",
                 .mc_cores = 4)
 ```
@@ -106,7 +106,7 @@ Patterns in the homogeneity of $\hat{e}_i^*$ are another diagnostic feature for 
 
 
 ```{r CV}
-tb_CV <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, grid.nm, 
+tb_CV <- diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm, grid.nm, 
                 .method = "CV", .hyp = "bp", .output = "diagnostics",
                 .mc_cores = 4)
 ```
@@ -118,7 +118,7 @@ The independence of the distributions, or autocorrelation among measurements, is
 
 
 ```{r IR}
-tb_IR <- diag_R(tb, "13C", "12C", file.nm, sample.nm,  grid_size.nm, grid.nm, 
+tb_IR <- diag_R(tb, "13C", "12C", file.nm, sample.nm, grid_size.nm, grid.nm, 
                 .method = "IR", .hyp = "ljung", .output = "diagnostics",
                 .mc_cores = 4)  
 ```
@@ -132,9 +132,9 @@ Barplots (`ggplot` with `geom_bar()`[@ggplot2; @ggplot22016]) are chosen to visu
 
 ```{r}
 # mean ion counts for grid-cell sizes
-vc_N_13C <- dplyr::group_by(tb, grid_size.nm, species.nm) %>% 
-  dplyr::summarise(N = mean(N.pr), .groups = "drop") %>% 
-  dplyr::filter(species.nm == "13C")   
+vc_N_13C <- group_by(tb, grid_size.nm, species.nm) %>% 
+  summarise(N = mean(N.pr), .groups = "drop") %>% 
+  filter(species.nm == "13C")   
 ```
 
 
@@ -203,6 +203,8 @@ The results of the regression diagnostics are furthermore evaluated by visualisi
 
 
 ```{r QQdens}
+library(ggplot2)
+
 QQ_dens <- gg_dens(
   tb_QQ, 
   TQ,
@@ -218,9 +220,9 @@ QQ_dens <- gg_dens(
 )  
 
 # add abline
-QQ_dens <- QQ_dens + ggplot2::geom_abline(alpha = 0.7, linetype = 3) 
+QQ_dens <- QQ_dens + geom_abline(alpha = 0.7, linetype = 3) 
 # plot and save for paper
-save_point(QQ_dens, name = "point_QQ", width = 12, height = 10, unit = "cm")
+save_point(QQ_dens, name = "point_QQ", width = 15, height = 10, unit = "cm")
 ```
 
 
@@ -249,9 +251,9 @@ CV_dens <- gg_dens(
   unit = "um"
 )
 # add ab line
-CV_dens <- CV_dens + ggplot2::geom_hline(yintercept = 0, linetype = 3)
+CV_dens <- CV_dens + geom_hline(yintercept = 0, linetype = 3)
 # plot and save for paper
-save_point(CV_dens, name = "point_CV", width = 12, height = 10, unit = "cm")
+save_point(CV_dens, name = "point_CV", width = 15, height = 10, unit = "cm")
 ```
 
 

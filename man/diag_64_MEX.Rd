@@ -5,11 +5,13 @@
 \alias{diag_64_MEX}
 \title{diag_64_MEX}
 \format{
-A data frame with 33,760 rows and 10 variables:
+A data frame with 3 rows and 5 variables:
 \describe{
   \item{dim.nm}{dimension name}
   \item{`$\\hat{\\bar{R}}$`}{latex formatted grand mean R}
-  ...
+  \item{`$\hat{\epsilon}_{\bar{R}}$ (\text{\textperthousand})`}{Relative standard deviation}
+  \item{`$\\Delta AIC_{\bar{R}}`}{Difference in AIC}
+  \item{`$p_{\\bar{R}}$`}{p value}
 }
 }
 \usage{

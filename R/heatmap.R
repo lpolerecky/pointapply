@@ -33,14 +33,16 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
                      y_lab, x_sec = NULL, trans_base = -2, trans_n = 10,
                      save = FALSE) {
 
+  # load simulated data (intra-analysis isotope variability)
+  sens <- load_point("simu", "sens_IC_intra", return_name = TRUE) |>
+    rlang::sym()
+
   if (simu == "intra") {
-    # load simulated data (intra-analysis isotope variability)
-    sens <- load_point("simu", "sens_IC_intra", NULL, return_name = TRUE) |>
-      rlang::sym()
+
     # load test statistics (intra-analysis isotope variability)
-    CD <- load_point("simu", "CooksD_IC_intra", NULL, return_name = TRUE) |>
+    CD <- load_point("simu", "CooksD_IC_intra", return_name = TRUE) |>
       rlang::sym()
-    CM <- load_point("simu", "Cameca_IC_intra", NULL, return_name = TRUE) |>
+    CM <- load_point("simu", "Cameca_IC_intra", return_name = TRUE) |>
       rlang::sym()
 
     # bind the two diagnostic treatments of simulated ion (Cameca and Cooks D)
@@ -57,33 +59,48 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
         .groups = "drop"
       )
 
-    # statistics on the single common isotope
-    X <- point::stat_X(
-      eval(sens),
-      .data$trend.nm,
-      .N = N.sm,
-      .X = Xt.sm,
-      .stat = c("RS", "hat_RS")
-    ) |>
-      filter(.data$species.nm == "12C")
-
-    # named vector for secondary axis
-    conversion <- set_names(
-      X$trend.nm,
-      nm = sprintf("%.0f", X$RS_Xt.sm - X$hat_RS_N.sm)
-    )
-
     # rename methods, make nice labels
-    IC <- mutate(
+    IC <- dplyr::mutate(
       IC,
       stat.nm =
         factor(
-          stat.nm,
-          levels = c("Cameca", "Cook's D"),
-          labels = c(sigma[R]~"rejection", "Cook~s~D")
+          .data$stat.nm,
+          levels = c("Cameca", "CooksD"),
+          labels = c(sigma[R]~"rejection", "Cooks~D")
         )
     )
+
+  } else if (simu == "inter") {
+
+    # load test statistics (intra-analysis isotope variability)
+    inter <- load_point("simu", "nlme_IC_inter", return_name = TRUE) |>
+      rlang::sym()
+
+    # calculate accuracy of model classification
+    IC <- dplyr::group_by(eval(inter), .data$trend.nm, .data$execution,
+                          .data$type.nm, .data$anomaly.nm) |>
+      dplyr::summarise(
+        accuracy = acc_fun(unique(.data$anomaly.nm), .data$p_M_R_Xt.sm, ntot = dplyr::n()),
+        .groups = "drop"
+      )
+
   }
+
+  # statistics on the single common isotope
+  X <- point::stat_X(
+    eval(sens),
+    .data$trend.nm,
+    .N = rlang::sym("N.sm"),
+    .X = rlang::sym("Xt.sm"),
+    .stat = c("RS", "hat_RS")
+  ) |>
+    filter(.data$species.nm == "12C")
+
+  # named vector for secondary axis
+  conversion <- set_names(
+    X$trend.nm,
+    nm = sprintf("%.0f", X$RS_Xt.sm - X$hat_RS_N.sm)
+  )
 
   # grouping
   grp1 <- enquo(grp1)
@@ -169,12 +186,22 @@ heat_map <- function(simu, x, y, stat, grp1, grp2, conversion, ttl, x_lab,
     themes_IC(base = ggplot2::theme_bw())
 
   if (isTRUE(save)) {
+    # name
+    nm <- paste0("heat_sens_", simu)
+    # dimensions
+    if (simu == "intra") {
+      width <- 16
+      height <- 14
+    } else if (simu == "inter") {
+      width <- 12
+      height <- 10.5
+    }
     # save
-    save_point("heat_sens_intra", p, width = 16, height = 14, unit = "cm")
+    save_point(nm, p, width = width, height = height, unit = "cm")
 
     message(
       paste0("The performance of the intra-analysis isotope variability test is",
-      " saved with name: 'heat_sens_intra'.")
+      " saved with name: '",nm , "'.")
     )
   }
   # and return
@@ -257,6 +284,7 @@ rayleigh_trans <- function(base, frac){
 
 }
 
+# this holds the cut-off p value used in the study
 acc_fun <- function(x, y, ntot) {
   if(x != 0) return(sum(y < 0.001) / ntot)
   if(x == 0) return(1 - (sum(y < 0.001) / ntot))

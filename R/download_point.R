@@ -1,10 +1,10 @@
 #' Download, write and plot ion count data
 #'
 #' \code{download_point()} is a wrapper around zen4R in order to download the
-#' large matlab files as well as processed data cubes and simulated data.
+#'  large matlab files as well as processed data cubes and simulated data.
 #' \code{write_point()} stores processed  matlab files in the correct directory.
 #' \code{save_point()} stores ggplots in the correct directory for usage in the
-#' paper.
+#'  paper.
 #' \code{load_point()} load .rda files of the package.
 #'
 #' @param obj Character string of object to store.
@@ -96,9 +96,19 @@ write_point <- function (obj, name = NULL) {
 #' @export
 save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
                         unit, type_ms = "preprint",
-                        output_dir = fs::path_package("pointapply", "vignettes")
-                        ) {
+                        output_dir = NULL) {
 
+  # default to paper directory
+  if (is.null(output_dir)) {
+    output_dir <- fs::path_package("pointapply", "paper", type_ms)
+  }
+
+  # check for dir figures (otherwise make one)
+  if (!fs::dir_exists(fs::path(output_dir, "figures"))) {
+    fs::dir_create(fs::path(output_dir, "figures"))
+  }
+
+  # save figure
   args <- rlang::list2(
     filename = fs::path(output_dir, "figures", name, ext = "png"),
     plot = ggplot,
@@ -107,12 +117,13 @@ save_point <- function (name, ggplot = ggplot2::last_plot(), width, height,
     unit = unit
   )
   rlang::exec("ggsave", !!! args)
+
   # if loaded exists then it is in development mode
   if (exists("loaded", "package:pointapply")) {
     # copy whole dir to paper
     fs::dir_copy(
-      fs::path_package("pointapply", "vignettes", "figures"),
       fs::path_package("pointapply", "paper", type_ms, "figures"),
+      fs::path_package("pointapply", "vignettes", "figures"),
       overwrite = TRUE
     )
   }

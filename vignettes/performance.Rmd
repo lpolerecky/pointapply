@@ -57,13 +57,13 @@ The synthetic data can loaded with `load_point()`
 
 ```{r loadsimu}
 # load simulated data (intra-analysis isotope variability)
-load_point("simu", "sens_IC_intra", NULL)
+load_point("simu", "sens_IC_intra")
 # load test statistics (intra-analysis isotope variability)
-load_point("simu", "CooksD_IC_intra", NULL)
-load_point("simu", "Cameca_IC_intra", NULL)
+load_point("simu", "CooksD_IC_intra")
+load_point("simu", "Cameca_IC_intra")
 
 # load test statistics (inter-analysis isotope variability)
-load_point("simu", paste0("eval_inter_", 1:10), NULL)
+load_point("simu", "nlme_IC_inter")
 ```
 
 
@@ -81,7 +81,7 @@ The synthesised data include 10 repetitions for each of the set of variable comb
 
 $$\text{accuracy} = \frac{\text{Treu Positive (TP)}\, + \,\text{Treu Negative (TN)}}{\text{total}} \, \text{,}$$
 
-as also shown in the paper. To apply this to our synthesised dataset we use the function `acc_fun()` provides in the `pointapply` package within a `summarise()` call from the `dplyr` package [@dplyr], and where the data is first grouped (with `dplyr::group_by()`) according to before mentioned variable combinations.
+as also shown in the paper.
 
 In addition, the sensitivity range for ionization efficiency trend is converted to the excess ionization efficiency, which is used as the quantitative measure of this analytical factor throughout the paper. For this we need to subtract the relative standard deviation of the common isotope $\epsilon_{X^{a}}$ from the theoretical standard deviation $\hat{\epsilon}_{N^{a}}$ (Section 4.1 and Supplementary Section 2.1 of the paper), and this can be easily done with the `stat_Xt()` function of the `point` package. Here, we set the argument `.stat` to `c("RS", "hat_RS")` to only return the  $\epsilon_{X^{a}}$ and $\hat{\epsilon}_{N^{a}}$, respectively.
 
@@ -103,7 +103,7 @@ The model classification accuracy for all possible combinations of the two conti
 
 
 ```{r intraheat}
-# xaxis titles
+# x axis titles
 xlab1 <- expression(
   "isotope variation in substrate "*Delta[B - A] * " [\u2030] ("*f[B] == 1/6*")"
 )
@@ -137,57 +137,40 @@ knitr::include_graphics("figures/heat_sens_intra.png")
 
 The accuracy of the inter-isotope variability test does not significantly differ from the procedure outlined for the intra-isotope variability test. Because of the large computational demands of this synthetic dataset, the performance metric were broken up into 10 pieces. The following code assembles them again into one data frame.
 
-
-```{r loadinter}
-# combine datasets
-eval_inter <- purrr::map_dfr(rlang::syms(simu_inter), eval)
-```
-
-
 Data transformation and model classification accuracy calculations for inter-variability are then much the same as before.
-
-
-```{r transinter}
-# calculate accuracy of model classification
-tb_inter <- dplyr::group_by(eval_inter, trend.nm, execution, type.nm, anomaly.nm) %>% 
-  dplyr::summarise(
-    accuracy = acc_fun(unique(anomaly.nm), p_inter, ntot = n()), 
-    .groups = "drop"
-    ) 
-```
-
 
 Similar is also the call for plotting, which consists again of a heatmap, but now without the additional plot panels, as there are no additional nominal factors to test for. The only difference is the addition of a secondary axis which again is used to exemplify the sensitivity of the test statistic to isotopic perturbation as a fractional size difference (so, whilst fixing the isotopic composition of the anomalous analyses within the whole set analyses)
 
 
 ```{r interheatmap}
+# x axis titles
+xlab1 <- expression(
+  "isotope variation in substrate "*Delta[B - A] *" [\u2030] ("*f[B] == 1/10*")"
+)
+
+xlab2 <- expression(
+  "fractional size of inclusion "*f[B]~"("*Delta[B - A] == -2 ~ "[\u2030])"
+)
+  
 # heatmap inter-isotope variability test
-hmap2 <- heat_map(
-  tb_inter,
+heat_map(
+  "inter",
   x = anomaly.nm, 
   y = trend.nm,
   stat = accuracy,
   grp1 = NULL,
   grp2 = NULL,
-  conversion = vc_RS,
   ttl = "Intra-isotope variability",
-  x_lab = expression(
-    "isotope variation in substrate "*Delta[B - A] *" [\u2030] ("*f[B] == 1/10*")"
-    ),
+  x_lab = xlab1,
   y_lab = "excess ionization [%]",
-  x_sec = expression(
-    "fractional size of inclusion "*f[B]~"("*Delta[B - A] == -2 ~ "[\u2030])"
-    )
-  )
-
-# save and print
-save_point("heat_sens_inter", hmap2, width = 12, height = 10.5, unit = "cm", 
-           on_build)
+  x_sec = xlab2,
+  save = TRUE
+)
 ```
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap="Heatmap for model classification accuracy of the inter-isotope variability test", out.width="80%"}
- knitr::include_graphics("figures/heat_sens_inter.png")
+knitr::include_graphics("figures/heat_sens_inter.png")
 ```
 
 

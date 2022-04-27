@@ -25,6 +25,8 @@ gg_cnts(
 
 \item{viri}{Character string selecting the viriditas color scheme.}
 
+\item{res}{Pixel resolution.}
+
 \item{grid_cell}{Pixel size of grid_cells (one side of the square).}
 
 \item{scaler}{Numeric converting the pixels to metric dimension of
@@ -35,10 +37,6 @@ the grid layout
 (see \code{pointapply::\link[pointapply:gg_sketch]{gg_sketch}}).}
 
 \item{save}{Boolean whether to save the plot as an png.}
-
-\item{height}{Pixels of height.}
-
-\item{width}{Pixels of width.}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.

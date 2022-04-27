@@ -9,7 +9,7 @@
 \usage{
 download_point(type = "all")
 
-write_point(obj, name)
+write_point(obj, name = NULL)
 
 save_point(
   name,
@@ -18,7 +18,7 @@ save_point(
   height,
   unit,
   type_ms = "preprint",
-  output_dir = fs::path_package("pointapply", "vignettes")
+  output_dir = NULL
 )
 
 load_point(type, name, grid_cell = NULL, return_name = FALSE)
@@ -58,9 +58,9 @@ Raw matlab files are stored in the directories
 }
 \description{
 \code{download_point()} is a wrapper around zen4R in order to download the
-large matlab files as well as processed data cubes and simulated data.
+ large matlab files as well as processed data cubes and simulated data.
 \code{write_point()} stores processed  matlab files in the correct directory.
 \code{save_point()} stores ggplots in the correct directory for usage in the
-paper.
+ paper.
 \code{load_point()} load .rda files of the package.
 }

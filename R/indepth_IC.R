@@ -4,6 +4,7 @@
 #' Figure 8 and Supplementary Figure 9.
 #'
 #' @param title Character string for the analyte ("MEX" or "MON") to be used.
+#' @param grid_cell Selected grid cell.
 #' @param ion1_thr Character string for ion in the enumerator of ion ratio of
 #'  the map.
 #' @param ion2_thr Character string for ion in the denominator of ion ratio of
@@ -78,8 +79,6 @@ gg_point <- function(title, grid_cell, ion1_thr, ion2_thr, thr, ion1_R, ion2_R,
     point::cov_R(c(ion1_thr, ion2_thr), .data$sample.nm, .data$file.nm,
                  .data$grid.nm, .data$dim_name.nm, .data$height.mt,
                  .data$width.mt) |>
-    # point::cov_R(ions, .data$height.mt, .data$width.mt, .data$grid.nm,
-    #              .data$sample.nm) %>%
     dplyr::transmute(
       height.mt = .data$height.mt,
       width.mt = .data$width.mt,

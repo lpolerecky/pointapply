@@ -6,8 +6,7 @@
 #' @param ion1 A character string constituting the rare isotope ("13C").
 #' @param ion2 A character string constituting the common isotope ("12C").
 #' @param viri Character string selecting the viriditas color scheme.
-#' @param height Pixels of height.
-#' @param width Pixels of width.
+#' @param res Pixel resolution.
 #' @param grid_cell Pixel size of grid_cells (one side of the square).
 #' @param scaler Numeric converting the pixels to metric dimension of
 #'  measurement (default is the conversion used in this study).
@@ -119,9 +118,9 @@ dim_aggregate_ <- function(IC, grid_cell, dim) {
   dplyr::filter(IC, .data$dim_name.nm == dim) |>
     dplyr::arrange(!! rlang::sym(dims[names(dims) != dim])) |>
     dplyr::group_by(
-      species.nm,
+      .data$species.nm,
       !! rlang::sym(dims[names(dims) != dim]),
-      depth.mt = dplyr::ntile(depth.mt, grid_cell)
+      depth.mt = dplyr::ntile(.data$depth.mt, grid_cell)
       ) |>
     dplyr::summarise(
       # sum counts

@@ -1,23 +1,23 @@
-#' Title
+#' Sensitivity test of diagnostics
 #'
-#' @param yield
-#' @param R
-#' @param reps
-#' @param ion1
-#' @param ion2
-#' @param reference
-#' @param diag
-#' @param type
-#' @param save
-#' @param mc_cores
+#' @param yield Ionization yield.
+#' @param R Isotope ratio.
+#' @param reps Repetitions.
+#' @param ion1 Rare ion.
+#' @param ion2 Common ion.
+#' @param reference Reference standard.
+#' @param diag Name of the diagnostics test (either CooksD or Cameca).
+#' @param type Type of diagnostics (either "intra"- or "inter"-analysis).
+#' @param save Boolean whether to save the data.
+#' @param mc_cores Number of cores to use for parallel execution.
 #'
-#' @return
+#' @return A tibble with synthetic data or diagnostic results.
+#'
 #' @export
 #'
-#' @examples
 test_sensitivity <- function(yield, R, reps, ion1 = "13C", ion2 = "12C",
-                             reference = "VPDB", diag = "sens",
-                             type = "intra", save = FALSE, mc_cores = 1) {
+                             reference = "VPDB", diag = "sens",type = "intra",
+                             save = FALSE, mc_cores = 1) {
 
   # types of R variation
   if (type == "intra") {
@@ -25,6 +25,7 @@ test_sensitivity <- function(yield, R, reps, ion1 = "13C", ion2 = "12C",
   } else if (type == "inter") {
     scenario <- "ideal"
   }
+
   # seeds for number generation
   n_tot <- prod(sapply(list(yield, scenario, R), length))
   seed <- 1:n_tot
@@ -52,21 +53,24 @@ test_sensitivity <- function(yield, R, reps, ion1 = "13C", ion2 = "12C",
       } else if (diag == "CooksD") {
 
         # diagnostics CooksD
-        point::diag_R(x, "13C", "12C", type.nm, trend.nm, force.nm, spot.nm,
-                      .X = Xt.sm, .N = N.sm)
+        point::diag_R(x, "13C", "12C", .data$type.nm, .data$trend.nm,
+                      .data$force.nm, .data$spot.nm,
+                      X = rlang::sym("Xt.sm"), .N = rlang::sym("N.sm"))
 
       } else if (diag == "Cameca") {
 
         # diagnostics Cameca
-        x <- point::diag_R(x , "13C", "12C", type.nm, trend.nm, force.nm,
-                           spot.nm, bl.nm, .X = Xt.sm, .N = N.sm,
+        x <- point::diag_R(x , "13C", "12C", .data$type.nm, .data$trend.nm,
+                           .data$force.nm, .data$spot.nm, .data$bl.nm,
+                           X = rlang::sym("Xt.sm"), .N = rlang::sym("N.sm"),
                            .method = "Cameca", .output = "diagnostic")
         # evaluation of performance (intra-analysis isotope test)
-        x <- point::eval_diag(x, "13C", "12C", type.nm, trend.nm, force.nm,
-                              spot.nm, .X = Xt.sm, .N = N.sm)
+        x <- point::eval_diag(x, "13C", "12C", .data$type.nm, .data$trend.nm,
+                              .data$force.nm, .data$spot.nm,
+                              X = rlang::sym("Xt.sm"),.N = rlang::sym("N.sm"))
         # extract distinct groups omitting block-wise means
-        dplyr::distinct(x, type.nm, trend.nm, force.nm, spot.nm,
-                        .keep_all = TRUE)
+        dplyr::distinct(x, .data$type.nm, .data$trend.nm, .data$force.nm,
+                        .data$spot.nm, .keep_all = TRUE)
 
       }
     }
@@ -79,12 +83,15 @@ test_sensitivity <- function(yield, R, reps, ion1 = "13C", ion2 = "12C",
 
   } else if (type == "inter") {
 
+    # only one diagnostic option
+    diag <- "nlme"
+
     # cross all possible parameter combinations
     ls_parms <- tidyr::crossing(.sys = yield, .baseR = R) %>%
       tibble::add_column(.seed = seed)
 
     # function wrapper to prepare for mcMap
-    inner <- function(.sys, .baseR, .seed) {
+    inner2 <- function(.sys, .baseR, .seed) {
 
       # sensitivity run
       point::simu_R(.sys = .sys, .baseR = .baseR, .type = scenario,
@@ -94,37 +101,37 @@ test_sensitivity <- function(yield, R, reps, ion1 = "13C", ion2 = "12C",
 
     # parallel execution for producing ion count data
     tb <- rlang::inject(
-      parallel::mcMap(inner, !!! ls_parms, mc.cores = mc_cores)
+      parallel::mcMap(inner2, !!! ls_parms, mc.cores = mc_cores)
     ) |>
       dplyr::bind_rows()
 
     # parallel execution for mixed sets of isotope analysis
     tb <- parallel::mcMap(
-      function(x, y) {
-        x <- mix_R(simu = tb, R = x, n = y, reps = reps)
-        if (diag == "sens") {
+      function(n) {
 
-          # return sensitivity run
-          x
+      mix_R(simu = tb, R = R, n = n, reps = reps) |>
+        tibble::add_column(study.nm  = n) |>
+        point:::diag_R("13C", "12C", .data$type.nm, .data$trend.nm,
+                       .data$anomaly.nm, .data$study.nm, .data$spot.nm,
+                       .nest = rlang::sym("spot.nm"), .X = rlang::sym("Xt.sm"),
+                       .N = rlang::sym("N.sm")) |>
+          # only keep inter-analysis test statistics
+          dplyr::distinct(
+            dplyr::across(c(.data$trend.nm, .data$anomaly.nm)),
+            .keep_all = TRUE
+          )
 
-        } else if (diag == "nlme") {
 
-          point:::diag_R(x, "13C", "12C", type.nm, trend.nm, anomaly.nm,
-                         study.nm, spot.nm, .nest = study.nm,
-                         .X = Xt.sm, .N = N.sm)
-
-        }
       },
-      R,
       1:reps,
       mc.cores = mc_cores
     ) |>
       dplyr::bind_rows()
-
-
   }
 
+
   if (isTRUE(save)) {
+    # if (type == "inter") type <- paste0(type, n)
     nm <- paste("simu", diag, "IC", type, sep = "_")
     write_point(tb, nm)
 
@@ -136,7 +143,6 @@ test_sensitivity <- function(yield, R, reps, ion1 = "13C", ion2 = "12C",
   tb
 }
 
-
 # isotope anomaly mixer
 mix_R <- function(simu, R, n, reps) {
   purrr::map_dfr(
@@ -146,8 +152,7 @@ mix_R <- function(simu, R, n, reps) {
       R = .x,
       seed = n,
       reps = reps
-    ),
-    .id = "study.nm"
+    )
   )
 }
 
@@ -157,5 +162,5 @@ mix_R_ <- function(simu, R, seed, reps) {
   base <- dplyr::filter(simu, .data$base.nm == 0, .data$spot.nm != spot_samp)
   anomaly <- dplyr::filter(simu, .data$base.nm == R, .data$spot.nm == spot_samp)
   dplyr::bind_rows(base, anomaly) |>
-    mutate(anomaly.nm = R, .before = .data$base.nm)
+    dplyr::mutate(anomaly.nm = R, .before = .data$base.nm)
 }

@@ -286,16 +286,18 @@ dim_folds <- function(IC, geom, res, grid_cell){
   # the mutation differs depending on the chosen geom
   calcs <- rlang::exprs(
     grid = as.numeric(res) + as.numeric(grid_cell),
-    raster = depth.mt + as.integer(res) +  as.integer(grid_cell / 2)
+    raster = .data$depth.mt + as.integer(res) +  as.integer(grid_cell / 2)
   )
 
   # transform 3rd dimension into 2D grid and finally remove the 3rd dimension
   dplyr::mutate(
     IC,
     height.mt =
-      dplyr::if_else(.data$dim_name.nm == "height", !! calcs[[geom]], height.mt),
+      dplyr::if_else(.data$dim_name.nm == "height", !! calcs[[geom]],
+                     .data$height.mt),
     width.mt =
-      dplyr::if_else(.data$dim_name.nm == "width", !! calcs[[geom]], width.mt)
+      dplyr::if_else(.data$dim_name.nm == "width", !! calcs[[geom]],
+                     .data$width.mt)
   ) |>
     dplyr::select(-.data$depth.mt)
 

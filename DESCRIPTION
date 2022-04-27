@@ -43,7 +43,6 @@ Suggests:
     grid,
     tidyr,
     tibble,
-    cubelyr,
     R.matlab,
     tidyselect,
     usethis,
