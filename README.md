@@ -1,7 +1,13 @@
 
 # pointapply
 
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/MartinSchobben/pointapply/workflows/R-CMD-check/badge.svg)](https://github.com/MartinSchobben/pointapply/actions)
+[![Codecov test
+coverage](https://codecov.io/gh/MartinSchobben/pointapply/branch/master/graph/badge.svg)](https://app.codecov.io/gh/MartinSchobben/pointapply?branch=master)
 [![DOI](https://zenodo.org/badge/340077309.svg)](https://zenodo.org/badge/latestdoi/340077309)
+<!-- badges: end -->
 
 The R package *pointapply* contains the code and data to reconstruct the
 publication: Martin Schobben, Michiel Kienhuis, and Lubos Polerecky.

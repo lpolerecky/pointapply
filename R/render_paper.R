@@ -34,7 +34,7 @@ render_paper <- function(
   # make links
   fs::link_create(
     fs::path_package("pointapply", "paper", "templates"),
-    fs::path(fs::path_package("pointapply", "paper", type_ms), "templates")
+    fs::path(paper_dirs[1], "templates")
   ) # templates
 
   # make bookdown_yml
@@ -44,19 +44,19 @@ render_paper <- function(
     "rmd_files: [\"index.Rmd\", \"main.Rmd\", \"SI.Rmd\",  \"references.Rmd\"]",
     paste0("output_dir: ", output_dir) ,
     # "clean: [\"\"]",
-    file = fs::path_package("pointapply", "paper", type_ms, "_bookdown.yml"),
+    file = fs::path(paper_dirs[1], "_bookdown.yml"),
     sep = "\n"
   )
 
   # render paper
   rmarkdown::render_site(
-    input = fs::path_package("pointapply", "paper", type_ms),
+    input = paper_dirs[1],
     encoding = 'UTF-8'
   )
 
   # copy figures
   fs::dir_copy(
-    fs::path_package("pointapply", "paper", type_ms, "figures"),
+    fs::path(paper_dirs[1], "figures"),
     fs::path(output_dir, "figures"),
     overwrite = TRUE
   )
