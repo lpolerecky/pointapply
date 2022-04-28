@@ -31,16 +31,16 @@ always_allow_html: true
 
 ```{r setup, include=FALSE}
 # Default knitr options
-	knitr::opts_chunk$set(
-	  echo = FALSE, 
-		message = FALSE,
-		warning = FALSE,
-		# fig.pos = 'p', # place figs on own page
-		dpi = 300, 
-		digits = 2,
-		results = 'asis',
-		dev = "CairoPDF"
-		)
+knitr::opts_chunk$set(
+  echo = FALSE, 
+	message = FALSE,
+	warning = FALSE,
+	# fig.pos = 'p', # place figs on own page
+	dpi = 300, 
+	digits = 2,
+	results = 'asis'
+	# dev = "CairoPDF"
+)
 ```
 
 
@@ -57,19 +57,19 @@ SI <- function(x, unit, not = "fl", word = knitr::pandoc_to("docx")) {
   if (not == "sc") x <- sprintf("%.2e", x)
   if (word) {
     paste0(x, stringr::str_c(unit, collapse = "/")) 
-    } else {
-      paste0("$\\SI{",x,"}{\\", stringr::str_c(unit, collapse = "\\"),"}$")
-      }
+  } else {
+    paste0("$\\SI{",x,"}{\\", stringr::str_c(unit, collapse = "\\"),"}$")
   }
+}
 # deal with per mill latex vs docx
 permille <- function(x, sign = FALSE, word = knitr::pandoc_to("docx")){
   if (sign) x <- sprintf("%+.1f", x)  else x <- sprintf("%.1f", x)  
   if (word) {
     paste0(x, "‰")
-    } else {
-      paste0("$", x, "\\text{\\textperthousand}$")
-      }
+  } else {
+    paste0("$", x, "\\text{\\textperthousand}$")
   }
+}
 ```
 
 
@@ -85,7 +85,7 @@ var_mean <- function(data, plane, grid_cell, var) {
   dplyr::filter(data, dim_name.nm == plane, grid.nm %in% grid_cell) %>% 
     dplyr::pull({{ var }}) %>% 
     mean() 
-  }
+}
 ```
   
 
