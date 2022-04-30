@@ -1,0 +1,15 @@
+pandoc: 2.7.3
+pkgdown: 2.0.3
+pkgdown_sha: ~
+articles:
+  accuracy: accuracy.html
+  data: data.html
+  performance: performance.html
+  raster: raster.html
+  regression: regression.html
+  simulation: simulation.html
+last_built: 2022-04-30T09:05Z
+urls:
+  reference: https://martinschobben.github.io/pointapply/reference
+  article: https://martinschobben.github.io/pointapply/articles
+
