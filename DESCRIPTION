@@ -1,6 +1,6 @@
 Package: pointapply
 Type: Package
-Title: Package to apply point functionality to real and synthetic data
+Title: Package to apply point Functionality to Real and Synthetic Data
 Year: 2021
 Version: 0.1.0.9001
 Authors@R: 
@@ -14,7 +14,7 @@ Description: This package accompanies the paper: New methods to detect isotopic
   heterogeneity with Secondary Ion Mass Spectrometry, by Martin Schobben, 
   Michiel Kienhuis, and Lubos Polerecky. This paper revolves around the point 
   function diag_R() which allows an assessment of isotopic heterogeneity in SIMS 
-  analyses. The package ensures the complete reproduction of this work.
+  analyses. This package ensures the complete reproduction of this work.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
@@ -54,7 +54,8 @@ Suggests:
     stats,
     bibtex,
     broom.mixed,
-    covr
+    covr,
+    pkgdown
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
@@ -62,5 +63,6 @@ Config/testthat/edition: 3
 LinkingTo: 
     cpp11
 SystemRequirements: C++11
-Remotes:  
+Remotes: 
     MartinSchobben/point
+URL: https://martinschobben.github.io/pointapply/

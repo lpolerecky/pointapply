@@ -15,7 +15,7 @@ publication: Martin Schobben, Michiel Kienhuis, and Lubos Polerecky.
 Mass Spectrometry*, preprint on [Eartharxiv](https://eartharxiv.org/).
 
 This paper assesses the performance of the application of the `diag_R()`
-function of the sister package *point* (Schobben 2022a) in detecting
+function of the sister package *point* (Schobben 2022) in detecting
 isotope heterogeneity in natural substrates.
 
 # Data
@@ -48,8 +48,8 @@ render_paper(title = "Schobbenetal_SIMS_method", output_dir = "mydir")
 The construction of the R (R Core Team 2022) package *pointapply* and
 associated documentation was aided by the packages; *devtools* (Wickham,
 Hester, et al. 2021), *roxygen2* (Wickham, Danenberg, et al. 2021),
-*testthat* (Wickham 2022), *vdiffr* (Henry et al. 2022), and *fs*
-(Hester, Wickham, and Csárdi 2021).
+*testthat* (Wickham 2022), *vdiffr* (Henry et al. 2022), *cpp11* (Hester
+and François 2021), and *fs* (Hester, Wickham, and Csárdi 2021).
 
 The book: *R packages: organize, test, document, and share your code*,
 by Wickham (2015) is a great guide for learning how to build packages.
@@ -68,7 +68,7 @@ The package *rlang* (Henry and Wickham 2022) was used for tidy
 evaluation.
 
 Some specialised packages where used, notably; *readmat* for loading the
-matlab LANS files (Schobben 2022b) and *MASS* (Ripley 2022; Venables and
+matlab LANS files (**readmat?**) and *MASS* (Ripley 2022; Venables and
 Ripley 2002) for 2D density estimates.
 
 The data download from Zenodo with an api is facilitated by *zen4R*
@@ -77,8 +77,9 @@ The data download from Zenodo with an api is facilitated by *zen4R*
 The documentation and paper was written with *knitr* (Xie 2022b, 2014,
 2015), *rmarkdown* (Allaire, Xie, McPherson, et al. 2022; Xie, Allaire,
 and Grolemund 2018; Xie, Dervieux, and Riederer 2020), *bookdown* (Xie
-2022a, 2016), *rticles* (Allaire, Xie, Dervieux, et al. 2022) and
-*bibtex* (Francois 2020).
+2022a, 2016), *pkgdown* (Wickham, Hesselberth, and Salmon 2022),
+*rticles* (Allaire, Xie, Dervieux, et al. 2022) and *bibtex* (Francois
+2020).
 
 ## Installation
 
@@ -185,6 +186,13 @@ Features*. <https://CRAN.R-project.org/package=rlang>.
 
 </div>
 
+<div id="ref-cpp11" class="csl-entry">
+
+Hester, Jim, and Romain François. 2021. *Cpp11: A c++11 Interface for
+r’s c Interface*. <https://CRAN.R-project.org/package=cpp11>.
+
+</div>
+
 <div id="ref-fs" class="csl-entry">
 
 Hester, Jim, Hadley Wickham, and Gábor Csárdi. 2021. *Fs: Cross-Platform
@@ -224,14 +232,8 @@ and Ripley’s MASS*. <http://www.stats.ox.ac.uk/pub/MASS4/>.
 
 <div id="ref-point" class="csl-entry">
 
-Schobben, Martin. 2022a. *Point: Reading, Processing, and Analysing Raw
+Schobben, Martin. 2022. *Point: Reading, Processing, and Analysing Raw
 Ion Count Data*. <https://martinschobben.github.io/point/>.
-
-</div>
-
-<div id="ref-readmat" class="csl-entry">
-
-———. 2022b. *Readmat: Readmat Allows Fast Reading of Matlab Files*.
 
 </div>
 
@@ -307,6 +309,14 @@ Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2022.
 
 Wickham, Hadley, and Maximilian Girlich. 2022. *Tidyr: Tidy Messy Data*.
 <https://CRAN.R-project.org/package=tidyr>.
+
+</div>
+
+<div id="ref-pkgdown" class="csl-entry">
+
+Wickham, Hadley, Jay Hesselberth, and Maëlle Salmon. 2022. *Pkgdown:
+Make Static HTML Documentation for a Package*.
+<https://CRAN.R-project.org/package=pkgdown>.
 
 </div>
 

@@ -22,9 +22,9 @@ pkgs <- c(
 # plots
     "ggplot2", "scales", "ggrepel", "RColorBrewer",
 # package dev
-    "devtools", "roxygen2", "rlang", "fs", "testthat", "vdiffr",
+    "devtools", "roxygen2", "rlang", "fs", "testthat", "vdiffr", "cpp11", 
 # documentation and paper
-    "knitr", "rmarkdown", "bookdown", "rticles", "kableExtra", "bibtex",
+    "knitr", "rmarkdown", "bookdown", "rticles", "kableExtra", "bibtex", "pkgdown",
 # reading and downloading data
     "readmat", "R.matlab", "zen4R",
 # statistics
@@ -95,7 +95,7 @@ render_paper(title = "Schobbenetal_SIMS_method", output_dir = "mydir")
 
 ## Credits
 
-The construction of the R [@rversion] package *pointapply* and associated documentation was aided by the packages; *devtools* [@devtools], *roxygen2* [@roxygen2], *testthat* [@testthat], *vdiffr* [@vdiffr], and *fs* [@fs].
+The construction of the R [@rversion] package *pointapply* and associated documentation was aided by the packages; *devtools* [@devtools], *roxygen2* [@roxygen2], *testthat* [@testthat], *vdiffr* [@vdiffr], *cpp11* [@cpp11], and *fs* [@fs].
 
 The book: *R packages: organize, test, document, and share your code*, by @Wickham2015 is a great guide for learning how to build packages. 
 
@@ -109,7 +109,7 @@ Some specialised packages where used, notably; *readmat* for loading the matlab 
 
 The data download from Zenodo with an api is facilitated by *zen4R* [@zen4R].
 
-The documentation and paper was written with *knitr* [@knitr; @knitr2014; @knitr2015], *rmarkdown* [@rmarkdown; @rmarkdown2018; @rmarkdown2020], *bookdown* [@bookdown; @bookdown2016], *rticles* [@rticles] and *bibtex* [@bibtex].
+The documentation and paper was written with *knitr* [@knitr; @knitr2014; @knitr2015], *rmarkdown* [@rmarkdown; @rmarkdown2018; @rmarkdown2020], *bookdown* [@bookdown; @bookdown2016], *pkgdown* [@pkgdown], *rticles* [@rticles] and *bibtex* [@bibtex].
 
 
 ## Installation
