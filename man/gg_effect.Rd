@@ -20,7 +20,10 @@ gg_effect(
   .species = NULL,
   .t = NULL,
   .ion1 = "13C",
-  .ion2 = "12C"
+  .ion2 = "12C",
+  .name = "map_sum_grid",
+  .name_raster = "map_raster_image",
+  .sig_codes = c(0.1, 0.01, 0.001)
 )
 
 gg_sketch(grid_cell = 64, res = 256, scaler = 40/256, save)
@@ -60,6 +63,12 @@ measurement (default is the conversion used in this study).}
 \item{.ion1}{Character string for rare isotope (default = "13C").}
 
 \item{.ion2}{Character string for common isotope (default = "12C").}
+
+\item{.name}{Name of the grid-cell file.}
+
+\item{.name_raster}{Name of the raster file.}
+
+\item{.sig_codes}{The breaks for the scale of inter-analysis significance.}
 }
 \value{
 \code{\link[ggplot2:ggplot]{ggplot}}.

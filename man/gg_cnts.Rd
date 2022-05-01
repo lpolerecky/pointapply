@@ -13,7 +13,8 @@ gg_cnts(
   grid_cell = 64,
   scaler = 40/256,
   compilation = FALSE,
-  save = FALSE
+  save = FALSE,
+  .name = "map_raster_image"
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ the grid layout
 (see \code{pointapply::\link[pointapply:gg_sketch]{gg_sketch}}).}
 
 \item{save}{Boolean whether to save the plot as an png.}
+
+\item{.name}{Name of the raster file.}
 }
 \value{
 \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.

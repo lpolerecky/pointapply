@@ -6,9 +6,9 @@
       # A tibble: 3 x 5
         dim_name.nm `$\\hat{\\bar{R}}$` `$\\hat{\\epsilon}_{\\bar{R~` `$\\Delta AIC_~`
         <chr>                     <dbl>                         <dbl>            <dbl>
-      1 height                   0.0103                          2.33            11.6 
-      2 width                    0.0103                          1.94             6.29
-      3 depth                    0.0103                          2.20             4.58
+      1 depth                    0.0103                          2.20             4.58
+      2 height                   0.0103                          2.33            11.6 
+      3 width                    0.0103                          1.94             6.29
       # ... with 1 more variable: `$p_{\\bar{R}}$` <dbl>
 
 ---
@@ -19,9 +19,9 @@
       # A tibble: 3 x 5
         dim_name.nm `$\\hat{\\bar{R}}$` `$\\hat{\\epsilon}_{\\bar{R~` `$\\Delta AIC_~`
         <chr>                     <dbl>                         <dbl>            <dbl>
-      1 height                   0.0103                          8.13            40.2 
-      2 width                    0.0103                          1.31            -3.32
-      3 depth                    0.0103                          5.56            36.8 
+      1 depth                    0.0103                          5.56            36.8 
+      2 height                   0.0103                          8.13            40.2 
+      3 width                    0.0103                          1.31            -3.32
       # ... with 1 more variable: `$p_{\\bar{R}}$` <dbl>
 
 # 3D configuration can be converted to 2D configuration

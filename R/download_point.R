@@ -31,6 +31,13 @@
 #' @export
 download_point <- function (type = "all") {
 
+  if (!requireNamespace("zen4R", quietly = TRUE)) {
+    stop(
+      "Package \"zen4R\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
   path_int <- fs::path_package("pointapply", "data")
   # create extdata if no existing
   if (!fs::dir_exists(fs::path(fs::path_package("pointapply"), "extdata"))) {

@@ -24,6 +24,10 @@
 #' @param .ion1 Character string for rare isotope (default = "13C").
 #' @param .ion2 Character string for common isotope (default = "12C").
 #' @param save Boolean whether to save the plot as an png.
+#' @param .name Name of the grid-cell file.
+#' @param .name_raster Name of the raster file.
+#' @param .sig_codes The breaks for the scale of inter-analysis significance.
+#'
 #'
 #' @return \code{\link[ggplot2:ggplot]{ggplot}}.
 #'
@@ -32,10 +36,12 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
                       res = 256, grid_cell = 64, scaler = 40 / 256,
                       label = "latex", save = FALSE, .X = NULL, .N = NULL,
                       .species = NULL, .t = NULL, .ion1 = "13C",
-                      .ion2 = "12C") {
+                      .ion2 = "12C", .name = "map_sum_grid",
+                      .name_raster = "map_raster_image",
+                      .sig_codes = c(0.1, 0.01, 0.001)) {
 
   # grid data
-  IC <- load_point("map_sum_grid", title, grid_cell, return_name = TRUE)  |>
+  IC <- load_point(.name, title, grid_cell, return_name = TRUE)  |>
     rlang::sym()
 
   # quoting the call (user-supplied expressions) and complete if NULL
@@ -56,7 +62,7 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
   # diagnostics
   IC <- rlang::inject(
     point::diag_R(!!IC, .ion1, .ion2, dim_name.nm, sample.nm, file.nm,
-                  grid.nm, .nest = grid.nm, .output = "complete", .meta = TRUE)
+                  grid.nm, .nest = grid.nm, .meta = TRUE)
   )
 
   # base raster image for ion ratios
@@ -69,17 +75,22 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
     res = res,
     grid_cell = grid_cell,
     scaler = scaler,
-    compilation = TRUE
+    compilation = TRUE,
+    .name = .name_raster
   )
 
   # unfold metadata and select distinct grid-cell per plane
   meta <- point::unfold(IC, merge = FALSE) |>
-    dplyr::distinct(.data$dim_name.nm, .data$grid.nm, .keep_all = TRUE) |>
-    dplyr::select(.data$depth.mt, .data$width.mt, .data$height.mt)
-  # select grid-cell per plane for IC
-  IC <- dplyr::distinct(IC, .data$dim_name.nm, .data$grid.nm, .keep_all = TRUE)
+    dplyr::distinct(.data$dim_name.nm, .data$grid.nm, .data$depth.mt,
+                    .data$width.mt, .data$height.mt)
+
+  # number of grid-cells for depth
+  n_cells <- dplyr::filter(IC, .data$dim_name.nm == "depth") |>
+    dplyr::pull(.data$grid.nm) |>
+    max()
+
   # merge IC and meta
-  IC <- dplyr::bind_cols(IC, meta)
+  IC <- dplyr::full_join(IC, meta, by = c("dim_name.nm", "grid.nm"))
 
   # reduce dimensions to 2D grid
   IC <- dim_folds(IC, "grid", res, grid_cell)
@@ -121,8 +132,8 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
     ggplot2::scale_color_distiller(
       expression("Inter-analysis isotope var."~italic(p)),
       palette = "OrRd",
-      breaks = sapply(c(0.1, 0.01, 0.001) / 2, qt, 16, lower.tail = FALSE),
-      labels = c(0.1, 0.01, 0.001),
+      breaks = sapply(.sig_codes / 2, qt, n_cells, lower.tail = FALSE),
+      labels = .sig_codes,
       direction = 1
     ) +
     ggplot2::guides(color = ggplot2::guide_colorbar(title.position = "top")) +
@@ -131,7 +142,7 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
       subtitle =
         substitute(
           "Intra-analysis isotope var."~italic(p)*":"~a,
-          list(a = sig_coder())
+          list(a = sig_coder(dplyr::pull(IC, !! args[["p_R"]]))[[2]])
           )
     ) +
     themes_IC() +

@@ -23,6 +23,34 @@ render_paper <- function(
   copy_figures = TRUE
 ){
 
+  if (!requireNamespace("bookdown", quietly = TRUE)) {
+    stop(
+      "Package \"bookdown\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
+  if (!requireNamespace("kableExtra", quietly = TRUE)) {
+    stop(
+      "Package \"kableExtra\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
+  if (!requireNamespace("knitr", quietly = TRUE)) {
+    stop(
+      "Package \"knitr\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
+  if (!requireNamespace("rticles", quietly = TRUE)) {
+    stop(
+      "Package \"rticles\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
   # paths
   paper <- fs::path("paper", type_ms)
   # dirs

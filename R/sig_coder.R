@@ -14,6 +14,7 @@
 #' @export
 sig_coder <- function(x = NULL, make_lab = TRUE) {
 
+  NA_cross <- "\u2715"
   sig_code <- c("", "\u02d9", "*", "**", "***")
   sig_val <- c(1, 0.1, 0.05, 0.01, 0.001, 0)
   tb_sigs <- tibble::tibble(
@@ -24,32 +25,38 @@ sig_coder <- function(x = NULL, make_lab = TRUE) {
 
   if (!is.null(x)) {
 
-    # round number to make it working 4 sig is most needed
-    x <- round(x, 4)
-
+    # find p value from table
     p_finder <- function(x) {
+
+      if (is.na(x)) return(NA_cross)
       if (x == 0) return("***")
+
       dplyr::pull(
         dplyr::filter(tb_sigs, .data$upper >= x & .data$lower < x),
         "sig_code"
       )
     }
-    stars <- purrr::map_chr(unique(x), p_finder)
-    stars <- rlang::set_names(stars, nm = unique(x))
-    stars <- dplyr::recode(x, !!!stars)
+
+    # vectorize p finding
+    stars <- purrr::map_chr(x, p_finder)
   }
 
-
-  if (make_lab) {
+  # make legend
+  if (isTRUE(make_lab)) {
     star_labs <- stringr::str_c(
       purrr::map2_chr(
         sig_val[-1],
         c(sig_code[-1], ""),
-        ~paste(.x, .y)),
+        ~paste(.x, .y)
+      ),
       collapse = " "
     )
-    if (!is.null(x)) return(list(stars, star_labs)) else return(star_labs)
+    # add cross for NA values if exists
+
+    if (any(is.na(x))) star_labs <- paste(star_labs, "missing:", NA_cross)
+    # if no value only return label
+    if (!is.null(x)) list(stars, star_labs) else star_labs
   } else {
-    return(stars)
+    stars
   }
 }

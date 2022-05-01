@@ -14,7 +14,9 @@ data-raw/zenodo.R
 # files belonging to paper processing with custom render function
 inst/paper/preprint/*.log
 inst/paper/preprint/templates
+inst/paper/preprint/_bookdown_files/
 inst/doc
 # derived files (comparing vdiffr images)
 tests/**/*.svg
 docs
+

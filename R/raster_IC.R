@@ -14,16 +14,17 @@
 #'  the grid layout
 #'  (see \code{pointapply::\link[pointapply:gg_sketch]{gg_sketch}}).
 #' @param save Boolean whether to save the plot as an png.
+#' @param .name Name of the raster file.
 #'
 #' @return \code{ggplot2::\link[ggplot2:ggplot]{ggplot}}.
 #'
 #' @export
 gg_cnts <- function(title, ion1, ion2, viri = "D", res = 256,
                     grid_cell = 64, scaler = 40 / 256, compilation = FALSE,
-                    save = FALSE) {
+                    save = FALSE, .name = "map_raster_image") {
 
   # raster data
-  IC <-  load_point("map_raster_image", title, return_name = TRUE) |>
+  IC <-  load_point(.name, title, return_name = TRUE) |>
     rlang::sym()
 
   # expressions for ion species counts (to be used in wide format dataframe)
