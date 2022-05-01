@@ -14,7 +14,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">pointapply</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9002</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,10 @@
   .species <span class="op">=</span> <span class="cn">NULL</span>,
   .t <span class="op">=</span> <span class="cn">NULL</span>,
   .ion1 <span class="op">=</span> <span class="st">"13C"</span>,
-  .ion2 <span class="op">=</span> <span class="st">"12C"</span>
+  .ion2 <span class="op">=</span> <span class="st">"12C"</span>,
+  .name <span class="op">=</span> <span class="st">"map_sum_grid"</span>,
+  .name_raster <span class="op">=</span> <span class="st">"map_raster_image"</span>,
+  .sig_codes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.01</span>, <span class="fl">0.001</span><span class="op">)</span>
 <span class="op">)</span>
 
 <span class="fu">gg_sketch</span><span class="op">(</span>grid_cell <span class="op">=</span> <span class="fl">64</span>, res <span class="op">=</span> <span class="fl">256</span>, scaler <span class="op">=</span> <span class="fl">40</span><span class="op">/</span><span class="fl">256</span>, <span class="va">save</span><span class="op">)</span></code></pre></div>
@@ -117,6 +120,12 @@ measurement (default is the conversion used in this study).</p></dd>
 <dd><p>Character string for rare isotope (default = "13C").</p></dd>
 <dt>.ion2</dt>
 <dd><p>Character string for common isotope (default = "12C").</p></dd>
+<dt>.name</dt>
+<dd><p>Name of the grid-cell file.</p></dd>
+<dt>.name_raster</dt>
+<dd><p>Name of the raster file.</p></dd>
+<dt>.sig_codes</dt>
+<dd><p>The breaks for the scale of inter-analysis significance.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
