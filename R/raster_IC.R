@@ -84,7 +84,8 @@ gg_cnts <- function(title, ion1, ion2, viri = "D", res = 256,
       axis.title.x =
         ggplot2::element_text(hjust = ifelse(compilation, 0.35, 0.5))
     ) +
-    themes_IC(base = ggplot2::theme_void())
+    themes_IC() +
+    ggplot2::theme(axis.line = ggplot2::element_blank())
 
   # these arrows demarcate the depth dimension
   if (isTRUE(compilation)) p <- p + depth_arrows(res, grid_cell)
