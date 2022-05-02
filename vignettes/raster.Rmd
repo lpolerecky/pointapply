@@ -113,7 +113,7 @@ gg_effect("MON", "12C-40Ca16O", viri = "B", save = TRUE)
 ```
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C", "40Ca16O"), ")--grid-cell combination plot (MON)."), out.width="80%"}
-knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
+knitr::include_graphics("figures/effect_64_MON_13C-12C_12C-40Ca16O.png")
 ```
 
 
@@ -129,7 +129,7 @@ gg_effect("MEX", "12C-40Ca16O", viri = "B", save = TRUE)
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C", "40Ca16O"), ")--grid-cell combination plot (MEX)."), out.width="80%"}
-knitr::include_graphics("figures/raster_MEX_12C-40Ca16O.png")
+knitr::include_graphics("figures/effect_64_MEX_13C-12C_12C-40Ca16O.png")
 ```
 
 
@@ -144,7 +144,7 @@ gg_effect("MEX", "12C14N-12C", viri = "B", save = TRUE)
 
 
 ```{r echo=FALSE, eval=TRUE, fig.cap=paste0("Raster (", point::R_labeller("12C14N", "12C"), ")--grid-cell combination plot (MEX)."), out.width="80%"}
-knitr::include_graphics("figures/raster_MEX_12C14N-12C.png")
+knitr::include_graphics("figures/effect_64_MEX_13C-12C_12C14N-12C.png")
 ```
 
 

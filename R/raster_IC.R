@@ -58,24 +58,24 @@ gg_cnts <- function(title, ion1, ion2, viri = "D", res = 256,
 
   # build plot
   p <- ggplot2::ggplot(IC, ggplot2::aes(x = .data$width.mt, y = .data$height.mt)) +
-    ggplot2::geom_tile(ggplot2::aes(fill = .data$R)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = .data$R)) +
     ggplot2::scale_y_continuous(
       expression("height"~"("*mu*"m)"),
       trans = "reverse",
       breaks = seq(0, res, grid_cell),
       labels =  function(x) x * scaler,
       expand = c(0, 0)
-      ) +
+    ) +
     ggplot2::scale_x_continuous(
       expression("width"~"("*mu*"m)"),
       breaks = seq(0, res, grid_cell),
       labels = function(x) x * scaler,
       expand = c(0, 0)
-      ) +
+    ) +
     ggplot2::scale_fill_viridis_c(
       point::R_labeller(ion1, ion2, "expr"),
       option = viri
-      ) +
+    ) +
     ggplot2::coord_fixed(clip = "off") +
     ggplot2::guides(fill = ggplot2::guide_colorbar(title.position = "top")) +
     ggplot2::theme(
@@ -95,6 +95,8 @@ gg_cnts <- function(title, ion1, ion2, viri = "D", res = 256,
     save_point(nm, p, width = 10, height = 8, unit = "cm")
   }
 
+  # suppress warning
+  withr::local_options(list(warn = -1))
 
   # print
   p

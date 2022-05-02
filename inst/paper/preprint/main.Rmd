@@ -245,7 +245,7 @@ Based on the ion map (Fig. \@ref(fig:MON)), the mineralogy of the crystalline MO
 
 
 ```{r MON, fig.cap=paste0("Ion map (", point::R_labeller("12C", "40Ca-16O"), ") projection and superimposed ", SI(10, c("micro", "metre")), " by ", SI(10, c("micro", "metre")), " grid of highest-precision ", point::R_labeller("13C", "12C"), " (colored text labels) aggregated over the width, height and depth of the crystalline calcite (MON). Combined intra- and inter-analysis isotope variability is integrated as, respectively, significance stars and color of the $\\delta^{13}$C (", permille(NULL), " relative to $\\hat{\\bar{R}}$), where t-test statistics were used to allow the representation of single analyses (plane-specific $\\hat{\\epsilon}_{\\bar{R}}$ and LR test statistics in Table \\ref{tab:MONtab}). The array encompasses 400 frames over the depth dimension (Supplementary Section \\ref{sec:realdat}).")}
-knitr::include_graphics("figures/raster_MON_12C-40Ca16O.png")
+knitr::include_graphics("figures/effect_64_MON_13C-12C_12C-40Ca16O.png")
 ```
 
 
@@ -261,9 +261,9 @@ stat_R_ext_64_all <- point::stat_R(pointapply::map_sum_grid_64_all, "13C",
 # table of stats MON
 tb_dia <- dplyr::left_join(
   dplyr::filter(stat_R_ext_64_all, sample.nm == "MON"), 
-  pointapply::diag_64_MON,
+  pointapply::diag_64_MON_13C_12C,
   by = "dim_name.nm"
-  ) %>% 
+) %>% 
   dplyr::select(-c(sample.nm, ratio.nm)) %>% 
   dplyr::rename(` ` = "dim_name.nm") 
 
@@ -287,7 +287,7 @@ In contrast to the crystalline calcite (MON), the sedimentary carbonate (MEX) di
 
 
 ```{r MEX, fig.cap=paste0("Ion map (", point::R_labeller("12C", "40Ca-16O"), ") projection and superimposed ", SI(10, c("micro", "metre")),  " by ", SI(10, c("micro", "metre")), " grid of highest-precision ", point::R_labeller("13C", "12C"), " (colored text labels) aggregated over the width, height and depth of the sedimentary carbonate (MEX). Combined intra- and inter-analysis isotope variability is integrated as, respectively, significance stars and color of the $\\delta^{13}$C (", permille(NULL), " relative to $\\bar{\\bar{R}}$), where t-test statistics were used to allow the representation of single analyses (plane-specific $\\hat{\\epsilon}_{\\bar{R}}$ and LR test statistics in Table \\ref{tab:MEXtab}). The array encompasses 400 frames over the depth dimension (Supplementary Section \\ref{sec:realdat}).")}
-knitr::include_graphics("figures/raster_MEX_12C-40Ca16O.png")
+knitr::include_graphics("figures/effect_64_MEX_13C-12C_12C-40Ca16O.png")
 ```
 
 
@@ -298,9 +298,9 @@ knitr::include_graphics("figures/raster_MEX_12C-40Ca16O.png")
 # table of stats MEX
 tb_dia <- dplyr::left_join(
   dplyr::filter(stat_R_ext_64_all, sample.nm == "MEX"), 
-  pointapply::diag_64_MEX,
+  pointapply::diag_64_MEX_13C_12C,
   by = "dim_name.nm"
-  ) %>% 
+) %>% 
   dplyr::select(-c(sample.nm, ratio.nm)) %>% 
   dplyr::rename(` ` = "dim_name.nm") 
 

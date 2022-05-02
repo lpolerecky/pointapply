@@ -193,24 +193,28 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
 
   if (isTRUE(save)) {
     # save plot
-    nm <- paste("raster", title, ratio, sep = "_")
+    nm <- paste("effect", grid_cell, title, paste(.ion1, .ion2, sep = "-"),
+                ratio, sep = "_")
     save_point(nm, p, width = 16, height = 14, unit = "cm")
 
     message(
-      paste0("Effects plot has been saved with name ", nm, " .")
+      paste0("Effects plot has been saved with name ", nm, ".")
     )
 
     # save diagnostics
-    nm <- paste("diag", grid_cell, title, sep = "_")
+    nm <- paste("diag", grid_cell, title, .ion1, .ion2, sep = "_")
     write_point(IC, nm)
 
     message(
-      paste0("Diagnostics has been saved with name ", nm, " .")
+      paste0("Diagnostics has been saved with name ", nm, ".")
     )
   }
 
+  # suppress warning
+  withr::local_options(list(warn = -1))
+
   # print plot
-  print(p)
+  p
 
   # return data
   IC
@@ -364,3 +368,5 @@ depth_arrows <- function(res, grid_cell) {
       )
     )
 }
+
+
