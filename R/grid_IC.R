@@ -138,7 +138,11 @@ gg_effect <- function(title, ratio, grid_print = FALSE, viri = "A",
     ) +
     ggplot2::guides(color = ggplot2::guide_colorbar(title.position = "top")) +
     ggplot2::labs(
-      title = title,
+      title =
+        substitute(
+          a~b,
+          list(a = point::R_labeller(.ion1, .ion2, "expr"), b = title)
+          ),
       subtitle =
         substitute(
           "Intra-analysis isotope var."~italic(p)*":"~a,

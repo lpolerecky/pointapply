@@ -11,10 +11,10 @@
   "Packages": {
     "MASS": {
       "Package": "MASS",
-      "Version": "7.3-56",
+      "Version": "7.3-57",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "af0e1955cb80bb36b7988cc657db261e",
+      "Hash": "71476c1d88d1ebdf31580e5a257d5d31",
       "Requirements": []
     },
     "Matrix": {
@@ -125,16 +125,6 @@
       "Repository": "CRAN",
       "Hash": "543776ae6848fde2f48ff3816d0628bc",
       "Requirements": []
-    },
-    "bibtex": {
-      "Package": "bibtex",
-      "Version": "0.4.2.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "76c015d8a12da5047be8aa6bead07077",
-      "Requirements": [
-        "stringr"
-      ]
     },
     "bit": {
       "Package": "bit",
@@ -1110,6 +1100,18 @@
       "Repository": "CRAN",
       "Hash": "5e3c5dc0b071b21fa128676560dbe94d",
       "Requirements": []
+    },
+    "readmat": {
+      "Package": "readmat",
+      "Version": "0.0.0.9000",
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/nicola/Documents/work/code/readmat",
+      "Hash": "907b48b52eeea62785fcf6bd83647c3c",
+      "Requirements": [
+        "cpp11",
+        "fs"
+      ]
     },
     "readr": {
       "Package": "readr",
