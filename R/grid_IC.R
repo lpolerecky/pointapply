@@ -292,6 +292,7 @@ gg_sketch <- function(grid_cell = 64, res = 256, scaler = 40 / 256, save) {
       paste0("Grid layout figure has been saved with name `grid_sketch`.")
     )
   }
+  p
 }
 
 #-------------------------------------------------------------------------------
