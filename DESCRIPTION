@@ -56,7 +56,8 @@ Suggests:
     bookdown,
     kableExtra,
     RColorBrewer,
-    zen4R
+    zen4R,
+    devtools
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
