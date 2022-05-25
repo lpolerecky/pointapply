@@ -59,11 +59,15 @@ render_paper <- function(
   bibs <- fs::path("vignettes", c("packages", "rversion"), ext = "bib")
   purrr::walk(bibs, ~bib_copy(paper_dirs[1], .x))
 
-  # make links
-  fs::link_create(
-    fs::path_package("pointapply", "paper", "templates"),
-    fs::path(paper_dirs[1], "templates")
-  ) # templates
+  # make links templates
+  try(
+    fs::link_create(
+      fs::path_package("pointapply", "paper", "templates"),
+      fs::path(paper_dirs[1], "templates")
+    ),
+    silent = TRUE
+  )
+
 
   # make bookdown_yml
   cat(

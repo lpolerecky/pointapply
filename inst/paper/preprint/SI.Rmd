@@ -99,7 +99,7 @@ library(point)
 diag_R(.IC = <DATA>, .ion1 = "13C", .ion2 = "12C", <GROUPS>, .method = "QQ")
 ```
 
-Grid-cell sizes of `r SI(10, c("micro", "metre"))` by `r SI(10, c("micro", "metre"))` yielded a precision for ^13^C/^12^C that ranges between `r stringr::str_c(sapply(range(pointapply::stat_R_64_all$RSeM_R_Xt.pr), permille), collapse = "--")` ($\epsilon_{\bar{R}}$, see Supplementary Eq. \@ref(eq:se)), and thereby most closely approximates the standard analytical conditions (high-precision SIMS isotope analysis), while still preserving spatial resolution. The analytical precision is, however, somewhat less than usually aimed for, but the current study aims at providing methods that improve the accuracy of SIMS isotope measurements based on the underlying data structure of the ion counts, and not the precision (see Supplementary Section \@ref(sec:precision) and Supplementary Table \@ref(tab:precision) for details on the precision).
+Grid-cell sizes of `r SI(10, c("micro", "metre"))` by `r SI(10, c("micro", "metre"))` yielded a precision for ^13^C/^12^C that ranges between `r stringr::str_c(sapply(range(stat_R_64_all$RSeM_R_Xt.pr), permille), collapse = "--")` ($\epsilon_{\bar{R}}$, see Supplementary Eq. \@ref(eq:se)), and thereby most closely approximates the standard analytical conditions (high-precision SIMS isotope analysis), while still preserving spatial resolution. The analytical precision is, however, somewhat less than usually aimed for, but the current study aims at providing methods that improve the accuracy of SIMS isotope measurements based on the underlying data structure of the ion counts, and not the precision (see Supplementary Section \@ref(sec:precision) and Supplementary Table \@ref(tab:precision) for details on the precision).
 
 The data and R code for loading the matlab file and consecutive transformation and aggregation of the ion arrays as well as visualization can be found in the  `pointapply` vignettes *data* (`vignette("data", package = "pointapply)`) and *raster* (`vignette("raster", package = "pointapply)`).  
 
@@ -147,7 +147,7 @@ The $\chi^2$ test statistic for ^13^C/^12^C analysis from the `r SI(10, c("micro
 # footnote
 ft <- paste0("See Supplementary Fig. ", "(ref:foot3)", " for layout and numbering of grid-cells.")
 # table of precision stats
-point::stat_R(pointapply::map_sum_grid_64_all, "13C", "12C", sample.nm, 
+point::stat_R(map_sum_grid_64_all, "13C", "12C", sample.nm, 
               dim_name.nm,grid.nm, .stat=c("M", "RSeM", "chi2"), 
               .label = "latex") %>% 
   dplyr::rename(`analyte` = "sample.nm", `dimension` = "dim_name.nm", 
