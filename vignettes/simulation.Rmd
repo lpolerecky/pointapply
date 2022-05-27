@@ -151,7 +151,7 @@ map2_dfr(
 
 p <- last_plot() + 
   themes_IC(base = theme_bw()) + 
-  ggtitle("Isotopic heterogeneity")
+  ggtitle("Bivariate isotopic heterogeneity")
 
 # save and print
 save_point("hetero_concept", p, width = 15, height = 10, 
@@ -181,6 +181,71 @@ var_I <- seq(0, -22, length.out = 12)
 
 Besides the isotope-offset introduced above, two scenarios of intra-analysis isotope variability are tested (Supplementary Section 1.2: *Synthetic data* of the paper). The first scenario, referred to as *"asymmetric"* intra-analysis isotope variation, would approximate, for example, a situation in which the primary ion beams cuts through an organic inclusion (component A) with depth within a predominant carbonate matrix (component B), and thus both the matrix and isotopic composition deviate between components A and B. In a second scenario of *"symmetric"* intra-analysis isotope variation, a simulated gradient in the isotopic composition traverses the complete analyses.
 
+```{r simulations, echo=FALSE}
+# Compare input value of R with output (load dataset simu_IC)
+tb_R <- stat_R(simu_IC, "13C", "12C", type.nm, trend.nm, base.nm, 
+               force.nm, spot.nm, .output = "complete") 
+
+# Re-calculate R from delta value with calib_R()
+tb_R <- mutate(
+  tb_R, 
+  # main component
+  base.nm = calib_R(base.nm, "VPDB", "13C", input = "delta", output = "R"),
+  # R anomaly
+  force.nm =
+    if_else(
+      type.nm == "ideal",
+      base.nm,
+      calib_R(force.nm, "VPDB", "13C", input = "delta", output = "R")
+    )
+) |> 
+  group_by(type.nm, trend.nm, base.nm, force.nm) |> 
+  mutate(threshold = 2 * sd(R_Xt.pr)) |> 
+  filter(spot.nm == 1)
+
+# breaks for x axis
+brks <- with(
+  filter(tb_R, type.nm == "ideal"), 
+  c(min(M_R_Xt.pr - threshold), mean(M_R_Xt.pr), max(M_R_Xt.pr + threshold))
+)
+
+# Plot
+ggplot(tb_R, aes(x = R_Xt.pr)) +
+  geom_histogram(alpha = 0.4, binwidth = 1e-4) +
+  geom_segment(
+    aes(x = force.nm, xend = force.nm, y = 0, yend = 225), 
+    linetype = 2, 
+    color = "red"
+  ) +
+  geom_segment(
+    aes(x = base.nm, xend = base.nm, y = 0, yend = 225), 
+    linetype = 2
+  ) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_point(aes(x = M_R_Xt.pr, y = -15)) +
+  geom_errorbarh(
+    aes(
+      xmin = M_R_Xt.pr - threshold, 
+      xmax = M_R_Xt.pr + threshold, 
+      y = -15
+    ), 
+    height = 10
+  ) +
+  scale_x_continuous(
+    "R", 
+    breaks = brks,
+    labels = scales::label_scientific(2)
+  ) +
+  scale_y_continuous("count", expand = expansion(mult = c(.05, 0))) +
+  facet_grid(cols = vars(type.nm)) +
+  labs(title = "Univariate isotopic heterogeneity", subtitle = "") +
+  themes_IC(base = theme_bw()) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+
+# save and print
+save_point("univariate_concept", last_plot(), width = 17, height = 6,
+           unit = "cm")
+```
 
 ```{r concept, echo=FALSE}
 library(tidyr)

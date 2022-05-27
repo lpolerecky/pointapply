@@ -1,5 +1,5 @@
 --- 
-title: "New methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry"
+title: "New data processing methods to detect isotopic heterogeneity with Secondary Ion Mass Spectrometry"
 authors:
   - name: Martin Schobben
     thanks: "Corresponding author"
