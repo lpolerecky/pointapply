@@ -26,6 +26,7 @@ documentclass: book
 bibliography: ["SIMS_method.bib", "packages.bib", "rversion.bib"]
 csl: templates/elsevier-vancouver-author-date.csl
 link-citations: yes
+linkcolor: blue
 always_allow_html: true
 ---
 
