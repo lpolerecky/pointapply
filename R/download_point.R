@@ -63,12 +63,12 @@ download_point <- function (type = "all") {
     )
   }
 
-  if (type == "all" | type == "raw") {
+  if (type == "all" || type == "raw") {
     # extract matlab
     ls_mat <- list.files(path_ext, pattern = "GLENDON.zip$", full.names = TRUE)
   }
 
-  if (type == "all" | type == "processed") {
+  if (type == "all" || type == "processed") {
     # extract data (.rda format)
     ls_dat <- list.files(path_ext, pattern = "data.zip", full.names = TRUE)
     utils::unzip(ls_dat, exdir = path_int, junkpaths = TRUE)
