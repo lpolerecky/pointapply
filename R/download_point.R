@@ -58,7 +58,7 @@ download_point <- function (type = "all") {
   # get the data
   if (length(list.files(path_ext, pattern = ".zip$")) == 0) {
     pointdata <- zen4R::download_zenodo(
-      "10.5281/zenodo.4748667",
+      "10.5281/zenodo.6581080",
       path = path_ext
     )
   }

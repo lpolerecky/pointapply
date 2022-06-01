@@ -10,11 +10,12 @@ Authors@R:
            role = "cre", 
            comment = c(ORCID = "0000-0001-8560-0037"))
 Maintainer: Martin Schobben <schobbenmartin@gmail.com>
-Description: This package accompanies the paper: New methods to detect isotopic 
-  heterogeneity with Secondary Ion Mass Spectrometry, by Martin Schobben, 
-  Michiel Kienhuis, and Lubos Polerecky. This paper revolves around the point 
-  function diag_R() which allows an assessment of isotopic heterogeneity in SIMS 
-  analyses. This package ensures the complete reproduction of this work.
+Description: This package accompanies the paper: New data processing methods to 
+  detect isotopic heterogeneity with Secondary Ion Mass Spectrometry, by Martin 
+  Schobben, Michiel Kienhuis, and Lubos Polerecky. This paper revolves around 
+  the point function diag_R() which allows an assessment of isotopic 
+  heterogeneity in SIMS analyses. This package ensures the complete reproduction 
+  of this work.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
